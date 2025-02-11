@@ -1,0 +1,62 @@
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+    id 'com.google.devtools.ksp'
+
+}
+
+android {
+    namespace 'com.example.hanyarunrun'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.example.hanyarunrun"
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+    buildFeatures {
+        compose true
+    }
+}
+
+dependencies {
+
+    // Core libraries
+    implementation libs.androidx.core.ktx.v1101
+    implementation libs.androidx.lifecycle.runtime.ktx.v261
+    implementation libs.androidx.activity.compose.v172
+
+    // Jetpack Compose & Material3
+    implementation libs.ui
+    implementation libs.material3
+    implementation libs.ui.tooling.preview
+    implementation libs.androidx.runtime.livedata
+    debugImplementation libs.ui.tooling
+
+    // Navigation Compose
+    implementation libs.androidx.navigation.compose
+
+    // Room Database
+    implementation libs.androidx.room.runtime
+    ksp libs.androidx.room.compiler
+    implementation libs.androidx.room.ktx
+}
