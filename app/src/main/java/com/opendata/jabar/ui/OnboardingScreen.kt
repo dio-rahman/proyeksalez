@@ -33,26 +33,24 @@ fun OnboardingScreen(onFinish: () -> Unit) {
     val scope = rememberCoroutineScope()
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val context = LocalContext.current // Tambahkan ini untuk mendapatkan Context
+    val context = LocalContext.current
 
-    Box(modifier = Modifier.fillMaxSize()) {        // Background container to ensure full screen coverage
+    Box(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black)
         )
 
-        // Image with improved scaling options
         Image(
             painter = painterResource(pages[pagerState.currentPage].imageRes),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RectangleShape),
-            contentScale = ContentScale.FillBounds // Changed to FillBounds to ensure full screen coverage
+            contentScale = ContentScale.FillBounds
         )
 
-        // Gradient overlay
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -77,9 +75,9 @@ fun OnboardingScreen(onFinish: () -> Unit) {
                         .fillMaxSize()
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Bottom // Changed to Bottom to ensure text is visible
+                    verticalArrangement = Arrangement.Bottom
                 ) {
-                    Spacer(Modifier.weight(1f)) // Pushes content to bottom
+                    Spacer(Modifier.weight(1f))
                     Text(
                         text = pages[page].title,
                         style = TextStyle(
@@ -99,11 +97,10 @@ fun OnboardingScreen(onFinish: () -> Unit) {
                             color = Color.LightGray
                         )
                     )
-                    Spacer(Modifier.height(screenHeight * 0.05f)) // Bottom padding
+                    Spacer(Modifier.height(screenHeight * 0.05f))
                 }
             }
 
-            // Navigation buttons
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -130,8 +127,8 @@ fun OnboardingScreen(onFinish: () -> Unit) {
                 Button(
                     onClick = {
                         if (pagerState.currentPage == pages.size - 1) {
-                            setOnboardingCompleted(context) // Simpan status onboarding selesai
-                            onFinish() // Panggil onFinish untuk pindah ke layar berikutnya
+                            setOnboardingCompleted(context)
+                            onFinish()
                         } else {
                             scope.launch {
                                 pagerState.animateScrollToPage(pagerState.currentPage + 1)
@@ -149,20 +146,17 @@ fun OnboardingScreen(onFinish: () -> Unit) {
     }
 }
 
-// Font untuk teks
 val MontserratFont = FontFamily(
     Font(R.font.montserrat_regular, FontWeight.Normal),
     Font(R.font.montserrat_bold, FontWeight.Bold)
 )
 
-// Data model untuk onboarding
 data class OnboardingPage(
     val title: String,
     val description: String,
     val imageRes: Int
 )
 
-// Data halaman onboarding
 val pages = listOf(
     OnboardingPage("Selamat Datang", "Amankan Data dan Permudah Akses Disini!", R.drawable.god_highschool),
     OnboardingPage("Mudahkan Keseharianmu", "Dapatkan Pengalaman Terbaikmu Disni!", R.drawable.demon_slayer),

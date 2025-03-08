@@ -6,17 +6,14 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileInputStream
 
-// Function to extract data from Excel files and convert to DataEntity objects
 fun extractDataFromExcel(file: File): List<DataEntity> {
     val dataEntities = mutableListOf<DataEntity>()
     val workbook = XSSFWorkbook(FileInputStream(file))
     val sheet = workbook.getSheetAt(0)
 
-    // Start from row 2 (index 1) to skip header row
     for (rowIndex in 1..sheet.lastRowNum) {
         val row = sheet.getRow(rowIndex) ?: continue
 
-        // Skip empty rows
         if (row.getCell(0) == null) continue
 
         try {
@@ -62,7 +59,6 @@ fun extractDataFromExcel(file: File): List<DataEntity> {
 
             dataEntities.add(entity)
         } catch (e: Exception) {
-            // Skip rows with errors
             continue
         }
     }

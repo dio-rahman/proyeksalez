@@ -10,7 +10,6 @@ import org.junit.Assert.*
 class opendataInstrumentedTest {
     @Test
     fun useAppContext() {
-        // Context aplikasi diambil dari InstrumentationRegistry
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         assertEquals("com.opendata.jabar", appContext.packageName)
     }

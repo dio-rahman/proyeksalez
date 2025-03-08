@@ -45,14 +45,12 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         return repository.getDataById(id)
     }
 
-    // Method to update imported data
     fun updateImportedData(data: String) {
         _importedData.value = data
     }
 
     fun importDataFromExcel(dataList: List<DataEntity>) {
         viewModelScope.launch(Dispatchers.IO) {
-            // Insert all data entities
             dataList.forEach { data ->
                 repository.insert(data)
             }

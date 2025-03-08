@@ -36,7 +36,6 @@ fun HomeScreen(navController: NavHostController) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Teks di tengah layar
             Text(
                 text = "Mana yang akan Anda pilih?",
                 style = MaterialTheme.typography.headlineSmall
@@ -44,7 +43,6 @@ fun HomeScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Tombol pertama: Menuju DataEntryScreen
             Button(
                 onClick = { navController.navigate("DataEntryScreen") },
                 modifier = Modifier.fillMaxWidth()
@@ -54,7 +52,6 @@ fun HomeScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Tombol kedua: Menuju DataEntryScreen 2
             Button(
                 onClick = { navController.navigate("DataEntryScreenExcel") },
                 modifier = Modifier.fillMaxWidth()
@@ -62,7 +59,6 @@ fun HomeScreen(navController: NavHostController) {
                 Text("Lihat Data")
             }
 
-            // Tombol ketiga: Menuju DataEntryScreen 3
             Button(
                 onClick = { navController.navigate("DataEntryScreenPdf") },
                 modifier = Modifier.fillMaxWidth()

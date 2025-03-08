@@ -24,18 +24,15 @@ fun DataEntryScreenAutoPdf(navController: NavHostController, viewModel: DataView
     var pdfData by remember { mutableStateOf("No data imported yet") }
     var isLoading by remember { mutableStateOf(false) }
 
-    // Create file picker launcher for PDF
     val pdfFileLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let {
             isLoading = true
             try {
-                // Create a temporary file to store the selected PDF file
                 val inputStream = context.contentResolver.openInputStream(uri)
                 val tempFile = File(context.cacheDir, "temp_pdf.pdf")
 
-                // Copy to temp file
                 val outputStream = FileOutputStream(tempFile)
                 inputStream?.copyTo(outputStream)
                 inputStream?.close()

@@ -40,17 +40,14 @@ fun DataEntryScreenAutoExcel(navController: NavHostController, viewModel: DataVi
             importSuccess = false
 
             try {
-                // Create a temporary file to store the selected Excel file
                 val inputStream = context.contentResolver.openInputStream(uri)
                 val tempFile = File(context.cacheDir, "temp_excel.xlsx")
 
-                // Copy to temp file
                 val outputStream = FileOutputStream(tempFile)
                 inputStream?.copyTo(outputStream)
                 inputStream?.close()
                 outputStream.close()
 
-                // Extract data
                 val dataEntities = extractDataFromExcel(tempFile)
                 extractedData = dataEntities
 

@@ -30,10 +30,8 @@ fun DataListScreen(navController: NavHostController, viewModel: DataViewModel) {
     val dataList by viewModel.dataList.observeAsState(emptyList())
     val context = LocalContext.current
 
-    // State for delete confirmation dialog
     var showDeleteAllDialog by remember { mutableStateOf(false) }
 
-    // Delete All Confirmation Dialog
     if (showDeleteAllDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteAllDialog = false },
@@ -73,7 +71,6 @@ fun DataListScreen(navController: NavHostController, viewModel: DataViewModel) {
                     }
                 },
                 actions = {
-                    // Delete All Data button
                     IconButton(
                         onClick = { showDeleteAllDialog = true }
                     ) {
@@ -84,7 +81,6 @@ fun DataListScreen(navController: NavHostController, viewModel: DataViewModel) {
                         )
                     }
 
-                    // Add Data button
                     IconButton(
                         onClick = { navController.navigate("DataEntryScreen") }
                     ) {

@@ -38,7 +38,6 @@ fun EditScreen(
     var satuan by remember { mutableStateOf("") }
     var tahun by remember { mutableStateOf("") }
 
-    // Update state when data is loaded
     LaunchedEffect(dataState) {
         dataState?.let { data ->
             kodeProvinsi = data.kode_provinsi.toString()
@@ -130,7 +129,6 @@ fun EditScreen(
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = {
-                    // Only update if we have data
                     dataState?.let {
                         val updatedData = DataEntity(
                             id = dataId,
