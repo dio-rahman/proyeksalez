@@ -29,15 +29,11 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun updateData(data: DataEntity) {
+    fun importDataFromExcel(dataList: List<DataEntity>) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.update(data)
-        }
-    }
-
-    fun deleteData(data: DataEntity) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.delete(data)
+            dataList.forEach { data ->
+                repository.insert(data)
+            }
         }
     }
 
@@ -45,15 +41,19 @@ class DataViewModel(application: Application) : AndroidViewModel(application) {
         return repository.getDataById(id)
     }
 
+    fun updateData(data: DataEntity) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.update(data)
+        }
+    }
+
     fun updateImportedData(data: String) {
         _importedData.value = data
     }
 
-    fun importDataFromExcel(dataList: List<DataEntity>) {
+    fun deleteData(data: DataEntity) {
         viewModelScope.launch(Dispatchers.IO) {
-            dataList.forEach { data ->
-                repository.insert(data)
-            }
+            repository.delete(data)
         }
     }
 

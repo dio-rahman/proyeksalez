@@ -3,7 +3,6 @@ package com.salez.kasir.data
 import androidx.lifecycle.LiveData
 
 class DataRepository(private val dataDao: DataDao) {
-
     val allData: LiveData<List<DataEntity>> = dataDao.getAllData()
 
     suspend fun insert(data: DataEntity) {

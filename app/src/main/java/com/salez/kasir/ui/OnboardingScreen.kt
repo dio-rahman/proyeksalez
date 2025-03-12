@@ -61,7 +61,6 @@ fun OnboardingScreen(onFinish: () -> Unit) {
                 )
         )
 
-        // Content
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally

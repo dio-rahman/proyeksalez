@@ -17,7 +17,7 @@ private val DarkColors = darkColorScheme(
 
 @Composable
 fun kasirTheme(
-    darkTheme: Boolean = false, // Ubah sesuai preferensi atau logika sistem
+    darkTheme: Boolean = false,
     content: @Composable () -> Unit
 ) {
     MaterialTheme(

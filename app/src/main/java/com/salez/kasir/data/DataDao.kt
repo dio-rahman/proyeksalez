@@ -9,29 +9,33 @@ import androidx.room.Query
 import androidx.room.Update
 
 @Dao
-interface DataDao {
+interface DataDao
+    @Insert
+    (onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(data: DataEntity)
+
     @Insert
     (onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(data: List<DataEntity>)
 
-    @Query("SELECT * FROM rata_rata_lama_sekolah WHERE tahun = :tahun")
+    @Query
+    ("SELECT * FROM menu_pesanan WHERE tahun = :tahun")
     suspend fun getDataByYear(tahun: Int): List<DataEntity>
 
-    @Query("SELECT * FROM rata_rata_lama_sekolah")
+    @Query
+    ("SELECT * FROM menu_pesanan")
     fun getAllData(): LiveData<List<DataEntity>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(data: DataEntity)
-
-    @Query("SELECT * FROM rata_rata_lama_sekolah WHERE id = :id")
+    @Query
+    ("SELECT * FROM menu_pesanan WHERE id = :id")
     fun getDataById(id: Int): LiveData<DataEntity?>
 
-    @Update
-    suspend fun update(data: DataEntity)
+    @Query("DELETE FROM menu_pesanan")
+    suspend fun deleteAllData()
 
     @Delete
     suspend fun delete(data: DataEntity)
 
-    @Query("DELETE FROM rata_rata_lama_sekolah")
-    suspend fun deleteAllData()
+    @Update
+    suspend fun update(data: DataEntity)
 }
