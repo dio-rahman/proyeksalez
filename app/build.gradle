@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace "com.opendata.jabar"
+    namespace "com.salez.kasir"
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.opendata.jabar"
+        applicationId "com.salez.kasir"
         minSdk 26
         targetSdk 34
         versionCode 1
