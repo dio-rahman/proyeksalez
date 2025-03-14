@@ -19,7 +19,7 @@ fun AppNavHost(viewModel: DataViewModel) {
 
     NavHost(
         navController = navController,
-        startDestination = if (onboardingCompleted) "main" else "onboarding"
+        startDestination = "onboarding"
     ) {
         composable("onboarding") {
             OnboardingScreen(onFinish = {

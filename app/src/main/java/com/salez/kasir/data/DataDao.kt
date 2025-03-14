@@ -9,7 +9,7 @@ import androidx.room.Query
 import androidx.room.Update
 
 @Dao
-interface DataDao
+interface DataDao{
     @Insert
     (onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(data: DataEntity)
@@ -19,8 +19,8 @@ interface DataDao
     suspend fun insertAll(data: List<DataEntity>)
 
     @Query
-    ("SELECT * FROM menu_pesanan WHERE tahun = :tahun")
-    suspend fun getDataByYear(tahun: Int): List<DataEntity>
+    ("SELECT * FROM menu_pesanan WHERE biaya_menu = :biaya_menu")
+    suspend fun getDataByYear(biaya_menu: Int): List<DataEntity>
 
     @Query
     ("SELECT * FROM menu_pesanan")

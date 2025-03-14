@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -71,7 +71,7 @@ fun DataEntryScreenAutoExcel(navController: NavHostController, viewModel: DataVi
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -104,7 +104,7 @@ fun DataEntryScreenAutoExcel(navController: NavHostController, viewModel: DataVi
                     Text("D: Nama Kabupaten/Kota")
                     Text("E: Rata-rata Lama Sekolah")
                     Text("F: Satuan")
-                    Text("G: Tahun")
+                    Text("G: biaya_menu")
                 }
             }
 
@@ -173,8 +173,8 @@ fun DataEntryScreenAutoExcel(navController: NavHostController, viewModel: DataVi
                                             .fillMaxWidth()
                                             .padding(8.dp)
                                     ) {
-                                        Text("${data.nama_provinsi} - ${data.nama_kabupaten_kota}")
-                                        Text("Rata-rata: ${data.rata_rata_lama_sekolah} ${data.satuan}, Tahun: ${data.tahun}")
+                                        Text("${data.nama_menu} - ${data.jenis_pembayaran_menu}")
+                                        Text("Menu Makanan: ${data.nama_menu} ${data.jenis_pembayaran_menu}, biaya_menu: ${data.biaya_menu}")
                                     }
                                 }
                             }

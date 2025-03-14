@@ -34,6 +34,10 @@ fun OnboardingScreen(onFinish: () -> Unit) {
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val context = LocalContext.current
+    val MontserratFont = FontFamily(
+        Font(R.font.montserrat_regular, FontWeight.Normal),
+        Font(R.font.montserrat_bold, FontWeight.Bold)
+    )
 
     Box(modifier = Modifier.fillMaxSize()) {
         Box(
@@ -145,11 +149,6 @@ fun OnboardingScreen(onFinish: () -> Unit) {
     }
 }
 
-val MontserratFont = FontFamily(
-    Font(R.font.montserrat_regular, FontWeight.Normal),
-    Font(R.font.montserrat_bold, FontWeight.Bold)
-)
-
 data class OnboardingPage(
     val title: String,
     val description: String,
@@ -157,7 +156,7 @@ data class OnboardingPage(
 )
 
 val pages = listOf(
-    OnboardingPage("Selamat Datang", "Amankan Data dan Permudah Akses Disini!", R.drawable.god_highschool),
-    OnboardingPage("Mudahkan Keseharianmu", "Dapatkan Pengalaman Terbaikmu Disni!", R.drawable.demon_slayer),
-    OnboardingPage("Kelola Secara Mudah", "Keamanan Data Terjamin dan Mudah Untuk Digunakan!", R.drawable.solo_leveling)
+    OnboardingPage("Selamat Datang", "Gunakan Secara Gratis Tanpa Ada Hambatan Apa Pun!", R.drawable.god_highschool),
+    OnboardingPage("Mudahkan Keseharianmu", "Dapatkan Pengalaman Terbaikmu Disini!", R.drawable.demon_slayer),
+    OnboardingPage("Gunakan Secara Instan", "Gunakan Tanpa Ribet dan Perkerjaanmu Semakin Lancar!", R.drawable.solo_leveling)
 )

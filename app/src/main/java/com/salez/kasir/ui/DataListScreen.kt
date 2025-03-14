@@ -8,7 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
@@ -65,7 +65,7 @@ fun DataListScreen(navController: NavHostController, viewModel: DataViewModel) {
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -157,7 +157,7 @@ fun DataItemCard(data: DataEntity, navController: NavHostController) {
                 .padding(16.dp)
         ) {
             Text(
-                text = "${data.nama_provinsi}",
+                text = "${data.nama_menu}",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -165,7 +165,7 @@ fun DataItemCard(data: DataEntity, navController: NavHostController) {
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "${data.nama_kabupaten_kota} (Kode: ${data.kode_kabupaten_kota})",
+                text = "Harga: ${data.biaya_menu}",
                 style = MaterialTheme.typography.bodyMedium
             )
 
@@ -176,12 +176,12 @@ fun DataItemCard(data: DataEntity, navController: NavHostController) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Rata-rata: ${data.rata_rata_lama_sekolah} ${data.satuan}",
+                    text = "Pembayaran: ${data.jenis_pembayaran_menu}",
                     style = MaterialTheme.typography.bodyMedium
                 )
 
                 Text(
-                    text = "Tahun: ${data.tahun}",
+                    text = "biaya_menu: ${data.biaya_menu}",
                     style = MaterialTheme.typography.bodySmall
                 )
             }

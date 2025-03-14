@@ -20,18 +20,18 @@ fun extractDataFromExcel(file: File): List<DataEntity> {
         try {
             val nama_menu = row.getCell(0)?.stringCellValue ?: ""
 
-            val harga_menu = when(row.getCell(1)?.cellType) {
+            val biaya_menu = when(row.getCell(1)?.cellType) {
                 CellType.NUMERIC -> row.getCell(1)?.numericCellValue?.toInt() ?: 0
                 CellType.STRING -> row.getCell(1)?.stringCellValue?.toIntOrNull() ?: 0
                 else -> 0
             }
 
-            val jenis_menu = row.getCell(5)?.stringCellValue ?: ""
+            val jenis_pembayaran_menu = row.getCell(5)?.stringCellValue ?: ""
 
             val entity = DataEntity(
-                val nama_menu: String,
-                val harga_menu: Int,
-                val jenis_menu: Int,
+                nama_menu = nama_menu,
+                biaya_menu = biaya_menu,
+                jenis_pembayaran_menu = jenis_pembayaran_menu
             )
 
             dataEntities.add(entity)

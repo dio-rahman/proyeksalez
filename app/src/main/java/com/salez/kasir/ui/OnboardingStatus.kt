@@ -10,11 +10,7 @@ private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
 
 @Composable
 fun rememberOnboardingStatus(): Boolean {
-    val context = LocalContext.current
-    return remember {
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .getBoolean(KEY_ONBOARDING_COMPLETED, false)
-    }
+    return false
 }
 
 fun setOnboardingCompleted(context: Context) {

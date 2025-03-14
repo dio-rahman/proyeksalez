@@ -7,7 +7,6 @@ import androidx.room.PrimaryKey
 data class DataEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val nama_menu: String,
-    val harga_menu: Int,
     val biaya_menu: Int,
     val jenis_pembayaran_menu: String
 )

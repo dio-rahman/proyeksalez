@@ -7,7 +7,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -30,23 +30,15 @@ fun EditScreen(
     val context = LocalContext.current
     val dataState by viewModel.getDataById(dataId).observeAsState()
 
-    var kodeProvinsi by remember { mutableStateOf("") }
-    var namaProvinsi by remember { mutableStateOf("") }
-    var kodeKabupatenKota by remember { mutableStateOf("") }
-    var namaKabupatenKota by remember { mutableStateOf("") }
-    var rataRataLamaSekolah by remember { mutableStateOf("") }
-    var satuan by remember { mutableStateOf("") }
-    var tahun by remember { mutableStateOf("") }
+    var nama_menu by remember { mutableStateOf("") }
+    var jenis_pembayaran_menu by remember { mutableStateOf("") }
+    var biaya_menu by remember { mutableStateOf("") }
 
     LaunchedEffect(dataState) {
         dataState?.let { data ->
-            kodeProvinsi = data.kode_provinsi.toString()
-            namaProvinsi = data.nama_provinsi
-            kodeKabupatenKota = data.kode_kabupaten_kota.toString()
-            namaKabupatenKota = data.nama_kabupaten_kota
-            rataRataLamaSekolah = data.rata_rata_lama_sekolah.toString()
-            satuan = data.satuan
-            tahun = data.tahun.toString()
+            nama_menu = data.nama_menu
+            biaya_menu = data.biaya_menu.toString()
+            jenis_pembayaran_menu = data.jenis_pembayaran_menu
         }
     }
 
@@ -57,7 +49,7 @@ fun EditScreen(
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -74,57 +66,27 @@ fun EditScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             OutlinedTextField(
-                value = kodeProvinsi,
-                onValueChange = { kodeProvinsi = it },
-                label = { Text("Kode Provinsi") },
+                value = nama_menu,
+                onValueChange = { nama_menu = it },
+                label = { Text("Nama Menu") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
+                value = biaya_menu,
+                onValueChange = { biaya_menu = it },
+                label = { Text("Biaya Menu") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
-                value = namaProvinsi,
-                onValueChange = { namaProvinsi = it },
-                label = { Text("Nama Provinsi") },
+                value = jenis_pembayaran_menu,
+                onValueChange = { jenis_pembayaran_menu = it },
+                label = { Text("Jenis Pembayaran Menu") },
                 modifier = Modifier.fillMaxWidth()
             )
 
-            OutlinedTextField(
-                value = kodeKabupatenKota,
-                onValueChange = { kodeKabupatenKota = it },
-                label = { Text("Kode Kabupaten/Kota") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            OutlinedTextField(
-                value = namaKabupatenKota,
-                onValueChange = { namaKabupatenKota = it },
-                label = { Text("Nama Kabupaten/Kota") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            OutlinedTextField(
-                value = rataRataLamaSekolah,
-                onValueChange = { rataRataLamaSekolah = it },
-                label = { Text("Rata-rata Lama Sekolah") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            OutlinedTextField(
-                value = satuan,
-                onValueChange = { satuan = it },
-                label = { Text("Satuan") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            OutlinedTextField(
-                value = tahun,
-                onValueChange = { tahun = it },
-                label = { Text("Tahun") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
-            )
 
             Spacer(modifier = Modifier.height(24.dp))
             Button(
@@ -132,16 +94,12 @@ fun EditScreen(
                     dataState?.let {
                         val updatedData = DataEntity(
                             id = dataId,
-                            kode_provinsi = kodeProvinsi.toIntOrNull() ?: 0,
-                            nama_provinsi = namaProvinsi,
-                            kode_kabupaten_kota = kodeKabupatenKota.toIntOrNull() ?: 0,
-                            nama_kabupaten_kota = namaKabupatenKota,
-                            rata_rata_lama_sekolah = rataRataLamaSekolah.toDoubleOrNull() ?: 0.0,
-                            satuan = satuan,
-                            tahun = tahun.toIntOrNull() ?: 0
+                            nama_menu = nama_menu,
+                            biaya_menu = biaya_menu.toIntOrNull() ?: 0,
+                            jenis_pembayaran_menu = jenis_pembayaran_menu
                         )
                         viewModel.updateData(updatedData)
-                        Toast.makeText(context, "Data berhasil diupdate!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Menu berhasil diperbarui!", Toast.LENGTH_SHORT).show()
                         navController.popBackStack()
                     }
                 },
@@ -155,7 +113,7 @@ fun EditScreen(
                 onClick = {
                     dataState?.let {
                         viewModel.deleteData(it)
-                        Toast.makeText(context, "Data berhasil dihapus!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Menu berhasil dihapus!", Toast.LENGTH_SHORT).show()
                         navController.popBackStack()
                     }
                 },
@@ -163,7 +121,7 @@ fun EditScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Delete Data")
+                Text(text = "Delete Menu")
             }
         }
     }
