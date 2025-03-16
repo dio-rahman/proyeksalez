@@ -1,12 +1,10 @@
 package com.salez.kasir.ui
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -15,7 +13,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -23,13 +20,20 @@ import androidx.navigation.NavHostController
 import androidx.compose.runtime.livedata.observeAsState
 import com.salez.kasir.viewmodel.DataViewModel
 import com.salez.kasir.data.DataEntity
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import com.salez.kasir.R
+
+val MontserratFont = FontFamily(
+    Font(R.font.montserrat_regular, FontWeight.Normal),
+    Font(R.font.montserrat_bold, FontWeight.Bold)
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DataListScreen(navController: NavHostController, viewModel: DataViewModel) {
+fun EditList(navController: NavHostController, viewModel: DataViewModel) {
     val dataList by viewModel.dataList.observeAsState(emptyList())
     val context = LocalContext.current
-
     var showDeleteAllDialog by remember { mutableStateOf(false) }
 
     if (showDeleteAllDialog) {
@@ -61,7 +65,7 @@ fun DataListScreen(navController: NavHostController, viewModel: DataViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Data List") },
+                title = { Text("List Makanan") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
@@ -80,9 +84,8 @@ fun DataListScreen(navController: NavHostController, viewModel: DataViewModel) {
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
-
                     IconButton(
-                        onClick = { navController.navigate("DataEntryScreen") }
+                        onClick = { navController.navigate("MasukanMenu") }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Add,
@@ -105,23 +108,24 @@ fun DataListScreen(navController: NavHostController, viewModel: DataViewModel) {
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "No Data Available",
-                        style = MaterialTheme.typography.headlineMedium
+                        text = "Tidak Ada Makanan Yang Dipesan",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontFamily = MontserratFont
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Button(onClick = { navController.navigate("DataEntryScreen") }) {
-                            Text("Add Data")
+                        Button(onClick = { navController.navigate("MasukanMenu") }) {
+                            Text("Add Data", fontFamily = MontserratFont)
                         }
                         Button(
-                            onClick = { navController.navigate("DataEntryScreenAutoExcel") },
+                            onClick = { navController.navigate("MasukanMenuAutoExcel") },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.secondary
                             )
                         ) {
-                            Text("Import From Excel")
+                            Text("Import From Excel", fontFamily = MontserratFont)
                         }
                     }
                 }
@@ -149,7 +153,7 @@ fun DataItemCard(data: DataEntity, navController: NavHostController) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable { navController.navigate("edit/${data.id}") },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
     ) {
         Column(
             modifier = Modifier
@@ -159,30 +163,21 @@ fun DataItemCard(data: DataEntity, navController: NavHostController) {
             Text(
                 text = "${data.nama_menu}",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontFamily = MontserratFont
             )
-
             Spacer(modifier = Modifier.height(4.dp))
-
             Text(
-                text = "Harga: ${data.biaya_menu}",
+                text = "Harga : ${data.biaya_menu}",
                 style = MaterialTheme.typography.bodyMedium
             )
-
             Spacer(modifier = Modifier.height(8.dp))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Pembayaran: ${data.jenis_pembayaran_menu}",
+                    text = "Pembayaran : ${data.jenis_pembayaran_menu}",
                     style = MaterialTheme.typography.bodyMedium
-                )
-
-                Text(
-                    text = "biaya_menu: ${data.biaya_menu}",
-                    style = MaterialTheme.typography.bodySmall
                 )
             }
         }

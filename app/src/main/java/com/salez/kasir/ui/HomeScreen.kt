@@ -45,7 +45,7 @@ fun HomeScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { navController.navigate("DataEntryScreen") },
+                onClick = { navController.navigate("MasukanMenu") },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Input Data")
@@ -54,14 +54,14 @@ fun HomeScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { navController.navigate("DataEntryScreenExcel") },
+                onClick = { navController.navigate("MasukanMenuExcel") },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Lihat Data")
             }
 
             Button(
-                onClick = { navController.navigate("DataEntryScreenPdf") },
+                onClick = { navController.navigate("MasukanMenuPdf") },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Lihat Data")

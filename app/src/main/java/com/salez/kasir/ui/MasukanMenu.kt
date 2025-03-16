@@ -11,25 +11,31 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.salez.kasir.R
 import com.salez.kasir.viewmodel.DataViewModel
 import com.salez.kasir.data.DataEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DataEntryScreen(navController: NavHostController, viewModel: DataViewModel) {
+fun MasukanMenu(navController: NavHostController, viewModel: DataViewModel) {
     val context = LocalContext.current
-
     var nama_menu by remember { mutableStateOf("") }
     var biaya_menu by remember { mutableStateOf("") }
     var jenis_pembayaran_menu by remember { mutableStateOf("") }
-
+    val MontserratFont = FontFamily(
+        Font(com.salez.kasir.R.font.montserrat_regular, FontWeight.Normal),
+        Font(R.font.montserrat_bold, FontWeight.Bold)
+    )
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Input Data") },
+                title = { Text("Input Data", fontFamily = MontserratFont) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
@@ -52,14 +58,14 @@ fun DataEntryScreen(navController: NavHostController, viewModel: DataViewModel) 
             OutlinedTextField(
                 value = nama_menu,
                 onValueChange = { nama_menu = it },
-                label = { Text("Nama Menu") },
+                label = { Text("Nama Menu", fontFamily = MontserratFont) },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = biaya_menu,
                 onValueChange = { biaya_menu = it },
-                label = { Text("Biaya Menu") },
+                label = { Text("Biaya Menu", fontFamily = MontserratFont) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -67,7 +73,7 @@ fun DataEntryScreen(navController: NavHostController, viewModel: DataViewModel) 
             OutlinedTextField(
                 value = jenis_pembayaran_menu,
                 onValueChange = { jenis_pembayaran_menu = it },
-                label = { Text("Jenis Pembayaran Menu") },
+                label = { Text("Jenis Pembayaran Menu", fontFamily = MontserratFont) },
                 modifier = Modifier.fillMaxWidth()
             )
             Button(
@@ -84,7 +90,7 @@ fun DataEntryScreen(navController: NavHostController, viewModel: DataViewModel) 
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Submit Data")
+                Text("Submit Data", fontFamily = MontserratFont)
             }
         }
     }

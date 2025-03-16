@@ -19,7 +19,7 @@ import java.io.FileOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DataEntryScreenAutoPdf(navController: NavHostController, viewModel: DataViewModel) {
+fun MasukanMenuAutoPdf(navController: NavHostController, viewModel: DataViewModel) {
     val context = LocalContext.current
     var pdfData by remember { mutableStateOf("No data imported yet") }
     var isLoading by remember { mutableStateOf(false) }

@@ -23,7 +23,7 @@ import java.io.FileOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DataEntryScreenAutoExcel(navController: NavHostController, viewModel: DataViewModel) {
+fun MasukanMenuAutoExcel(navController: NavHostController, viewModel: DataViewModel) {
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(false) }
     var extractedData by remember { mutableStateOf<List<DataEntity>>(emptyList()) }

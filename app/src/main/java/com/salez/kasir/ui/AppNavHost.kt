@@ -22,7 +22,7 @@ fun AppNavHost(viewModel: DataViewModel) {
         startDestination = "onboarding"
     ) {
         composable("onboarding") {
-            OnboardingScreen(onFinish = {
+            TampilanOnboarding(onFinish = {
                 setOnboardingCompleted(context)
                 navController.navigate("main") {
                     popUpTo("onboarding") { inclusive = true }
@@ -32,24 +32,24 @@ fun AppNavHost(viewModel: DataViewModel) {
         composable("main") {
             MainScreen(navController = navController)
         }
-        composable("DataEntryScreen") {
-            DataEntryScreen(navController = navController, viewModel = viewModel)
+        composable("MasukanMenu") {
+            MasukanMenu(navController = navController, viewModel = viewModel)
         }
-        composable("DataEntryScreenAutoExcel") {
-            DataEntryScreenAutoExcel(navController = navController, viewModel = viewModel)
+        composable("MasukanMenuAutoExcel") {
+            MasukanMenuAutoExcel(navController = navController, viewModel = viewModel)
         }
-        composable("DataEntryScreenAutoPdf") {
-            DataEntryScreenAutoPdf(navController = navController, viewModel = viewModel)
+        composable("MasukanMenuAutoPdf") {
+            MasukanMenuAutoPdf(navController = navController, viewModel = viewModel)
         }
         composable("list") {
-            DataListScreen(navController = navController, viewModel = viewModel)
+            EditList(navController = navController, viewModel = viewModel)
         }
         composable(
             route = "edit/{id}",
             arguments = listOf(navArgument("id") { type = NavType.IntType })
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getInt("id") ?: 0
-            EditScreen(navController = navController, viewModel = viewModel, dataId = id)
+            EditList(navController = navController, viewModel = viewModel, dataId = id)
         }
     }
 }

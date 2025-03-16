@@ -43,7 +43,7 @@ fun MainScreen(navController: NavHostController) {
         Spacer(modifier = Modifier.height(48.dp))
 
         Button(
-            onClick = { navController.navigate("DataEntryScreen") },
+            onClick = { navController.navigate("MasukanMenu") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
@@ -52,7 +52,7 @@ fun MainScreen(navController: NavHostController) {
         }
 
         Button(
-            onClick = { navController.navigate("DataEntryScreenAutoExcel") },
+            onClick = { navController.navigate("MasukanMenuAutoExcel") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
@@ -61,7 +61,7 @@ fun MainScreen(navController: NavHostController) {
         }
 
         Button(
-            onClick = { navController.navigate("DataEntryScreenAutoPdf") },
+            onClick = { navController.navigate("MasukanMenuAutoPdf") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
