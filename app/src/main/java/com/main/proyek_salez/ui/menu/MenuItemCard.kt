@@ -10,10 +10,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,7 +30,8 @@ fun MenuItemCard(
     foodItem: FoodItem,
     cartViewModel: CartViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
-    var itemCount by remember { mutableStateOf(0) }
+    val cartItems by cartViewModel.cartItems.collectAsState()
+    val itemCount = cartItems[foodItem] ?: 0
 
     Card(
         modifier = Modifier
@@ -165,7 +164,6 @@ fun MenuItemCard(
                 IconButton(
                     onClick = {
                         if (itemCount > 0) {
-                            itemCount--
                             cartViewModel.decrementItem(foodItem)
                         }
                     },
@@ -177,13 +175,24 @@ fun MenuItemCard(
                         imageVector = Icons.Default.Remove,
                         contentDescription = "Remove",
                         tint = UnguTua,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.size(16.dp)
                     )
+                }
+
+                if (itemCount > 0) {
+                    Text(
+                        text = itemCount.toString(),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = UnguTua,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
 
                 IconButton(
                     onClick = {
-                        itemCount++
                         cartViewModel.addToCart(foodItem)
                     },
                     modifier = Modifier
@@ -194,7 +203,7 @@ fun MenuItemCard(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add",
                         tint = UnguTua,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.size(16.dp)
                     )
                 }
             }

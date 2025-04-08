@@ -14,11 +14,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.main.proyek_salez.R
 import com.main.proyek_salez.ui.theme.*
 
 @Composable
-fun SidebarMenu(onCloseDrawer: () -> Unit) {
+fun SidebarMenu(
+    navController: NavController,
+    onCloseDrawer: () -> Unit
+) {
     val gradientBackground = Brush.verticalGradient(
         colors = listOf(
             Jingga,
@@ -76,29 +81,40 @@ fun SidebarMenu(onCloseDrawer: () -> Unit) {
             text = "Profil",
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = Putih,
-                fontWeight = FontWeight.Bold
-            )
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp // Increased font size
+            ),
+            onClick = {
+                navController.navigate("profile")
+                onCloseDrawer()
+            }
         )
         MenuItem(
             text = "List Menu",
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = Putih,
-                fontWeight = FontWeight.Bold
-            )
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp // Increased font size
+            ),
+            onClick = { }
         )
         MenuItem(
             text = "Cek Histori",
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = Putih,
-                fontWeight = FontWeight.Bold
-            )
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp // Increased font size
+            ),
+            onClick = { }
         )
         MenuItem(
             text = "Log Out",
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = Putih,
-                fontWeight = FontWeight.Bold
-            )
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp // Increased font size
+            ),
+            onClick = { }
         )
     }
 }
@@ -108,14 +124,16 @@ fun MenuItem(
     text: String,
     style: TextStyle = MaterialTheme.typography.bodyLarge.copy(
         color = Putih,
-        fontWeight = FontWeight.Bold
-    )
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp // Increased default font size
+    ),
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 12.dp)
-            .clickable { },
+            .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Spacer(modifier = Modifier.width(8.dp))

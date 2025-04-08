@@ -17,7 +17,9 @@ class CartViewModel : ViewModel() {
     fun addToCart(item: FoodItem) {
         _cartItems.update { currentItems ->
             val currentQuantity = currentItems[item] ?: 0
-            currentItems + (item to (currentQuantity + 1))
+            val updatedItems = currentItems + (item to (currentQuantity + 1))
+            println("Cart updated: $updatedItems") // Debug log
+            updatedItems
         }
     }
 
@@ -25,20 +27,43 @@ class CartViewModel : ViewModel() {
         _cartItems.update { currentItems ->
             val currentQuantity = currentItems[item] ?: 0
             if (currentQuantity <= 1) {
-                currentItems - item
+                val updatedItems = currentItems - item
+                println("Item removed: $updatedItems") // Debug log
+                updatedItems
             } else {
-                currentItems + (item to (currentQuantity - 1))
+                val updatedItems = currentItems + (item to (currentQuantity - 1))
+                println("Cart updated: $updatedItems") // Debug log
+                updatedItems
             }
         }
     }
 
     fun removeItem(item: FoodItem) {
         _cartItems.update { currentItems ->
-            currentItems - item
+            val updatedItems = currentItems - item
+            println("Item removed: $updatedItems") // Debug log
+            updatedItems
         }
     }
 
     fun clearCart() {
         _cartItems.value = emptyMap()
+        println("Cart cleared") // Debug log
+    }
+
+    fun getItemQuantity(item: FoodItem): Int {
+        return cartItems.value[item] ?: 0
+    }
+
+    fun getTotalPrice(): String {
+        val totalPrice = cartItems.value.entries.sumOf { (item, quantity) ->
+            val priceString = item.price.replace("Rp ", "").replace(".", "")
+            try {
+                priceString.toInt() * quantity
+            } catch (e: NumberFormatException) {
+                0
+            }
+        }
+        return "Rp ${totalPrice.toString().chunked(3).joinToString(".")}"
     }
 }

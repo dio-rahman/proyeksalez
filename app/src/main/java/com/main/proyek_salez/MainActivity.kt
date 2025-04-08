@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -18,6 +19,7 @@ import com.main.proyek_salez.ui.cart.CartViewModel
 import com.main.proyek_salez.ui.checkout.CheckoutScreen
 import com.main.proyek_salez.ui.checkout.CompletionScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.main.proyek_salez.ui.ProfileScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +36,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    val cartViewModel: CartViewModel = viewModel()
+    val cartViewModel: CartViewModel = viewModel(LocalContext.current as ComponentActivity)
 
     NavHost(
         navController = navController,
@@ -49,13 +51,13 @@ fun AppNavigation() {
             HomeScreen(navController = navController)
         }
         composable("food_menu") {
-            FoodMenuScreen(navController = navController)
+            FoodMenuScreen(navController = navController, cartViewModel = cartViewModel)
         }
         composable("drink_menu") {
-            DrinkMenuScreen(navController = navController)
+            DrinkMenuScreen(navController = navController, cartViewModel = cartViewModel)
         }
         composable("other_menu") {
-            OtherMenuScreen(navController = navController)
+            OtherMenuScreen(navController = navController, cartViewModel = cartViewModel)
         }
         composable("cart_screen") {
             CartScreen(
@@ -73,6 +75,9 @@ fun AppNavigation() {
             CompletionScreen(
                 navController = navController
             )
+        }
+        composable("profile") {
+            ProfileScreen(navController = navController)
         }
     }
 }

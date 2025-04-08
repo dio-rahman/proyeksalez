@@ -46,6 +46,7 @@ fun CheckoutScreen(
         drawerState = drawerState,
         drawerContent = {
             SidebarMenu(
+                navController = navController,
                 onCloseDrawer = {
                     scope.launch {
                         drawerState.close()
@@ -109,16 +110,16 @@ fun CheckoutScreen(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Text(
-                    text = "Konfirmasi atas nama",
+                    text = "Pesanan atas nama",
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = UnguTua,
                         textAlign = TextAlign.Center,
-                        fontSize = 12.sp
+                        fontSize = 10.sp
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 OutlinedTextField(
                     value = customerName,
@@ -191,8 +192,7 @@ fun CheckoutScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
+                Spacer(modifier = Modifier.height(100 .dp))
                 Button(
                     onClick = { navController.navigate("cart_screen") },
                     modifier = Modifier

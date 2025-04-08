@@ -43,6 +43,7 @@ fun CompletionScreen(
         drawerState = drawerState,
         drawerContent = {
             SidebarMenu(
+                navController = navController,
                 onCloseDrawer = {
                     scope.launch {
                         drawerState.close()
@@ -91,7 +92,6 @@ fun CompletionScreen(
                 }
 
                 Spacer(modifier = Modifier.height(80.dp))
-
                 Text(
                     text = "TERIMA KASIH ATAS PESANAN-NYA!",
                     style = MaterialTheme.typography.headlineLarge.copy(
@@ -105,7 +105,6 @@ fun CompletionScreen(
                 )
 
                 Spacer(modifier = Modifier.height(80.dp))
-
                 Text(
                     text = "SELAMAT MENIKMATI DENGAN PENUH HATI!",
                     style = MaterialTheme.typography.headlineLarge.copy(
@@ -118,7 +117,6 @@ fun CompletionScreen(
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
-
                 Text(
                     text = "DITUNGGU PESANAN SELANJUTNYA YA!",
                     style = MaterialTheme.typography.headlineLarge.copy(
@@ -131,7 +129,6 @@ fun CompletionScreen(
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
-
                 Button(
                     onClick = {
                         navController.navigate("home") {

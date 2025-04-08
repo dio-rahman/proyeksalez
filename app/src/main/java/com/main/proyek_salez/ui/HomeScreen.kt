@@ -29,9 +29,7 @@ fun HomeScreen(navController: NavController) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    var customerInput by remember { mutableStateOf("") }
     var menuInput by remember { mutableStateOf("") }
-    var customerText by remember { mutableStateOf("") }
     var menuText by remember { mutableStateOf("") }
     val gradientBackground = Brush.verticalGradient(
         colors = listOf(
@@ -45,6 +43,7 @@ fun HomeScreen(navController: NavController) {
         drawerState = drawerState,
         drawerContent = {
             SidebarMenu(
+                navController = navController,
                 onCloseDrawer = {
                     scope.launch {
                         drawerState.close()
@@ -93,7 +92,7 @@ fun HomeScreen(navController: NavController) {
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.height(120.dp))
+                Spacer(modifier = Modifier.height(140.dp))
                 Text(
                     text = "SELAMAT DATANG,",
                     style = MaterialTheme.typography.headlineLarge.copy(
@@ -116,70 +115,7 @@ fun HomeScreen(navController: NavController) {
                     )
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
-                OutlinedTextField(
-                    value = customerInput,
-                    onValueChange = { customerInput = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    placeholder = {
-                        Text(
-                            text = "Masukkan nama pelanggan disini",
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
-                        )
-                    },
-                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedContainerColor = Putih,
-                        focusedContainerColor = Putih,
-                        focusedBorderColor = UnguTua,
-                        unfocusedBorderColor = AbuAbu
-                    ),
-                    shape = RoundedCornerShape(50)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = {
-                        customerText = if (customerInput.isNotEmpty()) {
-                            "Pesanan atas nama: $customerInput"
-                        } else {
-                            "Isi nama pelanggan atau nomor meja"
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .height(48.dp)
-                        .shadow(
-                            elevation = 15.dp,
-                            shape = RoundedCornerShape(50)
-                        ),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Oranye
-                    ),
-                    shape = RoundedCornerShape(50)
-                ) {
-                    Text(
-                        text = "Buat Pesanan",
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            color = UnguTua,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = customerText,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = UnguTua,
-                        fontWeight = FontWeight.Medium
-                    ),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-
+                Spacer(modifier = Modifier.height(35.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -251,7 +187,7 @@ fun HomeScreen(navController: NavController) {
                         )
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(35.dp))
                 Text(
                     text = menuText,
                     style = MaterialTheme.typography.bodyMedium.copy(
