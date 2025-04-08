@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace "com.salez.kasir"
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.salez.kasir"
