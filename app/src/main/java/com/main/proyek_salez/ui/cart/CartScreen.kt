@@ -34,13 +34,10 @@ fun CartScreen(
 ) {
     val cartItems by cartViewModel.cartItems.collectAsState()
     val showConfirmationDialog = remember { mutableStateOf(false) }
-
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
-
     val gradientBackground = Brush.verticalGradient(colors = listOf(Putih, Jingga, UnguTua))
-
     val totalPrice = cartItems.entries.sumOf { (item, quantity) ->
         val priceString = item.price.replace("Rp ", "").replace(".", "")
         try {
@@ -50,7 +47,6 @@ fun CartScreen(
         }
     }
     val formattedTotalPrice = "Rp ${totalPrice.toString().chunked(3).joinToString(".")}"
-
     if (showConfirmationDialog.value) {
         AlertDialog(
             onDismissRequest = { showConfirmationDialog.value = false },
@@ -65,7 +61,7 @@ fun CartScreen(
             dismissButton = {
                 TextButton(onClick = { showConfirmationDialog.value = false }) { Text("Tidak", color = UnguTua) }
             },
-            containerColor = Putih,
+            containerColor = Jingga,
             titleContentColor = UnguTua,
             textContentColor = AbuAbuGelap
         )
@@ -123,7 +119,7 @@ fun CartScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
-                    onClick = { /* Logic for creating order can be added here */ },
+                    onClick = { },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp).height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Oranye),
                     shape = RoundedCornerShape(50),
@@ -218,7 +214,6 @@ fun CartScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    // Show "Checkout" and "Batalkan Pesanan" buttons only if cart is not empty
                     if (cartItems.isNotEmpty()) {
                         Button(
                             onClick = { navController.navigate("checkout_screen") },

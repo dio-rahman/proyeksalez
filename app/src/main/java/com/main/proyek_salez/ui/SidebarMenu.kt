@@ -82,7 +82,7 @@ fun SidebarMenu(
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = Putih,
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp // Increased font size
+                fontSize = 20.sp
             ),
             onClick = {
                 navController.navigate("profile")
@@ -94,7 +94,7 @@ fun SidebarMenu(
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = Putih,
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp // Increased font size
+                fontSize = 20.sp
             ),
             onClick = { }
         )
@@ -103,7 +103,7 @@ fun SidebarMenu(
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = Putih,
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp // Increased font size
+                fontSize = 20.sp
             ),
             onClick = { }
         )
@@ -112,7 +112,7 @@ fun SidebarMenu(
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = Putih,
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp // Increased font size
+                fontSize = 20.sp
             ),
             onClick = { }
         )
@@ -125,7 +125,7 @@ fun MenuItem(
     style: TextStyle = MaterialTheme.typography.bodyLarge.copy(
         color = Putih,
         fontWeight = FontWeight.Bold,
-        fontSize = 20.sp // Increased default font size
+        fontSize = 20.sp
     ),
     onClick: () -> Unit
 ) {

@@ -88,7 +88,6 @@ fun MenuItemCard(
             )
 
             Spacer(modifier = Modifier.height(2.dp))
-
             Text(
                 text = foodItem.name,
                 style = MaterialTheme.typography.bodyLarge.copy(
@@ -102,7 +101,6 @@ fun MenuItemCard(
             )
 
             Spacer(modifier = Modifier.height(2.dp))
-
             Text(
                 text = foodItem.description,
                 style = MaterialTheme.typography.bodyMedium.copy(
@@ -117,7 +115,6 @@ fun MenuItemCard(
             )
 
             Spacer(modifier = Modifier.height(2.dp))
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -141,7 +138,6 @@ fun MenuItemCard(
             }
 
             Spacer(modifier = Modifier.height(2.dp))
-
             Text(
                 text = "Hidangan ${foodItem.price}",
                 style = MaterialTheme.typography.bodyMedium.copy(
@@ -153,7 +149,6 @@ fun MenuItemCard(
             )
 
             Spacer(modifier = Modifier.weight(1f))
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -11,14 +11,13 @@ import kotlinx.coroutines.flow.update
 class CartViewModel : ViewModel() {
     private val _cartItems = MutableStateFlow<Map<FoodItem, Int>>(emptyMap())
     val cartItems: StateFlow<Map<FoodItem, Int>> = _cartItems.asStateFlow()
-
     val customerName = mutableStateOf("")
 
     fun addToCart(item: FoodItem) {
         _cartItems.update { currentItems ->
             val currentQuantity = currentItems[item] ?: 0
             val updatedItems = currentItems + (item to (currentQuantity + 1))
-            println("Cart updated: $updatedItems") // Debug log
+            println("Cart updated: $updatedItems")
             updatedItems
         }
     }
@@ -28,11 +27,11 @@ class CartViewModel : ViewModel() {
             val currentQuantity = currentItems[item] ?: 0
             if (currentQuantity <= 1) {
                 val updatedItems = currentItems - item
-                println("Item removed: $updatedItems") // Debug log
+                println("Item removed: $updatedItems")
                 updatedItems
             } else {
                 val updatedItems = currentItems + (item to (currentQuantity - 1))
-                println("Cart updated: $updatedItems") // Debug log
+                println("Cart updated: $updatedItems")
                 updatedItems
             }
         }
@@ -41,14 +40,14 @@ class CartViewModel : ViewModel() {
     fun removeItem(item: FoodItem) {
         _cartItems.update { currentItems ->
             val updatedItems = currentItems - item
-            println("Item removed: $updatedItems") // Debug log
+            println("Item removed: $updatedItems")
             updatedItems
         }
     }
 
     fun clearCart() {
         _cartItems.value = emptyMap()
-        println("Cart cleared") // Debug log
+        println("Cart cleared")
     }
 
     fun getItemQuantity(item: FoodItem): Int {

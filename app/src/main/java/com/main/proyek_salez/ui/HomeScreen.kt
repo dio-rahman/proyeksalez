@@ -28,7 +28,6 @@ import androidx.compose.ui.draw.shadow
 fun HomeScreen(navController: NavController) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-
     var menuInput by remember { mutableStateOf("") }
     var menuText by remember { mutableStateOf("") }
     val gradientBackground = Brush.verticalGradient(

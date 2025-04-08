@@ -35,7 +35,7 @@ fun CartItemCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(4.dp)
-            .height(200.dp), // Reduced height for compactness
+            .height(200.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
@@ -45,20 +45,17 @@ fun CartItemCard(
                 .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Food image
             Image(
                 painter = painterResource(id = foodItem.imageRes),
                 contentDescription = foodItem.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp) // Reduced image height
+                    .height(60.dp)
                     .clip(RoundedCornerShape(8.dp))
             )
 
             Spacer(modifier = Modifier.height(4.dp))
-
-            // Food name
             Text(
                 text = foodItem.name,
                 style = MaterialTheme.typography.bodyLarge.copy(
@@ -72,8 +69,6 @@ fun CartItemCard(
             )
 
             Spacer(modifier = Modifier.height(4.dp))
-
-            // Price
             Text(
                 text = foodItem.price,
                 style = MaterialTheme.typography.bodyMedium.copy(
@@ -85,8 +80,6 @@ fun CartItemCard(
             )
 
             Spacer(modifier = Modifier.weight(1f))
-
-            // Quantity controls
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -107,7 +100,6 @@ fun CartItemCard(
                         modifier = Modifier.size(16.dp)
                     )
                 }
-
                 Text(
                     text = quantity.toString(),
                     style = MaterialTheme.typography.bodyMedium.copy(
@@ -116,7 +108,6 @@ fun CartItemCard(
                         fontSize = 12.sp
                     )
                 )
-
                 IconButton(
                     onClick = onIncrement,
                     modifier = Modifier

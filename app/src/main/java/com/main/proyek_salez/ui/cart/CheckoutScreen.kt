@@ -33,7 +33,6 @@ fun CheckoutScreen(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-
     val gradientBackground = Brush.verticalGradient(
         colors = listOf(
             Putih,
@@ -95,7 +94,6 @@ fun CheckoutScreen(
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
-
                 Text(
                     text = "PILIH PEMBAYARAN",
                     style = MaterialTheme.typography.headlineLarge.copy(
@@ -108,7 +106,6 @@ fun CheckoutScreen(
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
-
                 Text(
                     text = "Pesanan atas nama",
                     style = MaterialTheme.typography.bodyMedium.copy(
@@ -120,10 +117,9 @@ fun CheckoutScreen(
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
-
                 OutlinedTextField(
                     value = customerName,
-                    onValueChange = { /* Read-only */ },
+                    onValueChange = { },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 40.dp)
@@ -141,7 +137,6 @@ fun CheckoutScreen(
                 )
 
                 Spacer(modifier = Modifier.height(64.dp))
-
                 Button(
                     onClick = { navController.navigate("completion_screen") },
                     modifier = Modifier
@@ -167,7 +162,6 @@ fun CheckoutScreen(
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-
                 Button(
                     onClick = { navController.navigate("completion_screen") },
                     modifier = Modifier

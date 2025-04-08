@@ -39,28 +39,21 @@ import androidx.core.content.edit
 @Composable
 fun ProfileScreen(navController: NavController) {
     var isEditMode by remember { mutableStateOf(false) }
-
     var username by remember { mutableStateOf("DioRahmanPutra") }
     var email by remember { mutableStateOf("dio.rahman.ti123@polban.ac.id") }
     var nickname by remember { mutableStateOf("Dio") }
-
     var tempUsername by remember { mutableStateOf(username) }
     var tempEmail by remember { mutableStateOf(email) }
     var tempNickname by remember { mutableStateOf(nickname) }
-
     var profilePhotoUri by remember { mutableStateOf<Uri?>(null) }
     var tempProfilePhotoUri by remember { mutableStateOf<Uri?>(null) }
-
     val hasSpacesInUsername by remember { derivedStateOf { isEditMode && tempUsername.contains(" ") } }
-
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
-
     LaunchedEffect(Unit) {
         val savedUriString = sharedPreferences.getString("profile_photo_uri", null)
         profilePhotoUri = savedUriString?.toUri()
     }
-
     var hasPermission by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         hasPermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
@@ -75,13 +68,11 @@ fun ProfileScreen(navController: NavController) {
             ) == PackageManager.PERMISSION_GRANTED
         }
     }
-
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         hasPermission = isGranted
     }
-
     val pickImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -89,7 +80,6 @@ fun ProfileScreen(navController: NavController) {
             tempProfilePhotoUri = uri
         }
     }
-
     val gradientBackground = Brush.verticalGradient(
         colors = listOf(
             Jingga,
@@ -118,7 +108,7 @@ fun ProfileScreen(navController: NavController) {
                 modifier = Modifier.padding(start = 10.dp)
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Updated to AutoMirrored
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     tint = UnguTua
                 )
@@ -141,7 +131,6 @@ fun ProfileScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(140.dp))
-
             Box(
                 modifier = Modifier
                     .size(150.dp)
@@ -170,7 +159,6 @@ fun ProfileScreen(navController: NavController) {
             }
 
             Spacer(modifier = Modifier.height(30.dp))
-
             ProfileField(
                 label = "Username",
                 value = if (isEditMode) tempUsername else username,
@@ -190,7 +178,6 @@ fun ProfileScreen(navController: NavController) {
             }
 
             Spacer(modifier = Modifier.height(if (hasSpacesInUsername) 0.dp else 20.dp))
-
             ProfileField(
                 label = "Email",
                 value = if (isEditMode) tempEmail else email,
@@ -199,7 +186,6 @@ fun ProfileScreen(navController: NavController) {
             )
 
             Spacer(modifier = Modifier.height(20.dp))
-
             ProfileField(
                 label = "Nama Panggilan",
                 value = if (isEditMode) tempNickname else nickname,
@@ -208,7 +194,6 @@ fun ProfileScreen(navController: NavController) {
             )
 
             Spacer(modifier = Modifier.height(30.dp))
-
             if (isEditMode) {
                 Button(
                     onClick = {
@@ -290,7 +275,7 @@ fun ProfileScreen(navController: NavController) {
                                 email = tempEmail
                                 nickname = tempNickname
                                 profilePhotoUri = tempProfilePhotoUri
-                                sharedPreferences.edit { // Use KTX edit extension
+                                sharedPreferences.edit {
                                     putString("profile_photo_uri", profilePhotoUri?.toString())
                                 }
                                 isEditMode = false

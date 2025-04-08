@@ -44,15 +44,11 @@ fun FoodMenuScreen(
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var menuText by remember { mutableStateOf("") }
-
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
-
     val showScrollToTopButton by remember { derivedStateOf { scrollState.value > 100 } }
-
     val gradientBackground = Brush.verticalGradient(colors = listOf(Putih, Jingga, UnguTua))
-
     val foodItems = listOf(
         FoodItem(
             id = 0, name = "Mi Goreng El Salvadore", description = "Olahan dengan nuansa tradisional yang berani tercipta dalam dan nuansa elegan",

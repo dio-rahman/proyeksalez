@@ -30,7 +30,6 @@ fun CompletionScreen(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-
     val gradientBackground = Brush.verticalGradient(
         colors = listOf(
             Putih,
