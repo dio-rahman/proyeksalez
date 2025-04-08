@@ -1,7 +1,6 @@
 package com.salez.kasir.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.salez.kasir.data.models.User
 import com.salez.kasir.data.models.UserRole
