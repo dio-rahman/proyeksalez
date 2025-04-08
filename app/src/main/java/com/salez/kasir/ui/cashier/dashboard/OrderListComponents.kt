@@ -15,6 +15,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.salez.kasir.data.models.Order
 import com.salez.kasir.data.models.OrderStatus
+import com.salez.kasir.ui.theme.CompletedColor
+import com.salez.kasir.ui.theme.PendingColor
+import com.salez.kasir.ui.theme.PendingText
+import com.salez.kasir.ui.theme.ProcessingColor
 import com.salez.kasir.utils.FormatUtils
 
 @Composable
@@ -141,19 +145,17 @@ fun OrderCard(
 
 
 @Composable
-fun OrderStatusBadge(
-    status: OrderStatus
-) {
-    val (backgroundColor, text) = when (status) {
-        OrderStatus.PENDING -> Pair(MaterialTheme.colorScheme.tertiary, "Tertunda")
-        OrderStatus.PROCESSING -> Pair(MaterialTheme.colorScheme.secondary, "Diproses")
-        OrderStatus.COMPLETED -> Pair(MaterialTheme.colorScheme.primary, "Selesai")
-        OrderStatus.CANCELLED -> Pair(Color.Gray, "Dibatalkan")
+fun OrderStatusBadge(status: OrderStatus) {
+    val (backgroundColor, textColor, text) = when (status) {
+        OrderStatus.PENDING -> Triple(PendingColor, PendingText, "Menunggu")
+        OrderStatus.PROCESSING -> Triple(ProcessingColor, Color.White, "Dibuat")
+        OrderStatus.COMPLETED -> Triple(CompletedColor, Color.White, "Selesai")
+        OrderStatus.CANCELLED -> Triple(Color.Gray, Color.White, "Dibatalkan")
     }
 
     Surface(
         color = backgroundColor,
-        contentColor = Color.White,
+        contentColor = textColor,
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier.padding(4.dp)
     ) {

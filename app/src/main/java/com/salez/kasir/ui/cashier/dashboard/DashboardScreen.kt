@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.salez.kasir.data.models.OrderStatus
 import com.salez.kasir.ui.cashier.OrderViewModel
+import com.salez.kasir.ui.theme.AppGradientBackground
 
 
 /**
@@ -42,85 +43,88 @@ fun DashboardScreen(
         orderViewModel.loadOrdersByStatus(OrderStatus.PENDING)
         orderViewModel.loadOrdersByStatus(OrderStatus.COMPLETED)
     }
+    AppGradientBackground {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Kasir App") },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = Color.White
+                    ),
+                    actions = {
+                        // Menu icon
+                        IconButton(onClick = { /* Toggle drawer or menu */ }) {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Menu",
+                                tint = Color.White
+                            )
+                        }
+                    }
+                )
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = onStartNewOrder,
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Buat Pesanan Baru",
+                        tint = Color.White
+                    )
+                }
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+            ) {
+                // Dashboard Cards - Summary info
+                DashboardSummary(
+                    totalSales = todayOrders.sumOf { it.finalPrice },
+                    totalOrders = todayOrders.size,
+                    pendingOrders = pendingOrders.size
+                )
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Kasir App") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White
-                ),
-                actions = {
-                    // Menu icon
-                    IconButton(onClick = { /* Toggle drawer or menu */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu",
-                            tint = Color.White
+                // Tab row for order categories
+                TabRow(
+                    selectedTabIndex = selectedTabIndex,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.primary
+                ) {
+                    tabs.forEachIndexed { index, tab ->
+                        Tab(
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index },
+                            text = { Text(tab.title) }
                         )
                     }
                 }
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onStartNewOrder,
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Buat Pesanan Baru",
-                    tint = Color.White
-                )
-            }
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-        ) {
-            // Dashboard Cards - Summary info
-            DashboardSummary(
-                totalSales = todayOrders.sumOf { it.finalPrice },
-                totalOrders = todayOrders.size,
-                pendingOrders = pendingOrders.size
-            )
 
-            // Tab row for order categories
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.primary
-            ) {
-                tabs.forEachIndexed { index, tab ->
-                    Tab(
-                        selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index },
-                        text = { Text(tab.title) }
-                    )
-                }
-            }
+                // Content based on selected tab
+                Box(modifier = Modifier.weight(1f)) {
+                    when (selectedTabIndex) {
+                        0 -> OrderList(
+                            orders = todayOrders,
+                            emptyMessage = "Belum ada pesanan hari ini",
+                            onOrderClick = { /* Handle order click */ }
+                        )
 
-            // Content based on selected tab
-            Box(modifier = Modifier.weight(1f)) {
-                when (selectedTabIndex) {
-                    0 -> OrderList(
-                        orders = todayOrders,
-                        emptyMessage = "Belum ada pesanan hari ini",
-                        onOrderClick = { /* Handle order click */ }
-                    )
-                    1 -> OrderList(
-                        orders = pendingOrders,
-                        emptyMessage = "Tidak ada pesanan tertunda",
-                        onOrderClick = { /* Handle order click */ }
-                    )
-                    2 -> OrderList(
-                        orders = completedOrders,
-                        emptyMessage = "Belum ada pesanan selesai",
-                        onOrderClick = { /* Handle order click */ }
-                    )
+                        1 -> OrderList(
+                            orders = pendingOrders,
+                            emptyMessage = "Tidak ada pesanan tertunda",
+                            onOrderClick = { /* Handle order click */ }
+                        )
+
+                        2 -> OrderList(
+                            orders = completedOrders,
+                            emptyMessage = "Belum ada pesanan selesai",
+                            onOrderClick = { /* Handle order click */ }
+                        )
+                    }
                 }
             }
         }

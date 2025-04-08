@@ -1,5 +1,6 @@
 package com.salez.kasir
 
+import CafeAppTheme
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,12 +20,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.salez.kasir.ui.auth.LoginScreen
 import com.salez.kasir.ui.cashier.CartScreen
 import com.salez.kasir.ui.cashier.CheckoutScreen
 import com.salez.kasir.ui.cashier.MenuSelectionScreen
 import com.salez.kasir.ui.cashier.OrderViewModel
 import com.salez.kasir.ui.cashier.dashboard.DashboardScreen
-import com.salez.kasir.ui.theme.CafeAppTheme
+import com.salez.kasir.viewmodel.AuthViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -49,6 +52,7 @@ class MainActivity : ComponentActivity() {
 
                     // Shared ViewModel untuk seluruh flow pemesanan
                     val orderViewModel: OrderViewModel = hiltViewModel()
+                    val authViewModel: AuthViewModel = hiltViewModel()
 
                     // Observe state untuk loading dan error
                     val isLoading by orderViewModel.isLoading.collectAsState()
@@ -59,8 +63,23 @@ class MainActivity : ComponentActivity() {
                         // Setup NavHost dengan navigation graph
                         NavHost(
                             navController = navController,
-                            startDestination = "dashboard"
+                            startDestination = "login"
                         ) {
+                            // Login screen
+                            composable("login") {
+                                Log.d(TAG, "Navigating to Login screen")
+                                LoginScreen(
+                                    viewModel = authViewModel,
+                                    onLoginSuccess = { user ->
+                                        // Navigasi ke dashboard setelah login berhasil
+                                        navController.navigate("dashboard") {
+                                            // Hapus backstack agar tidak bisa kembali ke login
+                                            popUpTo("login") { inclusive = true }
+                                        }
+                                    }
+                                )
+                            }
+
                             // Dashboard screen
                             composable("dashboard") {
                                 Log.d(TAG, "Navigating to Dashboard screen")
@@ -102,7 +121,7 @@ class MainActivity : ComponentActivity() {
 
                             // Checkout screen
                             composable("checkout") {
-                                Log.d(TAG, "Navigating to Che   wwckout screen")
+                                Log.d(TAG, "Navigating to Checkout screen")
                                 CheckoutScreen(
                                     cashierId = cashierId,
                                     onNavigateBack = {
