@@ -24,11 +24,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.main.proyek_salez.ui.cart.CartViewModel
 import com.main.proyek_salez.ui.theme.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun MenuItemCard(
     foodItem: FoodItem,
-    cartViewModel: CartViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    cartViewModel: CartViewModel =  viewModel(),
+    modifier: Modifier = Modifier
 ) {
     val cartItems by cartViewModel.cartItems.collectAsState()
     val itemCount = cartItems[foodItem] ?: 0

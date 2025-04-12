@@ -17,7 +17,7 @@ class CartViewModel : ViewModel() {
         _cartItems.update { currentItems ->
             val currentQuantity = currentItems[item] ?: 0
             val updatedItems = currentItems + (item to (currentQuantity + 1))
-            println("Cart updated: $updatedItems")
+            println("Item ditambahkan: $item, Total: $updatedItems")
             updatedItems
         }
     }

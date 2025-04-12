@@ -33,6 +33,7 @@ fun CartScreen(
     cartViewModel: CartViewModel
 ) {
     val cartItems by cartViewModel.cartItems.collectAsState()
+    Text(text = "Jumlah item di keranjang: ${cartItems.size}")
     val showConfirmationDialog = remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()

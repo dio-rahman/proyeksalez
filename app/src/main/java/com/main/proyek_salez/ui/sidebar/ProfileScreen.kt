@@ -1,9 +1,10 @@
-package com.main.proyek_salez.ui
+package com.main.proyek_salez.ui.sidebar
 
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -56,7 +57,7 @@ fun ProfileScreen(navController: NavController) {
     }
     var hasPermission by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        hasPermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.READ_MEDIA_IMAGES
@@ -200,7 +201,7 @@ fun ProfileScreen(navController: NavController) {
                         if (hasPermission) {
                             pickImageLauncher.launch("image/*")
                         } else {
-                            val permission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                            val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 Manifest.permission.READ_MEDIA_IMAGES
                             } else {
                                 Manifest.permission.READ_EXTERNAL_STORAGE

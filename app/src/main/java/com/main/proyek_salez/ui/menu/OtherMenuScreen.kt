@@ -35,22 +35,20 @@ import com.main.proyek_salez.ui.SidebarMenu
 import com.main.proyek_salez.ui.cart.CartViewModel
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OtherMenuScreen(
     navController: NavController,
-    cartViewModel: CartViewModel
+    cartViewModel: CartViewModel = viewModel()
 ) {
-    var searchQuery by remember { mutableStateOf("") }
-    var menuText by remember { mutableStateOf("") }
-
+    var menuInput by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
-
     val showScrollToTopButton by remember { derivedStateOf { scrollState.value > 100 } }
-
     val gradientBackground = Brush.verticalGradient(colors = listOf(Putih, Jingga, UnguTua))
 
     val otherItems = listOf(
@@ -75,6 +73,18 @@ fun OtherMenuScreen(
             price = "Rp 14.000", rating = "4.8", reviews = "230 Penilaian", imageRes = R.drawable.salez_logo, isPopular = true
         )
     )
+
+    val filteredItems by remember(menuInput) {
+        derivedStateOf {
+            if (menuInput.isBlank()) {
+                otherItems
+            } else {
+                otherItems.filter {
+                    it.name.lowercase().contains(menuInput.lowercase().trim())
+                }
+            }
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -137,14 +147,35 @@ fun OtherMenuScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
+                        value = menuInput,
+                        onValueChange = {
+                            menuInput = it
+                            errorMessage = ""
+                        },
                         modifier = Modifier.weight(1f).clip(RoundedCornerShape(50)),
-                        placeholder = { Text(text = "Cari hidangan yang akan dipesan", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center, fontSize = 12.sp) },
+                        placeholder = {
+                            Text(
+                                text = "Cari hidangan yang akan dipesan",
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center,
+                                fontSize = 12.sp
+                            )
+                        },
                         textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-                        colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = Putih, focusedContainerColor = Putih, focusedBorderColor = UnguTua, unfocusedBorderColor = AbuAbu),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedContainerColor = Putih,
+                            focusedContainerColor = Putih,
+                            focusedBorderColor = UnguTua,
+                            unfocusedBorderColor = AbuAbu
+                        ),
                         shape = RoundedCornerShape(50),
-                        trailingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = "Search", tint = UnguTua) },
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search",
+                                tint = UnguTua
+                            )
+                        },
                         singleLine = true
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -156,34 +187,28 @@ fun OtherMenuScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = {
-                        menuText = if (searchQuery.isNotEmpty()) "Hidangan yang dicari: $searchQuery" else "Cari nama hidangan terkait pesanan"
-                    },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Oranye),
-                    shape = RoundedCornerShape(50),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 15.dp)
-                ) {
+                if (errorMessage.isNotEmpty()) {
                     Text(
-                        text = "Cari Hidangan",
-                        style = MaterialTheme.typography.headlineLarge.copy(color = UnguTua, fontWeight = FontWeight.Bold)
+                        text = errorMessage,
+                        style = MaterialTheme.typography.bodyMedium.copy(color = UnguTua, fontWeight = FontWeight.Medium),
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
                     )
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = menuText,
-                    style = MaterialTheme.typography.bodyMedium.copy(color = UnguTua, fontWeight = FontWeight.Medium),
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(24.dp))
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    for (i in otherItems.indices step 2) {
-                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Box(modifier = Modifier.weight(1f)) { MenuItemCard(foodItem = otherItems[i], cartViewModel = cartViewModel) }
-                            if (i + 1 < otherItems.size) {
-                                Box(modifier = Modifier.weight(1f)) { MenuItemCard(foodItem = otherItems[i + 1], cartViewModel = cartViewModel) }
+                    for (i in filteredItems.indices step 2) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(modifier = Modifier.weight(1f)) {
+                                MenuItemCard(foodItem = filteredItems[i], cartViewModel = cartViewModel)
+                            }
+                            if (i + 1 < filteredItems.size) {
+                                Box(modifier = Modifier.weight(1f)) {
+                                    MenuItemCard(foodItem = filteredItems[i + 1], cartViewModel = cartViewModel)
+                                }
                             } else {
                                 Spacer(modifier = Modifier.weight(1f))
                             }
@@ -210,11 +235,20 @@ fun OtherMenuScreen(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        Icon(imageVector = Icons.Default.ArrowUpward, contentDescription = "Scroll to top", tint = UnguTua, modifier = Modifier.size(18.dp))
+                        Icon(
+                            imageVector = Icons.Default.ArrowUpward,
+                            contentDescription = "Scroll to top",
+                            tint = UnguTua,
+                            modifier = Modifier.size(18.dp)
+                        )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "Kembali Ke Atas",
-                            style = MaterialTheme.typography.bodyLarge.copy(color = UnguTua, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                color = UnguTua,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
                         )
                     }
                 }

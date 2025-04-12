@@ -19,7 +19,7 @@ import com.main.proyek_salez.ui.cart.CartViewModel
 import com.main.proyek_salez.ui.checkout.CheckoutScreen
 import com.main.proyek_salez.ui.checkout.CompletionScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.main.proyek_salez.ui.ProfileScreen
+import com.main.proyek_salez.ui.sidebar.ProfileScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,7 +48,7 @@ fun AppNavigation() {
             )
         }
         composable("home") {
-            HomeScreen(navController = navController)
+            HomeScreen(navController = navController, cartViewModel)
         }
         composable("food_menu") {
             FoodMenuScreen(navController = navController, cartViewModel = cartViewModel)

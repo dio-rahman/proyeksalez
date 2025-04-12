@@ -19,17 +19,23 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
+import com.main.proyek_salez.ui.cart.CartViewModel
+import com.main.proyek_salez.ui.menu.FoodData
+import com.main.proyek_salez.ui.menu.FoodItem
+import com.main.proyek_salez.ui.menu.MenuItemCard
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.launch
 import androidx.compose.ui.draw.shadow
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController, cartViewModel: CartViewModel = viewModel()) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var menuInput by remember { mutableStateOf("") }
-    var menuText by remember { mutableStateOf("") }
+    var searchResult by remember { mutableStateOf<FoodItem?>(null) }
+    var errorMessage by remember { mutableStateOf("") }
     val gradientBackground = Brush.verticalGradient(
         colors = listOf(
             Putih,
@@ -159,10 +165,19 @@ fun HomeScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {
-                        menuText = if (menuInput.isNotEmpty()) {
-                            "Menu yang dicari: $menuInput"
+                        searchResult = null
+                        errorMessage = ""
+                        val foundItem = FoodData.foodItems.find {
+                            it.name.lowercase().contains(menuInput.lowercase().trim())
+                        } ?: FoodData.drinkItems.find {
+                            it.name.lowercase().contains(menuInput.lowercase().trim())
+                        } ?: FoodData.otherItems.find {
+                            it.name.lowercase().contains(menuInput.lowercase().trim())
+                        }
+                        if (foundItem != null) {
+                            searchResult = foundItem
                         } else {
-                            "Cari nama menu terkait pesanan"
+                            errorMessage = "Menu '${menuInput}' tidak tersedia."
                         }
                     },
                     modifier = Modifier
@@ -186,15 +201,32 @@ fun HomeScreen(navController: NavController) {
                         )
                     )
                 }
-                Spacer(modifier = Modifier.height(35.dp))
-                Text(
-                    text = menuText,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = UnguTua,
-                        fontWeight = FontWeight.Medium
-                    ),
-                    textAlign = TextAlign.Center
-                )
+                Spacer(modifier = Modifier.height(16.dp))
+                searchResult?.let { foodItem ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp, vertical = 4.dp)
+                    ){
+                        MenuItemCard(
+                            foodItem = foodItem,
+                            cartViewModel = cartViewModel,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(280.dp)
+                        )
+                    }
+                }
+                if (errorMessage.isNotEmpty()) {
+                    Text(
+                        text = errorMessage,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = UnguTua,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        textAlign = TextAlign.Center
+                    )
+                }
                 Spacer(modifier = Modifier.height(24.dp))
                 CategoryButton(
                     text = "Makanan",
