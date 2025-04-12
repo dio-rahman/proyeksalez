@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "334649269797",
+    "project_id": "salez-4c83e",
+    "storage_bucket": "salez-4c83e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:334649269797:android:7f81881a605232ef2c29cc",
+        "android_client_info": {
+          "package_name": "com.salez.kasir"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgNqvaVcEuDLili0EXJpAFvAC0EBVCN0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
