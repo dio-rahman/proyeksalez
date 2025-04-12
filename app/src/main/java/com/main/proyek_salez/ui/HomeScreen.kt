@@ -17,20 +17,23 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
-import com.main.proyek_salez.ui.cart.CartViewModel
-import com.main.proyek_salez.ui.menu.FoodData
+import com.main.proyek_salez.ui.viewmodel.CartViewModel
 import com.main.proyek_salez.ui.menu.FoodItem
 import com.main.proyek_salez.ui.menu.MenuItemCard
 import com.main.proyek_salez.ui.theme.*
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import androidx.compose.ui.draw.shadow
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController, cartViewModel: CartViewModel = viewModel()) {
+fun HomeScreen(
+    navController: NavController,
+    cartViewModel: CartViewModel = hiltViewModel(),
+    salezViewModel: SalezViewModel = hiltViewModel()
+) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var menuInput by remember { mutableStateOf("") }
@@ -165,19 +168,17 @@ fun HomeScreen(navController: NavController, cartViewModel: CartViewModel = view
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {
-                        searchResult = null
-                        errorMessage = ""
-                        val foundItem = FoodData.foodItems.find {
-                            it.name.lowercase().contains(menuInput.lowercase().trim())
-                        } ?: FoodData.drinkItems.find {
-                            it.name.lowercase().contains(menuInput.lowercase().trim())
-                        } ?: FoodData.otherItems.find {
-                            it.name.lowercase().contains(menuInput.lowercase().trim())
-                        }
-                        if (foundItem != null) {
-                            searchResult = foundItem
-                        } else {
-                            errorMessage = "Menu '${menuInput}' tidak tersedia."
+                        scope.launch {
+                            searchResult = null
+                            errorMessage = ""
+                            salezViewModel.repository.searchFoodItems(menuInput).collectLatest { items ->
+                                val foundItem = items.firstOrNull()
+                                if (foundItem != null) {
+                                    searchResult = foundItem
+                                } else {
+                                    errorMessage = "Menu '${menuInput}' tidak tersedia."
+                                }
+                            }
                         }
                     },
                     modifier = Modifier
@@ -207,7 +208,7 @@ fun HomeScreen(navController: NavController, cartViewModel: CartViewModel = view
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 4.dp, vertical = 4.dp)
-                    ){
+                    ) {
                         MenuItemCard(
                             foodItem = foodItem,
                             cartViewModel = cartViewModel,

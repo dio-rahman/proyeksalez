@@ -29,19 +29,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
 import com.main.proyek_salez.ui.SidebarMenu
-import com.main.proyek_salez.ui.cart.CartViewModel
+import com.main.proyek_salez.ui.viewmodel.SalezViewModel
+import com.main.proyek_salez.ui.viewmodel.CartViewModel
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.launch
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DrinkMenuScreen(
     navController: NavController,
-    cartViewModel: CartViewModel = viewModel()
+    cartViewModel: CartViewModel = hiltViewModel(),
+    salezViewModel: SalezViewModel = hiltViewModel()
 ) {
     var menuInput by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -50,29 +52,7 @@ fun DrinkMenuScreen(
     val scrollState = rememberScrollState()
     val showScrollToTopButton by remember { derivedStateOf { scrollState.value > 100 } }
     val gradientBackground = Brush.verticalGradient(colors = listOf(Putih, Jingga, UnguTua))
-
-    val drinkItems = listOf(
-        FoodItem(
-            id = 0, name = "Jus Alpukat", description = "Jus alpukat segar dengan campuran susu dan gula alami",
-            price = "Rp 10.000", rating = "4.5", reviews = "200 Penilaian", imageRes = R.drawable.salez_logo, isPopular = true
-        ),
-        FoodItem(
-            id = 1, name = "Susu Cokelat", description = "Susu cokelat hangat dengan rasa manis yang pas",
-            price = "Rp 8.000", rating = "4.3", reviews = "150 Penilaian", imageRes = R.drawable.salez_logo, isPopular = false
-        ),
-        FoodItem(
-            id = 2, name = "Kopi Hitam", description = "Kopi hitam murni tanpa gula, pahit dan aromatik",
-            price = "Rp 7.000", rating = "4.6", reviews = "180 Penilaian", imageRes = R.drawable.salez_logo, isPopular = true
-        ),
-        FoodItem(
-            id = 3, name = "Teh Tarik", description = "Teh tarik khas dengan busa lembut dan rasa manis",
-            price = "Rp 9.000", rating = "4.4", reviews = "160 Penilaian", imageRes = R.drawable.salez_logo, isPopular = false
-        ),
-        FoodItem(
-            id = 4, name = "Es Kelapa Muda", description = "Kelapa muda segar dengan tambahan es batu",
-            price = "Rp 12.000", rating = "4.8", reviews = "220 Penilaian", imageRes = R.drawable.salez_logo, isPopular = true
-        )
-    )
+    val drinkItems by salezViewModel.repository.getFoodItemsByCategory("drink").collectAsState(initial = emptyList())
 
     val filteredItems by remember(menuInput) {
         derivedStateOf {

@@ -29,19 +29,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
+import com.main.proyek_salez.ui.viewmodel.SalezViewModel
 import com.main.proyek_salez.ui.SidebarMenu
-import com.main.proyek_salez.ui.cart.CartViewModel
+import com.main.proyek_salez.ui.viewmodel.CartViewModel
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.launch
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FoodMenuScreen(
     navController: NavController,
-    cartViewModel: CartViewModel = viewModel()
+    cartViewModel: CartViewModel = hiltViewModel(),
+    salezViewModel: SalezViewModel = hiltViewModel()
 ) {
     var menuInput by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -50,29 +52,7 @@ fun FoodMenuScreen(
     val scrollState = rememberScrollState()
     val showScrollToTopButton by remember { derivedStateOf { scrollState.value > 100 } }
     val gradientBackground = Brush.verticalGradient(colors = listOf(Putih, Jingga, UnguTua))
-
-    val foodItems = listOf(
-        FoodItem(
-            id = 0, name = "Mi Goreng El Salvadore", description = "Olahan dengan nuansa tradisional yang berani tercipta dalam dan nuansa elegan",
-            price = "Rp 12.000", rating = "4.5", reviews = "305 Penilaian", imageRes = R.drawable.salez_logo, isPopular = true
-        ),
-        FoodItem(
-            id = 1, name = "Nasi Goreng Spesial", description = "Nasi goreng dengan campuran bumbu khas dan topping telur",
-            price = "Rp 15.000", rating = "4.7", reviews = "420 Penilaian", imageRes = R.drawable.salez_logo, isPopular = false
-        ),
-        FoodItem(
-            id = 2, name = "Ayam Bakar Madu", description = "Ayam bakar dengan balutan madu manis dan rempah pilihan",
-            price = "Rp 20.000", rating = "4.8", reviews = "250 Penilaian", imageRes = R.drawable.salez_logo, isPopular = true
-        ),
-        FoodItem(
-            id = 3, name = "Soto Ayam Lamongan", description = "Soto ayam khas Lamongan dengan kuah gurih dan suwiran ayam",
-            price = "Rp 18.000", rating = "4.6", reviews = "180 Penilaian", imageRes = R.drawable.salez_logo, isPopular = false
-        ),
-        FoodItem(
-            id = 4, name = "Bakso Beranak", description = "Bakso besar berisi bakso kecil dengan kuah kaldu sapi",
-            price = "Rp 25.000", rating = "4.9", reviews = "350 Penilaian", imageRes = R.drawable.salez_logo, isPopular = true
-        )
-    )
+    val foodItems by salezViewModel.repository.getFoodItemsByCategory("food").collectAsState(initial = emptyList())
 
     val filteredItems by remember(menuInput) {
         derivedStateOf {
@@ -186,7 +166,6 @@ fun FoodMenuScreen(
                         Icon(imageVector = Icons.Default.ShoppingCart, contentDescription = "Cart", tint = Putih)
                     }
                 }
-
                 Spacer(modifier = Modifier.height(16.dp))
                 if (errorMessage.isNotEmpty()) {
                     Text(
@@ -197,7 +176,6 @@ fun FoodMenuScreen(
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                 }
-
                 Column(modifier = Modifier.fillMaxWidth()) {
                     for (i in filteredItems.indices step 2) {
                         Row(
