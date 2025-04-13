@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "334649269797",
-    "project_id": "salez-4c83e",
-    "storage_bucket": "salez-4c83e.firebasestorage.app"
+    "project_number": "124674087584",
+    "project_id": "proyeksalez-bafae",
+    "storage_bucket": "proyeksalez-bafae.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:334649269797:android:7f81881a605232ef2c29cc",
+        "mobilesdk_app_id": "1:124674087584:android:3ae608433d00d3ff2f07c5",
         "android_client_info": {
-          "package_name": "com.salez.kasir"
+          "package_name": "com.main.proyek_salez"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAgNqvaVcEuDLili0EXJpAFvAC0EBVCN0A"
+          "current_key": "AIzaSyCP1CRI52n-d5e7uoWpgLmZpkPuJInaxdE"
         }
       ],
       "services": {
