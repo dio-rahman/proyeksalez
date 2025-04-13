@@ -1,6 +1,7 @@
 package com.main.proyek_salez.data
 
-import com.main.proyek_salez.R
+import com.main.proyek_salez.data.entities.FoodItemEntity
+import com.salez.proyek_salez.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
