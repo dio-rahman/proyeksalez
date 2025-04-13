@@ -1,7 +1,7 @@
 package com.main.proyek_salez.data
 
-import com.main.proyek_salez.data.entities.FoodItemEntity
-import com.salez.proyek_salez.R
+import com.main.proyek_salez.data.FoodItemEntity
+import com.main.proyek_salez.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -13,7 +13,7 @@ class DatabaseInitializer @Inject constructor(
 ) {
     suspend fun initialize() = withContext(Dispatchers.IO) {
         // Clear all existing items to avoid ID conflicts
-        repository.deleteAllFoodItems()
+//        repository.deleteAllFoodItems()
 
         // Insert food items
         val foodItems = listOf(

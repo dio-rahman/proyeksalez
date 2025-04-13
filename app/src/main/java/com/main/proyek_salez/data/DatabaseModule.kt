@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import com.main.proyek_salez.data.SalezDatabase
 import com.main.proyek_salez.data.SalezRepository
-import com.main.proyek_salez.data.daos.CartItemDao
-import com.main.proyek_salez.data.daos.FoodItemDao
-import com.main.proyek_salez.data.daos.OrderDao
+import com.main.proyek_salez.data.CartItemDao
+import com.main.proyek_salez.data.FoodItemDao
+import com.main.proyek_salez.data.OrderDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
