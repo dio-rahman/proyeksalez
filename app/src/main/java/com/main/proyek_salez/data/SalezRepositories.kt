@@ -24,7 +24,7 @@ class SalezRepository @Inject constructor(
         return foodItemDao.searchFoodItems(name)
             .map { entities -> entities.map { it.toFoodItem() } }
     }
-    suspend fun getFoodItemById(id: Long): FoodItem? {
+    suspend fun getFoodItemById(id: Int): FoodItem? {
         return foodItemDao.getFoodItemById(id)?.toFoodItem()
     }
 

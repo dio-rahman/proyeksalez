@@ -63,7 +63,7 @@ fun AppNavigation() {
     ) {
         composable("onboarding") {
             OnboardingApp(
-                onFinish = {  navController.navigate("home") { popUpTo("onboarding") { inclusive = true } } }
+                onFinish = {  navController.navigate(Screen.Login.route) { popUpTo("onboarding") { inclusive = true } } }
             )
         }
 
