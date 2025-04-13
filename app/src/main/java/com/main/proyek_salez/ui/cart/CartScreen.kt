@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun CartScreen(
     navController: NavController,
-    cartViewModel: CartViewModel = hiltViewModel<CartViewModel>()
+    cartViewModel: CartViewModel = hiltViewModel()
 ) {
     val cartItems by cartViewModel.cartItems.collectAsState(initial = emptyList())
     var totalPrice by remember { mutableStateOf("Rp 0") }

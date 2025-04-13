@@ -1,4 +1,4 @@
-package com.main.proyek_salez.di
+package com.main.proyek_salez.data
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth

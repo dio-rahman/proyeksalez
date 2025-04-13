@@ -3,7 +3,7 @@ package com.main.proyek_salez.data
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.main.proyek_salez.data.Converters
+import com.main.proyek_salez.data.converters.Converters
 
 @Database(
     entities = [FoodItemEntity::class, CartItemEntity::class, OrderEntity::class],

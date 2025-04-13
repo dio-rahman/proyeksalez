@@ -5,7 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.main.proyek_salez.data.entities.CartItemEntity
+import com.main.proyek_salez.data.CartItemEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
