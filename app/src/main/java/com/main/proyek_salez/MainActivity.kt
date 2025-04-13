@@ -15,12 +15,11 @@ import com.main.proyek_salez.ui.menu.FoodMenuScreen
 import com.main.proyek_salez.ui.menu.DrinkMenuScreen
 import com.main.proyek_salez.ui.menu.OtherMenuScreen
 import com.main.proyek_salez.ui.cart.CartScreen
-import com.main.proyek_salez.data.viewmodel.CartViewModel
+import com.main.proyek_salez.ui.cart.CartViewModel
 import com.main.proyek_salez.ui.checkout.CheckoutScreen
 import com.main.proyek_salez.ui.checkout.CompletionScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.main.proyek_salez.ui.sidebar.ProfileScreen
-import com.main.proyek_salez.ui.OnboardingApp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

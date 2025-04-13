@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.map
 import java.time.LocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.flow.first
 
 @Singleton
 class SalezRepository @Inject constructor(
@@ -17,21 +16,14 @@ class SalezRepository @Inject constructor(
     suspend fun insertFoodItems(foodItems: List<FoodItemEntity>) {
         foodItemDao.insertAll(foodItems)
     }
-
-    suspend fun deleteAllFoodItems() {
-        foodItemDao.deleteAll()
-    }
-
     fun getFoodItemsByCategory(category: String): Flow<List<FoodItem>> {
         return foodItemDao.getFoodItemsByCategory(category)
             .map { entities -> entities.map { it.toFoodItem() } }
     }
-
     fun searchFoodItems(name: String): Flow<List<FoodItem>> {
         return foodItemDao.searchFoodItems(name)
             .map { entities -> entities.map { it.toFoodItem() } }
     }
-
     suspend fun getFoodItemById(id: Int): FoodItem? {
         return foodItemDao.getFoodItemById(id)?.toFoodItem()
     }
@@ -41,16 +33,15 @@ class SalezRepository @Inject constructor(
     }
 
     suspend fun addToCart(foodItem: FoodItem) {
-        val existingCartItem = cartItemDao.getCartItemByFoodItemId(foodItem.id.toInt())
+        val existingCartItem = cartItemDao.getCartItemByFoodItemId(foodItem.id)
         if (existingCartItem != null) {
             cartItemDao.update(existingCartItem.copy(quantity = existingCartItem.quantity + 1))
         } else {
-            cartItemDao.insert(CartItemEntity(foodItemId = foodItem.id.toInt(), quantity = 1))
+            cartItemDao.insert(CartItemEntity(foodItemId = foodItem.id, quantity = 1))
         }
     }
-
     suspend fun decrementCartItem(foodItem: FoodItem) {
-        val existingCartItem = cartItemDao.getCartItemByFoodItemId(foodItem.id.toInt())
+        val existingCartItem = cartItemDao.getCartItemByFoodItemId(foodItem.id)
         if (existingCartItem != null) {
             if (existingCartItem.quantity <= 1) {
                 cartItemDao.delete(existingCartItem)
@@ -59,7 +50,6 @@ class SalezRepository @Inject constructor(
             }
         }
     }
-
     suspend fun clearCart() {
         cartItemDao.clearCart()
     }
@@ -75,7 +65,6 @@ class SalezRepository @Inject constructor(
         )
         clearCart()
     }
-
     fun getAllOrders(): Flow<List<OrderEntity>> {
         return orderDao.getAllOrders()
     }

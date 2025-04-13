@@ -3,6 +3,7 @@ package com.main.proyek_salez.data
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.main.proyek_salez.data.entities.FoodItemEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
