@@ -64,7 +64,8 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    implementation ("com.google.android.material:material:1.12.0")
+    implementation("androidx.compose.foundation:foundation:1.5.4")
+    implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.compose.material:material-icons-core:1.6.4")
     implementation("androidx.compose.material:material-icons-extended:1.6.4")
     implementation("androidx.compose.animation:animation:1.6.4")
@@ -93,16 +94,13 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.51.1")
     ksp("com.google.dagger:hilt-android-compiler:2.51.1")
 
-    // Accompanist
-    implementation("com.google.accompanist:accompanist-pager:0.34.0")
-    implementation("com.google.accompanist:accompanist-pager-indicators:0.34.0")
-
-    // Lainnya
+    // Other Libraries
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("org.apache.poi:poi:5.3.0")
     implementation("org.apache.poi:poi-ooxml:5.3.0")
     implementation("org.apache.pdfbox:pdfbox:3.0.2")
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

@@ -1,4 +1,4 @@
-package com.main.proyek_salez.data.entities
+package com.main.proyek_salez.data
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -19,6 +19,6 @@ import androidx.room.PrimaryKey
 )
 data class CartItemEntity(
     @PrimaryKey(autoGenerate = true) val cartItemId: Int = 0,
-    val foodItemId: Int,
+    val foodItemId: Long,
     val quantity: Int
 )

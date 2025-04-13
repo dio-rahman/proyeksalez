@@ -1,4 +1,4 @@
-package com.main.proyek_salez
+package com.main.proyek_salez.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,9 +17,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import com.main.proyek_salez.R
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.launch
 
@@ -139,14 +139,12 @@ fun OnboardingTampilan(headline: String, description: String, onSelanjutnya: () 
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun OnboardingAlur(onFinish: () -> Unit) {
-    val pagerState = rememberPagerState()
+    val pagerState = rememberPagerState(initialPage = 0) { 3 } // Menentukan jumlah halaman
     val scope = rememberCoroutineScope()
 
     HorizontalPager(
-        count = 3,
         state = pagerState,
         modifier = Modifier.fillMaxSize()
     ) { page ->

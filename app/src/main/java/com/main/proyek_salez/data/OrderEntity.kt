@@ -1,4 +1,4 @@
-package com.main.proyek_salez.data.entities
+package com.main.proyek_salez.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

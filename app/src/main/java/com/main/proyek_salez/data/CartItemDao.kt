@@ -1,4 +1,4 @@
-package com.main.proyek_salez.data.daos
+package com.main.proyek_salez.data
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -22,9 +22,9 @@ interface CartItemDao {
     @Query("SELECT * FROM cart_items")
     fun getAllCartItems(): Flow<List<CartItemEntity>>
 
+    @Query("SELECT * FROM cart_items WHERE foodItemId = :foodItemId")
+    suspend fun getCartItemByFoodItemId(foodItemId: Long): CartItemEntity?
+
     @Query("DELETE FROM cart_items")
     suspend fun clearCart()
-
-    @Query("SELECT * FROM cart_items WHERE foodItemId = :foodItemId")
-    suspend fun getCartItemByFoodItemId(foodItemId: Int): CartItemEntity?
 }

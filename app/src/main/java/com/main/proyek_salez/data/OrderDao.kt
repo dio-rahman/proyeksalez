@@ -1,4 +1,4 @@
-package com.main.proyek_salez.data.daos
+package com.main.proyek_salez.data
 
 import androidx.room.Dao
 import androidx.room.Insert

@@ -20,8 +20,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
+import com.main.proyek_salez.data.viewmodel.CartItemWithFood
+import com.main.proyek_salez.data.viewmodel.CartViewModel
 import com.main.proyek_salez.ui.SidebarMenu
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.launch
@@ -30,24 +33,21 @@ import kotlinx.coroutines.launch
 @Composable
 fun CartScreen(
     navController: NavController,
-    cartViewModel: CartViewModel
+    cartViewModel: CartViewModel = hiltViewModel<CartViewModel>()
 ) {
-    val cartItems by cartViewModel.cartItems.collectAsState()
-    Text(text = "Jumlah item di keranjang: ${cartItems.size}")
+    val cartItems by cartViewModel.cartItems.collectAsState(initial = emptyList())
+    var totalPrice by remember { mutableStateOf("Rp 0") }
     val showConfirmationDialog = remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     val gradientBackground = Brush.verticalGradient(colors = listOf(Putih, Jingga, UnguTua))
-    val totalPrice = cartItems.entries.sumOf { (item, quantity) ->
-        val priceString = item.price.replace("Rp ", "").replace(".", "")
-        try {
-            priceString.toInt() * quantity
-        } catch (e: NumberFormatException) {
-            0
-        }
+
+    // Update total price when cartItems change
+    LaunchedEffect(cartItems) {
+        totalPrice = cartViewModel.getTotalPrice()
     }
-    val formattedTotalPrice = "Rp ${totalPrice.toString().chunked(3).joinToString(".")}"
+
     if (showConfirmationDialog.value) {
         AlertDialog(
             onDismissRequest = { showConfirmationDialog.value = false },
@@ -120,7 +120,7 @@ fun CartScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
-                    onClick = { },
+                    onClick = { cartViewModel.createOrder() },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp).height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Oranye),
                     shape = RoundedCornerShape(50),
@@ -142,37 +142,13 @@ fun CartScreen(
                     }
                 } else {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        val cartList = cartItems.entries.toList()
-                        for (i in cartList.indices step 2) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Box(modifier = Modifier.weight(1f)) {
-                                    val (item, quantity) = cartList[i]
-                                    CartItemCard(
-                                        foodItem = item,
-                                        quantity = quantity,
-                                        onIncrement = { cartViewModel.addToCart(item) },
-                                        onDecrement = { cartViewModel.decrementItem(item) }
-                                    )
-                                }
-                                if (i + 1 < cartList.size) {
-                                    Box(modifier = Modifier.weight(1f)) {
-                                        val (item, quantity) = cartList[i + 1]
-                                        CartItemCard(
-                                            foodItem = item,
-                                            quantity = quantity,
-                                            onIncrement = { cartViewModel.addToCart(item) },
-                                            onDecrement = { cartViewModel.decrementItem(item) }
-                                        )
-                                    }
-                                } else {
-                                    Spacer(modifier = Modifier.weight(1f))
-                                }
-                            }
+                        cartItems.forEach { cartItemWithFood ->
+                            CartItemCard(
+                                foodItem = cartItemWithFood.foodItem,
+                                quantity = cartItemWithFood.cartItem.quantity,
+                                onIncrement = { cartViewModel.addToCart(cartItemWithFood.foodItem) },
+                                onDecrement = { cartViewModel.decrementItem(cartItemWithFood.foodItem) }
+                            )
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
@@ -193,7 +169,7 @@ fun CartScreen(
                                     style = MaterialTheme.typography.bodyLarge.copy(color = AbuAbuGelap)
                                 )
                                 Text(
-                                    text = cartItems.values.sum().toString(),
+                                    text = cartItems.sumOf { it.cartItem.quantity }.toString(),
                                     style = MaterialTheme.typography.bodyLarge.copy(color = AbuAbuGelap)
                                 )
                             }
@@ -208,7 +184,7 @@ fun CartScreen(
                                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = UnguTua)
                                 )
                                 Text(
-                                    text = formattedTotalPrice,
+                                    text = totalPrice,
                                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = UnguTua)
                                 )
                             }

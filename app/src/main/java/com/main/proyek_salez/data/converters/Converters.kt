@@ -1,9 +1,9 @@
-package com.main.proyek_salez.data
+package com.main.proyek_salez.data.converters
 
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.main.proyek_salez.data.entities.CartItemEntity
+import com.main.proyek_salez.data.CartItemEntity
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 

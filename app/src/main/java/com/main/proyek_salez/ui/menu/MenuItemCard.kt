@@ -22,21 +22,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.main.proyek_salez.ui.cart.CartViewModel
+import com.main.proyek_salez.data.viewmodel.CartViewModel
 import com.main.proyek_salez.ui.theme.*
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun MenuItemCard(
     foodItem: FoodItem,
-    cartViewModel: CartViewModel =  viewModel(),
+    cartViewModel: CartViewModel,
     modifier: Modifier = Modifier
 ) {
     val cartItems by cartViewModel.cartItems.collectAsState()
-    val itemCount = cartItems[foodItem] ?: 0
+    val itemCount = cartItems.find { it.foodItem.id == foodItem.id }?.cartItem?.quantity ?: 0
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(4.dp)
             .height(280.dp),

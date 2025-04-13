@@ -1,4 +1,4 @@
-package com.main.proyek_salez.di
+package com.main.proyek_salez.data
 
 import android.content.Context
 import androidx.room.Room

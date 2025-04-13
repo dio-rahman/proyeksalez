@@ -1,4 +1,4 @@
-package com.main.proyek_salez.data.entities
+package com.main.proyek_salez.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -6,7 +6,7 @@ import com.main.proyek_salez.ui.menu.FoodItem
 
 @Entity(tableName = "food_items")
 data class FoodItemEntity(
-    @PrimaryKey val id: Int,
+    @PrimaryKey val id: Long,
     val name: String,
     val description: String,
     val price: String,

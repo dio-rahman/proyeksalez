@@ -1,4 +1,4 @@
-package com.main.proyek_salez.data.daos
+package com.main.proyek_salez.data
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -19,4 +19,7 @@ interface FoodItemDao {
 
     @Query("SELECT * FROM food_items WHERE id = :id")
     suspend fun getFoodItemById(id: Int): FoodItemEntity?
+
+    @Query("DELETE FROM food_items")
+    suspend fun deleteAll()
 }
