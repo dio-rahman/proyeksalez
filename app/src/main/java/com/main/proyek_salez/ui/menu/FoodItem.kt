@@ -1,7 +1,7 @@
 package com.main.proyek_salez.ui.menu
 
 data class FoodItem(
-    val id: Int,
+    val id: Long = 0,
     val name: String,
     val description: String,
     val price: String,

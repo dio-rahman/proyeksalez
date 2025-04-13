@@ -34,7 +34,7 @@ import androidx.navigation.NavController
 import com.main.proyek_salez.R
 import com.main.proyek_salez.ui.viewmodel.SalezViewModel
 import com.main.proyek_salez.ui.SidebarMenu
-import com.main.proyek_salez.ui.viewmodel.CartViewModel
+import com.main.proyek_salez.data.viewmodel.CartViewModel
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.launch
 
@@ -42,7 +42,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun FoodMenuScreen(
     navController: NavController,
-    cartViewModel: CartViewModel = hiltViewModel(),
+    cartViewModel: CartViewModel = hiltViewModel<CartViewModel>(),
     salezViewModel: SalezViewModel = hiltViewModel()
 ) {
     var menuInput by remember { mutableStateOf("") }

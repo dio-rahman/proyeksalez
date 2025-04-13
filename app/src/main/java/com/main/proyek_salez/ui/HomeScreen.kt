@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
-import com.main.proyek_salez.ui.viewmodel.CartViewModel
+import com.main.proyek_salez.data.viewmodel.CartViewModel
 import com.main.proyek_salez.ui.menu.FoodItem
 import com.main.proyek_salez.ui.menu.MenuItemCard
 import com.main.proyek_salez.ui.theme.*
@@ -31,8 +31,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     navController: NavController,
-    cartViewModel: CartViewModel = hiltViewModel(),
-    salezViewModel: SalezViewModel = hiltViewModel()
+    cartViewModel: CartViewModel = hiltViewModel<CartViewModel>()
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -171,7 +170,7 @@ fun HomeScreen(
                         scope.launch {
                             searchResult = null
                             errorMessage = ""
-                            salezViewModel.repository.searchFoodItems(menuInput).collectLatest { items ->
+                            cartViewModel.searchFoodItems(menuInput).collectLatest { items ->
                                 val foundItem = items.firstOrNull()
                                 if (foundItem != null) {
                                     searchResult = foundItem
@@ -184,11 +183,8 @@ fun HomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
-                        .height(48.dp)
-                        .shadow(
-                            elevation = 15.dp,
-                            shape = RoundedCornerShape(50)
-                        ),
+                        .height(48.dp),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Oranye
                     ),
@@ -274,11 +270,8 @@ fun CategoryButton(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .height(48.dp)
-            .shadow(
-                elevation = 15.dp,
-                shape = RoundedCornerShape(50)
-            ),
+            .height(48.dp),
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Oranye
         ),
