@@ -76,7 +76,7 @@ fun AppNavigation() {
             )
         }
 
-        composable("home") {
+        composable("cashier_dashboard") {
             HomeScreen(navController = navController, cartViewModel)
         }
         composable("food_menu") {

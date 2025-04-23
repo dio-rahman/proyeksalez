@@ -1,11 +1,11 @@
-package com.main.proyek_salez.data
+package com.main.proyek_salez.data.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.main.proyek_salez.data.CartItemEntity
+import com.main.proyek_salez.data.model.CartItemEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

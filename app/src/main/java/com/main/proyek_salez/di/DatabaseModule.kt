@@ -1,12 +1,11 @@
-package com.main.proyek_salez.data
+package com.main.proyek_salez.di
 
 import android.content.Context
 import androidx.room.Room
-import com.main.proyek_salez.data.SalezDatabase
-import com.main.proyek_salez.data.SalezRepository
-import com.main.proyek_salez.data.CartItemDao
-import com.main.proyek_salez.data.FoodItemDao
-import com.main.proyek_salez.data.OrderDao
+import com.main.proyek_salez.data.dao.CartItemDao
+import com.main.proyek_salez.data.dao.FoodItemDao
+import com.main.proyek_salez.data.dao.OrderDao
+import com.main.proyek_salez.data.repository.SalezRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

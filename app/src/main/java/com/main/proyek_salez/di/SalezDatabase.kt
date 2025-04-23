@@ -1,9 +1,15 @@
-package com.main.proyek_salez.data
+package com.main.proyek_salez.di
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.main.proyek_salez.data.converters.Converters
+import com.main.proyek_salez.data.dao.CartItemDao
+import com.main.proyek_salez.data.dao.FoodItemDao
+import com.main.proyek_salez.data.dao.OrderDao
+import com.main.proyek_salez.data.model.CartItemEntity
+import com.main.proyek_salez.data.model.FoodItemEntity
+import com.main.proyek_salez.data.model.OrderEntity
 
 @Database(
     entities = [FoodItemEntity::class, CartItemEntity::class, OrderEntity::class],

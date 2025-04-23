@@ -3,8 +3,8 @@ package com.main.proyek_salez.data.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.main.proyek_salez.data.CartItemEntity
-import com.main.proyek_salez.data.SalezRepository
+import com.main.proyek_salez.data.model.CartItemEntity
+import com.main.proyek_salez.data.repository.SalezRepository
 import com.main.proyek_salez.ui.menu.FoodItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow

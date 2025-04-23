@@ -1,4 +1,4 @@
-package com.main.proyek_salez.data
+package com.main.proyek_salez.data.model
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
