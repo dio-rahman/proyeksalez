@@ -1,9 +1,10 @@
-package com.main.proyek_salez.data
+package com.main.proyek_salez.data.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.main.proyek_salez.data.model.FoodItemEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
