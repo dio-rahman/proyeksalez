@@ -1,5 +1,6 @@
 package com.main.proyek_salez.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,7 +14,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -24,7 +24,6 @@ import com.main.proyek_salez.R
 import com.main.proyek_salez.data.entities.User
 import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import com.main.proyek_salez.ui.theme.*
-import androidx.compose.foundation.Image
 
 @Composable
 fun LoginScreen(
@@ -64,6 +63,14 @@ fun LoginScreen(
             .fillMaxSize()
             .background(brush = gradientBackground)
     ) {
+        Image(
+            painter = painterResource(id = R.drawable.salez_logo),
+            contentDescription = "Salez Logo",
+            modifier = Modifier
+                .size(600.dp)
+                .align(Alignment.Center)
+        )
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -82,12 +89,6 @@ fun LoginScreen(
                     )
                 }
             }
-
-            Image(
-                painter = painterResource(id = R.drawable.salez_logo),
-                contentDescription = "Salez Logo",
-                modifier = Modifier.size(180.dp)
-            )
 
             Spacer(modifier = Modifier.height(16.dp))
             Text(
