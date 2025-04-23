@@ -19,7 +19,7 @@ interface FoodItemDao {
     fun searchFoodItems(name: String): Flow<List<FoodItemEntity>>
 
     @Query("SELECT * FROM food_items WHERE id = :id")
-    suspend fun getFoodItemById(id: Long): FoodItemEntity?
+    suspend fun getFoodItemById(id: Int): FoodItemEntity?
 
     @Query("DELETE FROM food_items")
     suspend fun deleteAll()

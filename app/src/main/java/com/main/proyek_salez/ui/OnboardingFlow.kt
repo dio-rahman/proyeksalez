@@ -141,7 +141,7 @@ fun OnboardingTampilan(headline: String, description: String, onSelanjutnya: () 
 
 @Composable
 fun OnboardingAlur(onFinish: () -> Unit) {
-    val pagerState = rememberPagerState(initialPage = 0) { 3 } // Menentukan jumlah halaman
+    val pagerState = rememberPagerState(initialPage = 0) { 3 }
     val scope = rememberCoroutineScope()
 
     HorizontalPager(

@@ -1,42 +1,36 @@
 package com.main.proyek_salez.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.main.proyek_salez.R
 import com.main.proyek_salez.data.entities.User
 import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import androidx.activity.compose.BackHandler
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.main.proyek_salez.utils.Event
-
+import com.main.proyek_salez.ui.theme.*
 private val _loginResult = MutableLiveData<Event<Result<User>>>()
 val loginResult: LiveData<Event<Result<User>>> = _loginResult
+
 
 @Composable
 fun LoginScreen(
@@ -71,73 +65,154 @@ fun LoginScreen(
         }
     }
 
-    Column(
+    val gradientBackground = Brush.verticalGradient(
+        colors = listOf(
+            Putih,
+            Jingga,
+            UnguTua
+        )
+    )
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .background(brush = gradientBackground)
     ) {
-        Text(
-            text = "Salez",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Error message
-        errorMessage?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = {
-                errorMessage = null
-                isLoading = true
-                viewModel.login(email, password)
-            },
-            enabled = !isLoading && email.isNotBlank() && password.isNotBlank(),
+        Image(
+            painter = painterResource(id = R.drawable.salez_logo),
+            contentDescription = "Salez Logo",
             modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
+                .size(600.dp)
+                .align(Alignment.Center)
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(24.dp)
-                )
-            } else {
-                Text("Masuk")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                IconButton(onClick = { /* TODO: Handle back navigation */ }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = UnguTua
+                    )
+                }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "LOG IN KASIR",
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    color = UnguTua,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("username kasir") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedContainerColor = Putih,
+                    focusedContainerColor = Putih,
+                    focusedBorderColor = UnguTua,
+                    unfocusedBorderColor = AbuAbu
+                ),
+                shape = RoundedCornerShape(50),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("password") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedContainerColor = Putih,
+                    focusedContainerColor = Putih,
+                    focusedBorderColor = UnguTua,
+                    unfocusedBorderColor = AbuAbu
+                ),
+                shape = RoundedCornerShape(50),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            errorMessage?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(
+                onClick = {
+                    errorMessage = null
+                    isLoading = true
+                    viewModel.login(email, password)
+                },
+                enabled = !isLoading && email.isNotBlank() && password.isNotBlank(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .height(48.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Oranye),
+                shape = RoundedCornerShape(50),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(color = Putih, modifier = Modifier.size(24.dp))
+                } else {
+                    Text(
+                        "Masuk",
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            color = UnguTua,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = { /* TODO: Handle reset password navigation */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .height(48.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Oranye),
+                shape = RoundedCornerShape(50),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+            ) {
+                Text(
+                    "Reset Password",
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        color = UnguTua,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Lupa Password? Reset Password Disini",
+                style = MaterialTheme.typography.bodyMedium.copy(color = UnguTua),
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .clickable { /* TODO: Handle reset password link */ }
+            )
         }
     }
 }
