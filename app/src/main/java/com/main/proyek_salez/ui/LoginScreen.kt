@@ -14,6 +14,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -63,36 +64,38 @@ fun LoginScreen(
             .fillMaxSize()
             .background(brush = gradientBackground)
     ) {
+        IconButton(
+            onClick = { /* TODO: Handle back navigation */ },
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                tint = UnguTua
+            )
+        }
+
         Image(
             painter = painterResource(id = R.drawable.salez_logo),
             contentDescription = "Salez Logo",
             modifier = Modifier
-                .size(600.dp)
+                .size(2000.dp)
                 .align(Alignment.Center)
+                .offset(x = 25.dp, y = (-320).dp)
         )
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(16.dp)
+                .offset(y = 250.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start
-            ) {
-                IconButton(onClick = { /* TODO: Handle back navigation */ }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = UnguTua
-                    )
-                }
-            }
-
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "LOG IN KASIR",
+                text = "LOG IN",
                 style = MaterialTheme.typography.headlineLarge.copy(
                     color = UnguTua,
                     fontWeight = FontWeight.Bold
