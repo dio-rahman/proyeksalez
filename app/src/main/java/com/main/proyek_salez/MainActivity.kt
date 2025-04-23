@@ -27,6 +27,8 @@ import com.main.proyek_salez.data.entities.User
 import com.main.proyek_salez.data.entities.UserRole
 import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import com.main.proyek_salez.data.viewmodel.CartViewModel
+import com.main.proyek_salez.navigation.MainNavigation
+import com.main.proyek_salez.navigation.Screen
 import com.main.proyek_salez.ui.LoginScreen
 import com.main.proyek_salez.ui.OnboardingApp
 import com.main.proyek_salez.ui.sidebar.ProfileScreen
@@ -111,23 +113,5 @@ fun AppNavigation() {
     }
 }
 
-class MainNavigation(
-    private val navController: NavHostController
-) {
-    fun navigateBasedOnRole(user: User) {
-        when (user.role) {
-            UserRole.CASHIER -> navController.navigate(Screen.CashierDashboard.route) {
-                popUpTo(Screen.Login.route) { inclusive = true }
-            }
 
-            UserRole.CHEF -> TODO()
-            UserRole.MANAGER -> TODO()
-        }
-    }
-}
 
-sealed class Screen(val route: String) {
-    object Login : Screen("login")
-    object CashierDashboard : Screen("cashier_dashboard")
-
-}

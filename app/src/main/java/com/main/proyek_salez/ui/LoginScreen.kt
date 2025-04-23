@@ -28,16 +28,25 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.main.proyek_salez.data.entities.User
 import com.main.proyek_salez.data.viewmodel.AuthViewModel
+import androidx.activity.compose.BackHandler
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.main.proyek_salez.utils.Event
 
+private val _loginResult = MutableLiveData<Event<Result<User>>>()
+val loginResult: LiveData<Event<Result<User>>> = _loginResult
 
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel = hiltViewModel(),
     onLoginSuccess: (User) -> Unit
 ) {
+
+    BackHandler(enabled = true) {
+        // Prevent going back to the dashboard
+    }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
@@ -47,7 +56,7 @@ fun LoginScreen(
     val loginResult by viewModel.loginResult.observeAsState()
 
     LaunchedEffect(loginResult) {
-        loginResult?.let { result ->
+        loginResult?.getContentIfNotHandled()?.let { result ->
             isLoading = false
             result.fold(
                 onSuccess = { user ->
@@ -70,7 +79,7 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Kasir App",
+            text = "Salez",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
         )

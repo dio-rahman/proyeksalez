@@ -23,6 +23,7 @@ import androidx.navigation.NavController
 import com.main.proyek_salez.R
 import com.main.proyek_salez.ui.theme.*
 import com.main.proyek_salez.data.viewmodel.AuthViewModel
+import com.main.proyek_salez.navigation.Screen
 
 @Composable
 fun SidebarMenu(
@@ -127,11 +128,15 @@ fun SidebarMenu(
             androidx.compose.material3.AlertDialog(
                 onDismissRequest = { showDialog.value = false },
                 confirmButton = {
+                    println("Logout button pressed")
                     Button(onClick = {
                         authViewModel.logout()
+                        authViewModel.clearLoginState()
                         showDialog.value = false
-                        navController.navigate("login") {
+                        println("Navigating to login screen")
+                        navController.navigate(Screen.Login.route) {
                             popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
                         }
                     }) {
                         Text("Ya")
