@@ -13,8 +13,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -29,7 +29,9 @@ import com.main.proyek_salez.ui.theme.*
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel = hiltViewModel(),
-    onLoginSuccess: (User) -> Unit
+    onLoginSuccess: (User) -> Unit,
+    startDestination: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -60,12 +62,12 @@ fun LoginScreen(
     )
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(brush = gradientBackground)
     ) {
         IconButton(
-            onClick = { /* TODO: Handle back navigation */ },
+            onClick = { "onboarding" },
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(16.dp)
@@ -81,12 +83,13 @@ fun LoginScreen(
             painter = painterResource(id = R.drawable.salez_logo),
             contentDescription = "Salez Logo",
             modifier = Modifier
-                .size(2000.dp)
+                .size(800.dp)
+                .scale(1.5f)
                 .align(Alignment.Center)
-                .offset(x = 25.dp, y = (-320).dp)
+                .offset(x = 20.dp, y = (-200).dp)
         )
 
-        Column(
+            Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
