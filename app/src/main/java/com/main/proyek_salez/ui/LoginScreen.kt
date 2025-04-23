@@ -39,19 +39,15 @@ val loginResult: LiveData<Event<Result<User>>> = _loginResult
 fun LoginScreen(
     viewModel: AuthViewModel = hiltViewModel(),
     onLoginSuccess: (User) -> Unit,
-    startDestination: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
     BackHandler(enabled = true) {
-        // Prevent going back to the dashboard
     }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-
-    // Observe login result
     val loginResult by viewModel.loginResult.observeAsState()
 
     LaunchedEffect(loginResult) {
@@ -59,11 +55,9 @@ fun LoginScreen(
             isLoading = false
             result.fold(
                 onSuccess = { user ->
-                    // Login berhasil, navigasi berdasarkan role
                     onLoginSuccess(user)
                 },
                 onFailure = { e ->
-                    // Login gagal, tampilkan pesan error
                     errorMessage = e.message ?: "Login gagal"
                 }
             )
@@ -84,7 +78,7 @@ fun LoginScreen(
             .background(brush = gradientBackground)
     ) {
         IconButton(
-            onClick = { "onboarding" },
+            onClick = {  },
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(16.dp)
