@@ -63,20 +63,15 @@ fun AppNavigation() {
     ) {
         composable("onboarding") {
             OnboardingApp(
-                onFinish = { navController.navigate(Screen.Login.route) { popUpTo("onboarding") { inclusive = true } } }
+                onFinish = {  navController.navigate(Screen.Login.route) { popUpTo("onboarding") { inclusive = true } } }
             )
         }
 
         composable(Screen.Login.route) {
-            LoginScreen(
+                LoginScreen(
                 viewModel = authViewModel,
                 onLoginSuccess = { user ->
                     mainNavigation.navigateBasedOnRole(user)
-                },
-                startDestination = {
-                    navController.navigate("onboarding") {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
                 }
             )
         }
@@ -134,4 +129,5 @@ class MainNavigation(
 sealed class Screen(val route: String) {
     object Login : Screen("login")
     object CashierDashboard : Screen("cashier_dashboard")
+
 }

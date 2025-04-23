@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.main.proyek_salez.data.entities.User
 import com.main.proyek_salez.data.entities.UserRole
 import com.main.proyek_salez.data.repository.AuthRepository
+import com.main.proyek_salez.utils.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -16,11 +17,11 @@ class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    private val _loginResult = MutableLiveData<Result<User>>()
-    val loginResult: LiveData<Result<User>> = _loginResult
+    private val _loginResult = MutableLiveData<Event<Result<User>>>()
+    val loginResult: LiveData<Event<Result<User>>> = _loginResult
 
-    private val _registerResult = MutableLiveData<Result<User>>()
-    val registerResult: LiveData<Result<User>> = _registerResult
+    private val _registerResult = MutableLiveData<Event<Result<User>>>()
+    val registerResult: LiveData<Event<Result<User>>> = _registerResult
 
     private val _currentUser = MutableLiveData<User?>()
     val currentUser: LiveData<User?> = _currentUser
@@ -29,7 +30,7 @@ class AuthViewModel @Inject constructor(
     fun login(email: String, password: String) {
         viewModelScope.launch {
             val result = authRepository.loginWithRoleCheck(email, password)
-            _loginResult.value = result
+            _loginResult.value = Event(result)
         }
     }
 
@@ -37,7 +38,7 @@ class AuthViewModel @Inject constructor(
     fun registerUser(email: String, password: String, name: String, phone: String, role: UserRole) {
         viewModelScope.launch {
             val result = authRepository.registerUser(email, password, name, phone, role)
-            _registerResult.value = result
+            _registerResult.value = Event(result)
         }
     }
 
@@ -53,4 +54,10 @@ class AuthViewModel @Inject constructor(
         authRepository.logout()
         _currentUser.value = null
     }
+
+    fun clearLoginState() {
+        _loginResult.value = Event(Result.failure(Exception("State cleared")))
+    }
+
+    companion object
 }

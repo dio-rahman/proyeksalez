@@ -107,7 +107,7 @@ fun FoodMenuScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
-                    onClick = { navController.navigate("home") },
+                    onClick = { navController.navigate("cashier_dashboard") },
                     modifier = Modifier.fillMaxWidth().height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Oranye),
                     shape = RoundedCornerShape(50),

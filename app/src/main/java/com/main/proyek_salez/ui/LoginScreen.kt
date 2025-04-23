@@ -24,7 +24,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.main.proyek_salez.R
 import com.main.proyek_salez.data.entities.User
 import com.main.proyek_salez.data.viewmodel.AuthViewModel
+import androidx.activity.compose.BackHandler
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.main.proyek_salez.utils.Event
 import com.main.proyek_salez.ui.theme.*
+
+
+private val _loginResult = MutableLiveData<Event<Result<User>>>()
+val loginResult: LiveData<Event<Result<User>>> = _loginResult
+
 
 @Composable
 fun LoginScreen(
@@ -33,20 +42,28 @@ fun LoginScreen(
     startDestination: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    BackHandler(enabled = true) {
+        // Prevent going back to the dashboard
+    }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    // Observe login result
     val loginResult by viewModel.loginResult.observeAsState()
 
     LaunchedEffect(loginResult) {
-        loginResult?.let { result: Result<User> ->
+        loginResult?.getContentIfNotHandled()?.let { result ->
             isLoading = false
             result.fold(
-                onSuccess = { user: User ->
+                onSuccess = { user ->
+                    // Login berhasil, navigasi berdasarkan role
                     onLoginSuccess(user)
                 },
-                onFailure = { e: Throwable ->
+                onFailure = { e ->
+                    // Login gagal, tampilkan pesan error
                     errorMessage = e.message ?: "Login gagal"
                 }
             )
@@ -109,7 +126,7 @@ fun LoginScreen(
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("username kasir") },
+                label = { Text("Username") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
@@ -126,7 +143,7 @@ fun LoginScreen(
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("password") },
+                label = { Text("Password") },
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier
                     .fillMaxWidth()

@@ -102,7 +102,7 @@ fun ProfileScreen(navController: NavController) {
         ) {
             IconButton(
                 onClick = {
-                    navController.navigate("home") {
+                    navController.navigate("cashier_dashboard") {
                         popUpTo("profile") { inclusive = true }
                     }
                 },

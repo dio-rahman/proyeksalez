@@ -4,9 +4,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -15,15 +18,20 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
 import com.main.proyek_salez.ui.theme.*
+import com.main.proyek_salez.data.viewmodel.AuthViewModel
+import com.main.proyek_salez.navigation.Screen
 
 @Composable
 fun SidebarMenu(
     navController: NavController,
     onCloseDrawer: () -> Unit
 ) {
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val showDialog = remember { mutableStateOf(false) }
     val gradientBackground = Brush.verticalGradient(
         colors = listOf(
             Jingga,
@@ -114,10 +122,38 @@ fun SidebarMenu(
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             ),
-            onClick = { }
+            onClick = { showDialog.value = true }
         )
+        if (showDialog.value) {
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { showDialog.value = false },
+                confirmButton = {
+                    println("Logout button pressed")
+                    Button(onClick = {
+                        authViewModel.logout()
+                        authViewModel.clearLoginState()
+                        showDialog.value = false
+                        println("Navigating to login screen")
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }) {
+                        Text("Ya")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showDialog.value = false }) {
+                        Text("Batal")
+                    }
+                },
+                title = { Text("Konfirmasi Logout") },
+                text = { Text("Apakah Anda yakin ingin logout?") }
+            )
+        }
     }
 }
+
 
 @Composable
 fun MenuItem(
