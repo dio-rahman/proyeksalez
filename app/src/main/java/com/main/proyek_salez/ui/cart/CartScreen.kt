@@ -227,7 +227,7 @@ fun CartScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
-                    onClick = { navController.navigate("home") },
+                    onClick = { navController.navigate("cashier_dashboard") },
                     modifier = Modifier.fillMaxWidth().height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Oranye),
                     shape = RoundedCornerShape(50),

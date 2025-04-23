@@ -53,4 +53,6 @@ class AuthViewModel @Inject constructor(
         authRepository.logout()
         _currentUser.value = null
     }
+
+    companion object
 }

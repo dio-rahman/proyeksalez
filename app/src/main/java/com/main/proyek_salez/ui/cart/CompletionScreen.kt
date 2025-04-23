@@ -130,8 +130,8 @@ fun CompletionScreen(
                 Spacer(modifier = Modifier.weight(1f))
                 Button(
                     onClick = {
-                        navController.navigate("home") {
-                            popUpTo("home") { inclusive = true }
+                        navController.navigate("cashier_dashboard") {
+                            popUpTo("cashier_dashboard") { inclusive = true }
                         }
                     },
                     modifier = Modifier
