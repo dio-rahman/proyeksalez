@@ -28,7 +28,7 @@ import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.viewmodel.CartViewModel
 import com.main.proyek_salez.ui.theme.*
 
-@Composable
+    @Composable
 fun MenuItemCard(
     foodItem: FoodItemEntity,
     cartViewModel: CartViewModel,
@@ -74,7 +74,7 @@ fun MenuItemCard(
                 )
             } else {
                 Image(
-                    painter = painterResource(id = R.drawable.placeholder_image),
+                    painter = painterResource(id = R.drawable.salez_logo),
                     contentDescription = "Placeholder",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

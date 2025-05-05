@@ -4,25 +4,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.main.proyek_salez.data.model.CartItemEntity
-import com.main.proyek_salez.data.repository.SalezRepository
-import com.main.proyek_salez.ui.menu.FoodItem
+import com.main.proyek_salez.data.model.FoodItemEntity
+import com.main.proyek_salez.data.repository.CashierRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
+import java.text.DecimalFormat
 import javax.inject.Inject
 
 data class CartItemWithFood(
     val cartItem: CartItemEntity,
-    val foodItem: FoodItem
+    val foodItem: FoodItemEntity
 )
 
 @HiltViewModel
 class CartViewModel @Inject constructor(
-    private val repository: SalezRepository
+    private val repository: CashierRepository
 ) : ViewModel() {
     private val _cartItems = MutableStateFlow<List<CartItemWithFood>>(emptyList())
     val cartItems: StateFlow<List<CartItemWithFood>> = _cartItems.asStateFlow()
@@ -32,7 +32,7 @@ class CartViewModel @Inject constructor(
         viewModelScope.launch {
             repository.getCartItems().collect { items ->
                 val cartItemsWithFood = items.mapNotNull { cartItem ->
-                    val foodItem = repository.getFoodItemById(cartItem.foodItemId.toLong())
+                    val foodItem = repository.getFoodItemById(cartItem.foodItemId)
                     foodItem?.let { CartItemWithFood(cartItem, it) }
                 }
                 _cartItems.value = cartItemsWithFood
@@ -40,13 +40,13 @@ class CartViewModel @Inject constructor(
         }
     }
 
-    fun addToCart(item: FoodItem) {
+    fun addToCart(item: FoodItemEntity) {
         viewModelScope.launch {
             repository.addToCart(item)
         }
     }
 
-    fun decrementItem(item: FoodItem) {
+    fun decrementItem(item: FoodItemEntity) {
         viewModelScope.launch {
             repository.decrementCartItem(item)
         }
@@ -60,18 +60,10 @@ class CartViewModel @Inject constructor(
 
     suspend fun getTotalPrice(): String {
         val totalPrice = _cartItems.value.sumOf { cartItemWithFood ->
-            val foodItem = cartItemWithFood.foodItem
-            val priceString = foodItem.price.replace("Rp ", "").replace(".", "")
-            try {
-                priceString.toBigDecimal() * cartItemWithFood.cartItem.quantity.toBigDecimal()
-            } catch (e: NumberFormatException) {
-                BigDecimal.ZERO
-            }
+            cartItemWithFood.foodItem.price * cartItemWithFood.cartItem.quantity
         }
-        val formattedPrice = totalPrice.toLong().toString().reversed()
-            .chunked(3)
-            .joinToString(".")
-            .reversed()
+        val formatter = DecimalFormat("#,###")
+        val formattedPrice = formatter.format(totalPrice).replace(",", ".")
         return "Rp $formattedPrice"
     }
 
@@ -85,7 +77,7 @@ class CartViewModel @Inject constructor(
         }
     }
 
-    fun searchFoodItems(query: String): Flow<List<FoodItem>> {
+    fun searchFoodItems(query: String): Flow<List<FoodItemEntity>> {
         return repository.searchFoodItems(query)
     }
 }

@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
+import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.viewmodel.CartViewModel
-import com.main.proyek_salez.ui.menu.FoodItem
 import com.main.proyek_salez.ui.menu.MenuItemCard
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.flow.collectLatest
@@ -36,7 +36,7 @@ fun HomeScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var menuInput by remember { mutableStateOf("") }
-    var searchResult by remember { mutableStateOf<FoodItem?>(null) }
+    var searchResult by remember { mutableStateOf<FoodItemEntity?>(null) }
     var errorMessage by remember { mutableStateOf("") }
     val gradientBackground = Brush.verticalGradient(
         colors = listOf(

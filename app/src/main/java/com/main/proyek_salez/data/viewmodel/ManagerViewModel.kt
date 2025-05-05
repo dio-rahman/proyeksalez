@@ -56,6 +56,20 @@ class ManagerViewModel @Inject constructor(
         }
     }
 
+    fun deleteCategory(categoryId: Long) {
+        viewModelScope.launch {
+            when (val result = repository.deleteCategory(categoryId)) {
+                is Result.Success -> {
+                    loadCategories()
+                    _errorMessage.value = null
+                }
+                is Result.Error -> {
+                    _errorMessage.value = result.message
+                }
+            }
+        }
+    }
+
     fun addFoodItem(
         id: Long,
         name: String,
@@ -74,6 +88,49 @@ class ManagerViewModel @Inject constructor(
                 categoryId = categoryId
             )
             when (val result = repository.addFoodItem(foodItem)) {
+                is Result.Success -> {
+                    loadFoodItems()
+                    _errorMessage.value = null
+                }
+                is Result.Error -> {
+                    _errorMessage.value = result.message
+                }
+            }
+        }
+    }
+
+    fun updateFoodItem(
+        id: Long,
+        name: String,
+        description: String,
+        price: Double,
+        imagePath: String?,
+        categoryId: Long
+    ) {
+        viewModelScope.launch {
+            val foodItem = FoodItemEntity(
+                id = id,
+                name = name,
+                description = description,
+                price = price,
+                imagePath = imagePath,
+                categoryId = categoryId
+            )
+            when (val result = repository.updateFoodItem(foodItem)) {
+                is Result.Success -> {
+                    loadFoodItems()
+                    _errorMessage.value = null
+                }
+                is Result.Error -> {
+                    _errorMessage.value = result.message
+                }
+            }
+        }
+    }
+
+    fun deleteFoodItem(id: Long) {
+        viewModelScope.launch {
+            when (val result = repository.deleteFoodItem(id)) {
                 is Result.Success -> {
                     loadFoodItems()
                     _errorMessage.value = null

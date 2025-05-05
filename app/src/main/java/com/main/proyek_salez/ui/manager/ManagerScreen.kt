@@ -11,8 +11,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,6 +40,9 @@ fun ManagerScreen(viewModel: ManagerViewModel = hiltViewModel()) {
     var selectedCategoryId by remember { mutableStateOf<Long?>(null) }
     var isCategoryDropdownExpanded by remember { mutableStateOf(false) }
     var selectedImageUri by remember { mutableStateOf<String?>(null) }
+    var editingFoodItem by remember { mutableStateOf<FoodItemEntity?>(null) }
+    var showDeleteCategoryDialog by remember { mutableStateOf<Long?>(null) }
+    var showDeleteFoodItemDialog by remember { mutableStateOf<Long?>(null) }
 
     val categories by viewModel.categories.collectAsState()
     val foodItems by viewModel.foodItems.collectAsState()
@@ -47,6 +53,54 @@ fun ManagerScreen(viewModel: ManagerViewModel = hiltViewModel()) {
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         selectedImageUri = uri?.toString()
+    }
+
+    // Delete Category Confirmation Dialog
+    showDeleteCategoryDialog?.let { categoryId ->
+        AlertDialog(
+            onDismissRequest = { showDeleteCategoryDialog = null },
+            title = { Text("Konfirmasi Hapus") },
+            text = { Text("Apakah anda yakin untuk menghapus kategori ini?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteCategory(categoryId)
+                        showDeleteCategoryDialog = null
+                    }
+                ) {
+                    Text("Ya")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteCategoryDialog = null }) {
+                    Text("Batal")
+                }
+            }
+        )
+    }
+
+    // Delete Food Item Confirmation Dialog
+    showDeleteFoodItemDialog?.let { foodItemId ->
+        AlertDialog(
+            onDismissRequest = { showDeleteFoodItemDialog = null },
+            title = { Text("Konfirmasi Hapus") },
+            text = { Text("Apakah anda yakin untuk menghapus menu ini?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteFoodItem(foodItemId)
+                        showDeleteFoodItemDialog = null
+                    }
+                ) {
+                    Text("Ya")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteFoodItemDialog = null }) {
+                    Text("Batal")
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -93,6 +147,7 @@ fun ManagerScreen(viewModel: ManagerViewModel = hiltViewModel()) {
                     )
                     Button(
                         onClick = {
+                            viewModel.clearErrorMessage()
                             if (categoryName.isBlank()) {
                                 viewModel.setErrorMessage("Nama kategori tidak boleh kosong")
                             } else {
@@ -110,7 +165,7 @@ fun ManagerScreen(viewModel: ManagerViewModel = hiltViewModel()) {
                 }
             }
 
-            // Form Tambah Menu
+            // Form Tambah/Edit Menu
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -122,7 +177,7 @@ fun ManagerScreen(viewModel: ManagerViewModel = hiltViewModel()) {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        "Tambah Menu",
+                        if (editingFoodItem == null) "Tambah Menu" else "Edit Menu",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -130,7 +185,8 @@ fun ManagerScreen(viewModel: ManagerViewModel = hiltViewModel()) {
                         value = foodId,
                         onValueChange = { foodId = it.filter { it.isDigit() } },
                         label = { Text("ID Menu") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = editingFoodItem == null // ID tidak bisa diubah saat edit
                     )
                     OutlinedTextField(
                         value = foodName,
@@ -150,7 +206,6 @@ fun ManagerScreen(viewModel: ManagerViewModel = hiltViewModel()) {
                         label = { Text("Harga Menu") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    // Tombol untuk memilih gambar
                     Button(
                         onClick = { imagePickerLauncher.launch("image/*") },
                         modifier = Modifier.fillMaxWidth()
@@ -169,9 +224,9 @@ fun ManagerScreen(viewModel: ManagerViewModel = hiltViewModel()) {
                                 IconButton(onClick = { isCategoryDropdownExpanded = true }) {
                                     Icon(
                                         imageVector = if (isCategoryDropdownExpanded)
-                                            androidx.compose.material.icons.Icons.Default.ArrowDropUp
+                                            Icons.Default.ArrowDropUp
                                         else
-                                            androidx.compose.material.icons.Icons.Default.ArrowDropDown,
+                                            Icons.Default.ArrowDropDown,
                                         contentDescription = null
                                     )
                                 }
@@ -193,47 +248,80 @@ fun ManagerScreen(viewModel: ManagerViewModel = hiltViewModel()) {
                             }
                         }
                     }
-                    Button(
-                        onClick = {
-                            when {
-                                foodId.isBlank() -> {
-                                    viewModel.setErrorMessage("ID menu tidak boleh kosong")
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        if (editingFoodItem != null) {
+                            TextButton(
+                                onClick = {
+                                    foodId = ""
+                                    foodName = ""
+                                    foodDesc = ""
+                                    foodPrice = ""
+                                    selectedImageUri = null
+                                    selectedCategoryId = null
+                                    editingFoodItem = null
+                                    viewModel.clearErrorMessage()
                                 }
-                                foodName.isBlank() -> {
-                                    viewModel.setErrorMessage("Nama menu tidak boleh kosong")
-                                }
-                                foodPrice.isBlank() -> {
-                                    viewModel.setErrorMessage("Harga menu tidak boleh kosong")
-                                }
-                                selectedCategoryId == null -> {
-                                    viewModel.setErrorMessage("Pilih kategori terlebih dahulu")
-                                }
-                                else -> {
-                                    val imagePath = selectedImageUri?.let { uri ->
-                                        saveImageToInternalStorage(context, Uri.parse(uri))
+                            ) {
+                                Text("Batal")
+                            }
+                        }
+                        Button(
+                            onClick = {
+                                viewModel.clearErrorMessage()
+                                when {
+                                    foodId.isBlank() -> {
+                                        viewModel.setErrorMessage("ID menu tidak boleh kosong")
                                     }
-                                    viewModel.addFoodItem(
-                                        id = foodId.toLongOrNull() ?: 0,
-                                        name = foodName,
-                                        description = foodDesc,
-                                        price = foodPrice.toDoubleOrNull() ?: 0.0,
-                                        imagePath = imagePath,
-                                        categoryId = selectedCategoryId!!
-                                    )
-                                    if (viewModel.errorMessage.value == null) {
-                                        foodId = ""
-                                        foodName = ""
-                                        foodDesc = ""
-                                        foodPrice = ""
-                                        selectedImageUri = null
-                                        selectedCategoryId = null
+                                    foodName.isBlank() -> {
+                                        viewModel.setErrorMessage("Nama menu tidak boleh kosong")
+                                    }
+                                    foodPrice.isBlank() -> {
+                                        viewModel.setErrorMessage("Harga menu tidak boleh kosong")
+                                    }
+                                    selectedCategoryId == null -> {
+                                        viewModel.setErrorMessage("Pilih kategori terlebih dahulu")
+                                    }
+                                    else -> {
+                                        val imagePath = selectedImageUri?.let { uri ->
+                                            saveImageToInternalStorage(context, Uri.parse(uri))
+                                        }
+                                        if (editingFoodItem == null) {
+                                            viewModel.addFoodItem(
+                                                id = foodId.toLongOrNull() ?: 0,
+                                                name = foodName,
+                                                description = foodDesc,
+                                                price = foodPrice.toDoubleOrNull() ?: 0.0,
+                                                imagePath = imagePath,
+                                                categoryId = selectedCategoryId!!
+                                            )
+                                        } else {
+                                            viewModel.updateFoodItem(
+                                                id = editingFoodItem!!.id,
+                                                name = foodName,
+                                                description = foodDesc,
+                                                price = foodPrice.toDoubleOrNull() ?: 0.0,
+                                                imagePath = imagePath,
+                                                categoryId = selectedCategoryId!!
+                                            )
+                                        }
+                                        if (viewModel.errorMessage.value == null) {
+                                            foodId = ""
+                                            foodName = ""
+                                            foodDesc = ""
+                                            foodPrice = ""
+                                            selectedImageUri = null
+                                            selectedCategoryId = null
+                                            editingFoodItem = null
+                                        }
                                     }
                                 }
                             }
-                        },
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        Text("Tambah Menu")
+                        ) {
+                            Text(if (editingFoodItem == null) "Tambah Menu" else "Simpan Perubahan")
+                        }
                     }
                 }
             }
@@ -263,10 +351,27 @@ fun ManagerScreen(viewModel: ManagerViewModel = hiltViewModel()) {
                         modifier = Modifier.heightIn(max = 100.dp)
                     ) {
                         items(categories) { category ->
-                            Text(
-                                "${category.name} ",
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    category.name,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                IconButton(
+                                    onClick = { showDeleteCategoryDialog = category.id }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Hapus Kategori",
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -290,7 +395,18 @@ fun ManagerScreen(viewModel: ManagerViewModel = hiltViewModel()) {
                         items(foodItems) { foodItem ->
                             FoodItemCard(
                                 foodItem = foodItem,
-                                categoryName = categories.find { it.id == foodItem.categoryId }?.name ?: "Unknown"
+                                categoryName = categories.find { it.id == foodItem.categoryId }?.name ?: "Unknown",
+                                onEdit = {
+                                    editingFoodItem = foodItem
+                                    foodId = foodItem.id.toString()
+                                    foodName = foodItem.name
+                                    foodDesc = foodItem.description
+                                    foodPrice = foodItem.price.toString()
+                                    selectedImageUri = foodItem.imagePath
+                                    selectedCategoryId = foodItem.categoryId
+                                    viewModel.clearErrorMessage()
+                                },
+                                onDelete = { showDeleteFoodItemDialog = foodItem.id }
                             )
                         }
                     }
@@ -304,7 +420,12 @@ fun ManagerScreen(viewModel: ManagerViewModel = hiltViewModel()) {
 }
 
 @Composable
-fun FoodItemCard(foodItem: FoodItemEntity, categoryName: String) {
+fun FoodItemCard(
+    foodItem: FoodItemEntity,
+    categoryName: String,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -315,7 +436,8 @@ fun FoodItemCard(foodItem: FoodItemEntity, categoryName: String) {
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
                 Text(
@@ -331,6 +453,24 @@ fun FoodItemCard(foodItem: FoodItemEntity, categoryName: String) {
                     "Harga: Rp ${foodItem.price}",
                     style = MaterialTheme.typography.bodySmall
                 )
+            }
+            Row {
+                IconButton(onClick = onEdit) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit Menu",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                IconButton(onClick = onDelete) {
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Hapus Menu",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
             }
         }
     }

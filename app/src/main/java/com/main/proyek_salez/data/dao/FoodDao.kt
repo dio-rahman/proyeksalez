@@ -42,5 +42,6 @@ interface FoodDao {
     @Query("SELECT * FROM food_items WHERE categoryId = :category")
     fun getFoodItemsByCategory(category: String): Flow<List<FoodItemEntity>>
 
-
+    @Query("DELETE FROM categories WHERE id = :id")
+    suspend fun deleteCategory(id: Long)
 }

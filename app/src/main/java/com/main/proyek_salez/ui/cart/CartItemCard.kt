@@ -70,7 +70,7 @@ fun CartItemCard(
 
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = foodItem.price,
+                text = "Rp ${foodItem.price}",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = AbuAbuGelap,
                     fontSize = 10.sp,
