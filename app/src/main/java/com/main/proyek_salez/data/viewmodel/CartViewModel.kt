@@ -32,7 +32,7 @@ class CartViewModel @Inject constructor(
         viewModelScope.launch {
             repository.getCartItems().collect { items ->
                 val cartItemsWithFood = items.mapNotNull { cartItem ->
-                    val foodItem = repository.getFoodItemById(cartItem.foodItemId.toInt())
+                    val foodItem = repository.getFoodItemById(cartItem.foodItemId.toLong())
                     foodItem?.let { CartItemWithFood(cartItem, it) }
                 }
                 _cartItems.value = cartItemsWithFood

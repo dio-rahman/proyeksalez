@@ -4,8 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.main.proyek_salez.data.entities.User
-import com.main.proyek_salez.data.entities.UserRole
+import com.main.proyek_salez.data.model.User
+import com.main.proyek_salez.data.model.UserRole
 import com.main.proyek_salez.data.repository.AuthRepository
 import com.main.proyek_salez.utils.Event
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -3,9 +3,9 @@ package com.main.proyek_salez.di
 import android.content.Context
 import androidx.room.Room
 import com.main.proyek_salez.data.dao.CartItemDao
-import com.main.proyek_salez.data.dao.FoodItemDao
+import com.main.proyek_salez.data.dao.FoodDao
 import com.main.proyek_salez.data.dao.OrderDao
-import com.main.proyek_salez.data.repository.SalezRepository
+import com.main.proyek_salez.data.repository.CashierRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,13 +23,9 @@ object DatabaseModule {
             context,
             SalezDatabase::class.java,
             "salez_database"
-        ).build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideFoodItemDao(database: SalezDatabase): FoodItemDao {
-        return database.foodItemDao()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
@@ -46,11 +42,17 @@ object DatabaseModule {
 
     @Provides
     @Singleton
+    fun provideFoodDao(database: SalezDatabase): FoodDao {
+        return database.FoodDao()
+    }
+
+    @Provides
+    @Singleton
     fun provideSalezRepository(
-        foodItemDao: FoodItemDao,
         cartItemDao: CartItemDao,
-        orderDao: OrderDao
-    ): SalezRepository {
-        return SalezRepository(foodItemDao, cartItemDao, orderDao)
+        orderDao: OrderDao,
+        foodDao: FoodDao
+    ): CashierRepository {
+        return CashierRepository(cartItemDao, foodDao, orderDao)
     }
 }

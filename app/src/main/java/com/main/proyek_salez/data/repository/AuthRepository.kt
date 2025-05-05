@@ -1,10 +1,12 @@
 package com.main.proyek_salez.data.repository
 
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.main.proyek_salez.data.entities.User
-import com.main.proyek_salez.data.entities.UserRole
+import com.main.proyek_salez.data.model.User
+import com.main.proyek_salez.data.model.UserRole
 import kotlinx.coroutines.tasks.await
+import kotlin.Result
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,7 +23,7 @@ class AuthRepository @Inject constructor(
 
             val userDoc = firestore.collection("users").document(firebaseUser.uid).get().await()
 
-            // Convert map to User object manually to handle Timestamp conversion
+
             if (userDoc.exists()) {
                 val data = userDoc.data
                 if (data != null) {
@@ -37,7 +39,7 @@ class AuthRepository @Inject constructor(
                         },
                         // Handle createdAt conversion properly
                         createdAt = when (val timestamp = data["createdAt"]) {
-                            is com.google.firebase.Timestamp -> timestamp.toDate().time
+                            is Timestamp -> timestamp.toDate().time
                             is Long -> timestamp
                             else -> System.currentTimeMillis()
                         }
@@ -54,7 +56,7 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    // For backward compatibility with existing code
+
     suspend fun loginWithRoleCheck(email: String, password: String): Result<User> {
         return login(email, password)
     }
@@ -105,9 +107,9 @@ class AuthRepository @Inject constructor(
                         } catch (e: Exception) {
                             UserRole.CASHIER
                         },
-                        // Handle createdAt conversion properly
+
                         createdAt = when (val timestamp = data["createdAt"]) {
-                            is com.google.firebase.Timestamp -> timestamp.toDate().time
+                            is Timestamp -> timestamp.toDate().time
                             is Long -> timestamp
                             else -> System.currentTimeMillis()
                         }

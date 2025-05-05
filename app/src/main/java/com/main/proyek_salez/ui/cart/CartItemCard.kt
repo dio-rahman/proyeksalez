@@ -21,12 +21,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.main.proyek_salez.ui.menu.FoodItem
+import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.ui.theme.*
 
 @Composable
 fun CartItemCard(
-    foodItem: FoodItem,
+    foodItem: FoodItemEntity,
     quantity: Int,
     onIncrement: () -> Unit,
     onDecrement: () -> Unit
@@ -45,7 +45,7 @@ fun CartItemCard(
                 .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
+            /*Image(
                 painter = painterResource(id = foodItem.imageRes),
                 contentDescription = foodItem.name,
                 contentScale = ContentScale.Crop,
@@ -53,7 +53,7 @@ fun CartItemCard(
                     .fillMaxWidth()
                     .height(60.dp)
                     .clip(RoundedCornerShape(8.dp))
-            )
+            )*/
 
             Spacer(modifier = Modifier.height(4.dp))
             Text(

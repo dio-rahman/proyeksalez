@@ -22,12 +22,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.main.proyek_salez.R
+import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.viewmodel.CartViewModel
 import com.main.proyek_salez.ui.theme.*
 
 @Composable
 fun MenuItemCard(
-    foodItem: FoodItem,
+    foodItem: FoodItemEntity,
     cartViewModel: CartViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -56,37 +59,30 @@ fun MenuItemCard(
                     .height(20.dp),
                 horizontalArrangement = Arrangement.Start
             ) {
-                if (foodItem.isPopular) {
-                    Card(
-                        modifier = Modifier
-                            .padding(start = 4.dp),
-                        shape = RoundedCornerShape(4.dp),
-                        colors = CardDefaults.cardColors(containerColor = Oranye)
-                    ) {
-                        Text(
-                            text = "Lagi Trend!",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                color = UnguTua,
-                                fontSize = 8.sp,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-                        )
-                    }
-                } else {
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
+                // Kosong untuk mempertahankan tata letak asli
             }
 
-            Image(
-                painter = painterResource(id = foodItem.imageRes),
-                contentDescription = foodItem.name,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp)
-                    .clip(RoundedCornerShape(8.dp))
-            )
+            if (foodItem.imagePath != null) {
+                AsyncImage(
+                    model = foodItem.imagePath,
+                    contentDescription = foodItem.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(80.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                )
+            } else {
+                Image(
+                    painter = painterResource(id = R.drawable.placeholder_image),
+                    contentDescription = "Placeholder",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(80.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                )
+            }
 
             Spacer(modifier = Modifier.height(2.dp))
             Text(
@@ -123,24 +119,12 @@ fun MenuItemCard(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    painter = painterResource(id = foodItem.imageRes),
-                    contentDescription = "Rating",
-                    tint = Color(0xFFFFC107),
-                    modifier = Modifier.size(12.dp)
-                )
-                Text(
-                    text = " ${foodItem.rating} (${foodItem.reviews})",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = AbuAbuGelap,
-                        fontSize = 8.sp
-                    )
-                )
+                // Kosong untuk mempertahankan tata letak asli
             }
 
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "Hidangan ${foodItem.price}",
+                text = "Rp ${foodItem.price}",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = AbuAbuGelap,
                     fontSize = 8.sp,

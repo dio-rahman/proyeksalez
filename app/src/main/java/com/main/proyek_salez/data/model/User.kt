@@ -1,4 +1,4 @@
-package com.main.proyek_salez.data.entities
+package com.main.proyek_salez.data.model
 
 enum class UserRole {
     CASHIER, CHEF, MANAGER

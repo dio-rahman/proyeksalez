@@ -1,45 +1,43 @@
 package com.main.proyek_salez.data.repository
 
 import com.main.proyek_salez.data.dao.CartItemDao
-import com.main.proyek_salez.data.model.CartItemEntity
-import com.main.proyek_salez.data.dao.FoodItemDao
-import com.main.proyek_salez.data.model.FoodItemEntity
+import com.main.proyek_salez.data.dao.FoodDao
 import com.main.proyek_salez.data.dao.OrderDao
+import com.main.proyek_salez.data.model.CartItemEntity
+import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.model.OrderEntity
-import com.main.proyek_salez.data.model.toFoodItem
-import com.main.proyek_salez.ui.menu.FoodItem
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import java.time.LocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class SalezRepository @Inject constructor(
-    private val foodItemDao: FoodItemDao,
+class CashierRepository @Inject constructor(
     private val cartItemDao: CartItemDao,
+    private val foodDao: FoodDao,
     private val orderDao: OrderDao
 ) {
     suspend fun insertFoodItems(foodItems: List<FoodItemEntity>) {
-        foodItemDao.insertAll(foodItems)
+        foodDao.insertAll(foodItems)
     }
-    fun getFoodItemsByCategory(category: String): Flow<List<FoodItem>> {
-        return foodItemDao.getFoodItemsByCategory(category)
-            .map { entities -> entities.map { it.toFoodItem() } }
+
+    fun getFoodItemsByCategory(category: String): Flow<List<FoodItemEntity>> {
+        return foodDao.getFoodItemsByCategory(category)
     }
-    fun searchFoodItems(name: String): Flow<List<FoodItem>> {
-        return foodItemDao.searchFoodItems(name)
-            .map { entities -> entities.map { it.toFoodItem() } }
+
+    fun searchFoodItems(name: String): Flow<List<FoodItemEntity>> {
+        return foodDao.searchFoodItems(name)
     }
-    suspend fun getFoodItemById(id: Int): FoodItem? {
-        return foodItemDao.getFoodItemById(id)?.toFoodItem()
+
+    suspend fun getFoodItemById(id: Long): FoodItemEntity? {
+        return foodDao.getFoodItemById(id)
     }
 
     fun getCartItems(): Flow<List<CartItemEntity>> {
         return cartItemDao.getAllCartItems()
     }
 
-    suspend fun addToCart(foodItem: FoodItem) {
+    suspend fun addToCart(foodItem: FoodItemEntity) {
         val existingCartItem = cartItemDao.getCartItemByFoodItemId(foodItem.id)
         if (existingCartItem != null) {
             cartItemDao.update(existingCartItem.copy(quantity = existingCartItem.quantity + 1))
@@ -47,7 +45,8 @@ class SalezRepository @Inject constructor(
             cartItemDao.insert(CartItemEntity(foodItemId = foodItem.id, quantity = 1))
         }
     }
-    suspend fun decrementCartItem(foodItem: FoodItem) {
+
+    suspend fun decrementCartItem(foodItem: FoodItemEntity) {
         val existingCartItem = cartItemDao.getCartItemByFoodItemId(foodItem.id)
         if (existingCartItem != null) {
             if (existingCartItem.quantity <= 1) {
@@ -57,6 +56,7 @@ class SalezRepository @Inject constructor(
             }
         }
     }
+
     suspend fun clearCart() {
         cartItemDao.clearCart()
     }
@@ -72,6 +72,7 @@ class SalezRepository @Inject constructor(
         )
         clearCart()
     }
+
     fun getAllOrders(): Flow<List<OrderEntity>> {
         return orderDao.getAllOrders()
     }

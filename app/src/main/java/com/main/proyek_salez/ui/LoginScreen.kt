@@ -22,7 +22,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.main.proyek_salez.R
-import com.main.proyek_salez.data.entities.User
+import com.main.proyek_salez.data.model.User
 import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import androidx.activity.compose.BackHandler
 import androidx.lifecycle.LiveData
@@ -188,33 +188,6 @@ fun LoginScreen(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = { /* TODO: Handle reset password navigation */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Oranye),
-                shape = RoundedCornerShape(50),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
-            ) {
-                Text(
-                    "Reset Password",
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        color = UnguTua,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Lupa Password? Reset Password Disini",
-                style = MaterialTheme.typography.bodyMedium.copy(color = UnguTua),
-                modifier = Modifier
-                    .padding(top = 16.dp)
-                    .clickable { /* TODO: Handle reset password link */ }
-            )
         }
     }
 }

@@ -11,7 +11,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -25,7 +24,6 @@ import com.main.proyek_salez.data.viewmodel.CartViewModel
 import com.main.proyek_salez.ui.menu.FoodItem
 import com.main.proyek_salez.ui.menu.MenuItemCard
 import com.main.proyek_salez.ui.theme.*
-import com.main.proyek_salez.ui.viewmodel.SalezViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 

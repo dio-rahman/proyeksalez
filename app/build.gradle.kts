@@ -1,8 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.compose")
-    id("com.google.devtools.ksp")
+    id("com.google.devtools.ksp") version "1.9.22-1.0.16"
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
 }
