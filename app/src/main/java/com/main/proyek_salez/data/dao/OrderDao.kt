@@ -16,4 +16,7 @@ interface OrderDao {
 
     @Query("SELECT * FROM orders WHERE orderId = :orderId")
     suspend fun getOrderById(orderId: Int): OrderEntity?
+
+    @Query("SELECT * FROM orders")
+    fun getOrderHistory(): Flow<List<OrderEntity>>
 }

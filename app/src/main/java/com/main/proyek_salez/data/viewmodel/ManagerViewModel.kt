@@ -38,7 +38,9 @@ class ManagerViewModel @Inject constructor(
 
     private fun loadFoodItems() {
         viewModelScope.launch {
-            _foodItems.value = repository.getAllFoodItems()
+            repository.getAllFoodItems().collect { items ->
+                _foodItems.value = items
+            }
         }
     }
 

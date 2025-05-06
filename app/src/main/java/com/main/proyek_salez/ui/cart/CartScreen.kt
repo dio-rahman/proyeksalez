@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
-import com.main.proyek_salez.data.viewmodel.CartItemWithFood
 import com.main.proyek_salez.data.viewmodel.CartViewModel
 import com.main.proyek_salez.ui.SidebarMenu
 import com.main.proyek_salez.ui.theme.*
@@ -42,6 +41,7 @@ fun CartScreen(
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     val gradientBackground = Brush.verticalGradient(colors = listOf(Putih, Jingga, UnguTua))
+    var errorMessage by remember { mutableStateOf("") }
 
     // Update total price when cartItems change
     LaunchedEffect(cartItems) {
@@ -51,12 +51,13 @@ fun CartScreen(
     if (showConfirmationDialog.value) {
         AlertDialog(
             onDismissRequest = { showConfirmationDialog.value = false },
-            title = { Text("Konfirmasi") },
-            text = { Text("Apakah Anda yakin ingin membatalkan pesanan?") },
+            title = { Text("Konfirmasi", color = UnguTua) },
+            text = { Text("Apakah Anda yakin ingin membatalkan pesanan?", color = AbuAbuGelap) },
             confirmButton = {
                 TextButton(onClick = {
                     cartViewModel.clearCart()
                     showConfirmationDialog.value = false
+                    navController.navigate("cashier_dashboard")
                 }) { Text("Iya", color = UnguTua) }
             },
             dismissButton = {
@@ -110,25 +111,64 @@ fun CartScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = cartViewModel.customerName.value,
-                    onValueChange = { cartViewModel.customerName.value = it },
+                    onValueChange = {
+                        cartViewModel.customerName.value = it
+                        errorMessage = ""
+                    },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp).clip(RoundedCornerShape(50)),
-                    placeholder = { Text(text = "Masukkan nama pelanggan disini", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center, fontSize = 14.sp) },
+                    placeholder = {
+                        Text(
+                            text = "Masukkan nama pelanggan disini",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            fontSize = 14.sp
+                        )
+                    },
                     textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-                    colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = Putih, focusedContainerColor = Putih, focusedBorderColor = UnguTua, unfocusedBorderColor = AbuAbu),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedContainerColor = Putih,
+                        focusedContainerColor = Putih,
+                        focusedBorderColor = UnguTua,
+                        unfocusedBorderColor = AbuAbu
+                    ),
                     shape = RoundedCornerShape(50),
                     singleLine = true
                 )
                 Spacer(modifier = Modifier.height(16.dp))
+                if (errorMessage.isNotEmpty()) {
+                    Text(
+                        text = errorMessage,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = UnguTua,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
                 Button(
-                    onClick = { cartViewModel.createOrder() },
+                    onClick = {
+                        if (cartViewModel.customerName.value.isBlank()) {
+                            errorMessage = "Nama pelanggan harus diisi"
+                        } else if (cartItems.isEmpty()) {
+                            errorMessage = "Keranjang kosong"
+                        } else {
+                            navController.navigate("checkout_screen")
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp).height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Oranye),
                     shape = RoundedCornerShape(50),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 15.dp)
                 ) {
                     Text(
-                        text = "Buat Pesanan",
-                        style = MaterialTheme.typography.headlineLarge.copy(color = UnguTua, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        text = "Checkout",
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            color = UnguTua,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -136,7 +176,10 @@ fun CartScreen(
                     Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
                         Text(
                             text = "Keranjang kosong, silakan tambahkan menu terlebih dahulu.",
-                            style = MaterialTheme.typography.bodyLarge.copy(color = UnguTua, textAlign = TextAlign.Center),
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                color = UnguTua,
+                                textAlign = TextAlign.Center
+                            ),
                             modifier = Modifier.padding(16.dp)
                         )
                     }
@@ -181,50 +224,39 @@ fun CartScreen(
                             ) {
                                 Text(
                                     text = "Total Harga:",
-                                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = UnguTua)
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = UnguTua
+                                    )
                                 )
                                 Text(
                                     text = totalPrice,
-                                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, color = UnguTua)
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = UnguTua
+                                    )
                                 )
                             }
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    if (cartItems.isNotEmpty()) {
-                        Button(
-                            onClick = { navController.navigate("checkout_screen") },
-                            modifier = Modifier.fillMaxWidth().height(48.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Oranye),
-                            shape = RoundedCornerShape(50),
-                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 15.dp)
-                        ) {
-                            Text(
-                                text = "Checkout",
-                                style = MaterialTheme.typography.headlineLarge.copy(color = UnguTua, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Button(
+                        onClick = { showConfirmationDialog.value = true },
+                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                        shape = RoundedCornerShape(50),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 15.dp)
+                    ) {
+                        Text(
+                            text = "Batalkan Pesanan",
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                color = Putih,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
                             )
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(
-                            onClick = { showConfirmationDialog.value = true },
-                            modifier = Modifier.fillMaxWidth().height(48.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                            shape = RoundedCornerShape(50),
-                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 15.dp)
-                        ) {
-                            Text(
-                                text = "Batalkan Pesanan",
-                                style = MaterialTheme.typography.headlineLarge.copy(color = Putih, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                            )
-                        }
+                        )
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Mau balik lagi buat tambahkan hidangan yang lain? Klik disini buat balik lagi!",
-                    style = MaterialTheme.typography.bodyMedium.copy(color = UnguTua, textAlign = TextAlign.Center, fontSize = 8.sp),
-                    modifier = Modifier.fillMaxWidth()
-                )
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = { navController.navigate("cashier_dashboard") },
@@ -235,7 +267,11 @@ fun CartScreen(
                 ) {
                     Text(
                         text = "Pilih Jenis Hidangan",
-                        style = MaterialTheme.typography.headlineLarge.copy(color = UnguTua, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            color = UnguTua,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
                     )
                 }
                 Spacer(modifier = Modifier.height(80.dp))

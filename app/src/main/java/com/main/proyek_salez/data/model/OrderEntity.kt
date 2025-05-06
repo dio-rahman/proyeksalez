@@ -10,5 +10,6 @@ data class OrderEntity(
     val customerName: String,
     val totalPrice: String,
     val orderDate: LocalDateTime,
-    val items: List<CartItemEntity>
+    val items: List<CartItemEntity>,
+    val paymentMethod: String
 )

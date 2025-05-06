@@ -104,7 +104,9 @@ fun SidebarMenu(
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             ),
-            onClick = { }
+            onClick = {
+                navController.navigate("cashier_dashboard")
+                onCloseDrawer()}
         )
         MenuItem(
             text = "Cek Histori",
@@ -113,7 +115,10 @@ fun SidebarMenu(
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             ),
-            onClick = { }
+            onClick = {
+                navController.navigate("order_history")
+                onCloseDrawer()
+            }
         )
         MenuItem(
             text = "Log Out",

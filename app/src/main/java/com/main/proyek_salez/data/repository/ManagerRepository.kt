@@ -3,6 +3,7 @@ package com.main.proyek_salez.data.repository
 import com.main.proyek_salez.data.dao.FoodDao
 import com.main.proyek_salez.data.model.CategoryEntity
 import com.main.proyek_salez.data.model.FoodItemEntity
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,7 +20,7 @@ class ManagerRepository @Inject constructor(
         return foodDao.getAllCategories()
     }
 
-    suspend fun getAllFoodItems(): List<FoodItemEntity> {
+    suspend fun getAllFoodItems(): Flow<List<FoodItemEntity>> {
         return foodDao.getAllFoodItems()
     }
 
@@ -39,8 +40,8 @@ class ManagerRepository @Inject constructor(
     suspend fun deleteCategory(categoryId: Long): Result<Unit> {
         return try {
             // Check if category has associated food items
-            val foodItems = foodDao.getAllFoodItems()
-            if (foodItems.any { it.categoryId == categoryId }) {
+            val foodItems = foodDao.getFoodItemsByCategoryId(categoryId)
+            if (foodItems.isNotEmpty()) {
                 Result.Error("Tidak dapat menghapus kategori karena memiliki menu terkait")
             } else {
                 foodDao.deleteCategory(categoryId)

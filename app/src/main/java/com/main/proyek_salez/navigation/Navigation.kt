@@ -16,6 +16,7 @@ import com.main.proyek_salez.data.model.User
 import com.main.proyek_salez.data.model.UserRole
 import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import com.main.proyek_salez.data.viewmodel.CartViewModel
+import com.main.proyek_salez.data.viewmodel.CashierViewModel
 import com.main.proyek_salez.ui.HomeScreen
 import com.main.proyek_salez.ui.LoginScreen
 import com.main.proyek_salez.ui.OnboardingApp
@@ -26,12 +27,12 @@ import com.main.proyek_salez.ui.manager.ManagerScreen
 import com.main.proyek_salez.ui.menu.DrinkMenuScreen
 import com.main.proyek_salez.ui.menu.FoodMenuScreen
 import com.main.proyek_salez.ui.menu.OtherMenuScreen
+import com.main.proyek_salez.ui.order.OrderHistoryScreen
 import com.main.proyek_salez.ui.sidebar.ProfileScreen
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    val cartViewModel: CartViewModel = viewModel(LocalContext.current as ComponentActivity)
     val authViewModel: AuthViewModel = hiltViewModel()
     val mainNavigation = remember { MainNavigation(navController) }
     val currentUserState = authViewModel.currentUser.observeAsState()
@@ -46,7 +47,7 @@ fun AppNavigation() {
     ) {
         composable("onboarding") {
             OnboardingApp(
-                onFinish = {  navController.navigate(Screen.Login.route) { popUpTo("onboarding") { inclusive = true } } }
+                onFinish = { navController.navigate(Screen.Login.route) { popUpTo("onboarding") { inclusive = true } } }
             )
         }
 
@@ -64,27 +65,26 @@ fun AppNavigation() {
         }
 
         composable("cashier_dashboard") {
-            HomeScreen(navController = navController, cartViewModel)
+            HomeScreen(navController = navController, viewModel = hiltViewModel())
         }
         composable("food_menu") {
-            FoodMenuScreen(navController = navController, cartViewModel = cartViewModel)
+            FoodMenuScreen(navController = navController, viewModel = hiltViewModel())
         }
         composable("drink_menu") {
-            DrinkMenuScreen(navController = navController, cartViewModel = cartViewModel)
+            DrinkMenuScreen(navController = navController, viewModel = hiltViewModel())
         }
         composable("other_menu") {
-            OtherMenuScreen(navController = navController, cartViewModel = cartViewModel)
-        }
+            OtherMenuScreen(navController = navController, viewModel = hiltViewModel())
+            }
         composable("cart_screen") {
             CartScreen(
                 navController = navController,
-                cartViewModel = cartViewModel
+                cartViewModel = hiltViewModel<CartViewModel>()
             )
         }
         composable("checkout_screen") {
             CheckoutScreen(
-                navController = navController,
-                customerName = cartViewModel.customerName.value
+                navController = navController
             )
         }
         composable("completion_screen") {
@@ -95,6 +95,9 @@ fun AppNavigation() {
         composable("profile") {
             ProfileScreen(navController = navController)
         }
+        composable("order_history") {
+            OrderHistoryScreen(navController = navController)
+        }
     }
 
     LaunchedEffect(currentUserState.value) {
@@ -103,8 +106,6 @@ fun AppNavigation() {
         }
     }
 }
-
-
 
 class MainNavigation(
     private val navController: NavHostController

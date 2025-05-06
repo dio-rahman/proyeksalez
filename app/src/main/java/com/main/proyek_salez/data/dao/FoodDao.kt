@@ -25,7 +25,7 @@ interface FoodDao {
     suspend fun insertAll(foodItems: List<FoodItemEntity>)
 
     @Query("SELECT * FROM food_items")
-    suspend fun getAllFoodItems(): List<FoodItemEntity>
+    fun getAllFoodItems(): Flow<List<FoodItemEntity>>
 
     @Query("DELETE FROM food_items WHERE id = :id")
     suspend fun deleteFoodItem(id: Long)
@@ -39,9 +39,12 @@ interface FoodDao {
     @Query("DELETE FROM food_items")
     suspend fun deleteAll()
 
-    @Query("SELECT * FROM food_items WHERE categoryId = :category")
-    fun getFoodItemsByCategory(category: String): Flow<List<FoodItemEntity>>
+    @Query("SELECT fi.* FROM food_items fi JOIN categories c ON fi.categoryId = c.id WHERE c.name = :categoryName")
+    fun getFoodItemsByCategory(categoryName: String): Flow<List<FoodItemEntity>>
 
     @Query("DELETE FROM categories WHERE id = :id")
     suspend fun deleteCategory(id: Long)
+
+    @Query("SELECT * FROM food_items WHERE categoryId = :categoryId")
+    suspend fun getFoodItemsByCategoryId(categoryId: Long): List<FoodItemEntity>
 }

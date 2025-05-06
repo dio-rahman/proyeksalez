@@ -48,11 +48,11 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideSalezRepository(
+    fun provideCashierRepository(
         cartItemDao: CartItemDao,
         orderDao: OrderDao,
         foodDao: FoodDao
     ): CashierRepository {
-        return CashierRepository(cartItemDao, foodDao, orderDao)
+        return CashierRepository(cartItemDao, orderDao, foodDao)
     }
 }
