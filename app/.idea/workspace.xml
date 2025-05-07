@@ -5,18 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2f75f7d8-f1e2-47a8-820a-e330c5243ab9" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../.kotlin/sessions/kotlin-compiler-10227186398540898542.salive" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.kotlin/sessions/kotlin-compiler-16288846490529080198.salive" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/MainActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/data/DatabaseInitializer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/data/DatabaseInitializer.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/data/SalezDatabase.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/data/SalezDatabase.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/data/SalezRepositories.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/data/SalezRepositories.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/data/daos/CartItemDao.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/data/daos/CartItemDao.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/data/daos/FoodItemDao.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/data/daos/FoodItemDao.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/data/daos/OrderDao.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/data/daos/OrderDao.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/data/entities/CardItemEntity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/data/entities/CardItemEntity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/di/DatabaseModule.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/di/DatabaseModule.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/ui/HomeScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/main/proyek_salez/ui/HomeScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/deploymentTargetSelector.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/deploymentTargetSelector.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,21 +22,24 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "deolux"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;deolux&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/dio-rahman/proyek-4-salez.git",
-    "accountId": "74a754cc-c785-4c5b-9bb3-33eafb8a0625"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/dio-rahman/proyek-4-salez.git&quot;,
+    &quot;accountId&quot;: &quot;74a754cc-c785-4c5b-9bb3-33eafb8a0625&quot;
   }
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 2
-}]]></component>
+}</component>
+  <component name="ProjectCodeStyleSettingsMigration">
+    <option name="version" value="2" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
   <component name="ProjectId" id="2veyjj4ZqEf1MmuFpnND1Q8LOMD" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -58,8 +54,11 @@
     "android.gradle.sync.needed": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
+    "dart.analysis.tool.window.visible": "false",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/Ryuki/OneDrive/Documents/Kuliah/SEM4/Proyek4/proyek-4-salez"
+    "last_opened_file_path": "D:/Tugas Kuliah/Semester 4/Proyek 4/proyeksalez",
+    "settings.build.tools.auto.reload": "ALL",
+    "settings.editor.selected.configurable": "settings.sync"
   }
 }]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />

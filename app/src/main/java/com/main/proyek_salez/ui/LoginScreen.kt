@@ -99,7 +99,7 @@ fun LoginScreen(
                 .offset(x = 20.dp, y = (-200).dp)
         )
 
-            Column(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
