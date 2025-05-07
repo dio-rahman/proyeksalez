@@ -23,14 +23,14 @@ import com.main.proyek_salez.ui.checkout.CheckoutScreen
 import com.main.proyek_salez.ui.checkout.CompletionScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.main.proyek_salez.data.entities.User
-import com.main.proyek_salez.data.entities.UserRole
 import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import com.main.proyek_salez.data.viewmodel.CartViewModel
 import com.main.proyek_salez.ui.LoginScreen
 import com.main.proyek_salez.ui.OnboardingApp
 import com.main.proyek_salez.ui.sidebar.ProfileScreen
 import dagger.hilt.android.AndroidEntryPoint
+import com.main.proyek_salez.data.model.User
+import com.main.proyek_salez.data.model.UserRole
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -108,6 +108,7 @@ fun AppNavigation() {
         composable("profile") {
             ProfileScreen(navController = navController)
         }
+
     }
 }
 
@@ -119,9 +120,12 @@ class MainNavigation(
             UserRole.CASHIER -> navController.navigate(Screen.CashierDashboard.route) {
                 popUpTo(Screen.Login.route) { inclusive = true }
             }
-
-            UserRole.CHEF -> TODO()
-            UserRole.MANAGER -> TODO()
+            UserRole.CHEF -> {
+                navController.navigate("manager_screen")
+            }
+            UserRole.MANAGER -> {
+                navController.navigate("manager_screen")
+            }
         }
     }
 }
@@ -129,5 +133,4 @@ class MainNavigation(
 sealed class Screen(val route: String) {
     object Login : Screen("login")
     object CashierDashboard : Screen("cashier_dashboard")
-
 }
