@@ -30,7 +30,7 @@ import androidx.lifecycle.MutableLiveData
 import com.main.proyek_salez.utils.Event
 import com.main.proyek_salez.ui.theme.*
 
-
+// cek
 private val _loginResult = MutableLiveData<Event<Result<User>>>()
 val loginResult: LiveData<Event<Result<User>>> = _loginResult
 
