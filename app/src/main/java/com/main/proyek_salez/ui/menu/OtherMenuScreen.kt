@@ -4,7 +4,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
@@ -33,11 +35,11 @@ fun OtherMenuScreen(
     navController: NavController,
     viewModel: CashierViewModel = hiltViewModel()
 ) {
-    // Mengambil daftar menu lainnya dari ViewModel
     val foodItems by viewModel.getFoodItemsByCategory("Lainnya").collectAsState(initial = emptyList<FoodItemEntity>())
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val gradientBackground = Brush.verticalGradient(colors = listOf(Putih, Jingga, UnguTua))
+    val searchQuery by remember { mutableStateOf("") }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -86,14 +88,17 @@ fun OtherMenuScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                LazyColumn {
-                    items(
-                        items = foodItems,
-                        key = { it.id }
-                    ) { foodItem ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    foodItems.filter {
+                        it.name.contains(searchQuery, ignoreCase = true)
+                    }.forEach { foodItem ->
                         MenuItemCard(
                             foodItem = foodItem,
-                            onAddToCart = { item ->
+                            onAddToCart = {
                                 scope.launch {
                                     viewModel.addToCart(foodItem)
                                 }

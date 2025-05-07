@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 data class OrderEntity(
     @PrimaryKey(autoGenerate = true) val orderId: Int = 0,
     val customerName: String,
-    val totalPrice: String,
+    val totalPrice: Long,
     val orderDate: LocalDateTime,
     val items: List<CartItemEntity>,
     val paymentMethod: String

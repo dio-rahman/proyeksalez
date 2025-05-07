@@ -4,11 +4,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.main.proyek_salez.data.dao.CartItemDao
+import com.main.proyek_salez.data.dao.FoodDao
 import com.main.proyek_salez.data.dao.OrderDao
 import com.main.proyek_salez.data.model.CartItemEntity
 import com.main.proyek_salez.data.model.CartItemWithFood
 import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.model.OrderEntity
+import com.main.proyek_salez.data.repository.CashierRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -20,9 +22,12 @@ import javax.inject.Inject
 class CartViewModel @Inject constructor(
     private val cartItemDao: CartItemDao,
     private val orderDao: OrderDao,
+    private val foodDao: FoodDao,
+    private val cashierRepository: CashierRepository
 ) : ViewModel() {
     val customerName = mutableStateOf("")
     val cartItems: Flow<List<CartItemWithFood>> = cartItemDao.getCartItemsWithFood()
+    val checkoutRequested = mutableStateOf(false)
 
     fun addToCart(foodItem: FoodItemEntity) {
         viewModelScope.launch {
@@ -61,26 +66,25 @@ class CartViewModel @Inject constructor(
         }
     }
 
-    suspend fun getTotalPrice(): String {
+    suspend fun getTotalPrice(): Long {
         val items = cartItems.first()
-        val total = items.sumOf { it.foodItem.price * it.cartItem.quantity.toDouble() }
-        return "Rp ${total.toLong()}"
+        return items.sumOf { it.foodItem.price * it.cartItem.quantity.toDouble() }.toLong()
     }
 
     fun createOrder(paymentMethod: String) {
         viewModelScope.launch {
-            val items = cartItems.first().map { it.cartItem }
+            val items = cartItems.first()
             if (items.isNotEmpty()) {
-                val totalPrice = getTotalPrice()
-                val order = OrderEntity(
+                cashierRepository.createOrder(
                     customerName = customerName.value,
-                    totalPrice = totalPrice,
-                    orderDate = LocalDateTime.now(),
-                    items = items,
+                    cartItems = items,
                     paymentMethod = paymentMethod
                 )
-                orderDao.insert(order)
             }
         }
+    }
+
+    fun searchFoodItems(query: String): Flow<List<FoodItemEntity>> {
+            return foodDao.searchFoodItems(query)
     }
 }

@@ -7,6 +7,7 @@ import com.main.proyek_salez.data.model.CartItemEntity
 import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.model.OrderEntity
 import com.main.proyek_salez.data.model.CartItemWithFood
+import com.main.proyek_salez.data.model.CategoryEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import java.time.LocalDateTime
@@ -50,9 +51,8 @@ class CashierRepository @Inject constructor(
         cartItemDao.clearCart()
     }
 
-    suspend fun getTotalPrice(cartItems: List<CartItemWithFood>): String {
-        val total = cartItems.sumOf { it.foodItem.price * it.cartItem.quantity.toDouble() }
-        return "Rp ${total.toLong()}"
+    suspend fun getTotalPrice(cartItems: List<CartItemWithFood>): Long {
+        return cartItems.sumOf { it.foodItem.price.toLong() * it.cartItem.quantity.toLong() }
     }
 
     suspend fun createOrder(customerName: String, cartItems: List<CartItemWithFood>, paymentMethod: String) {
@@ -87,5 +87,9 @@ class CashierRepository @Inject constructor(
 
     fun getOrderHistory(): Flow<List<OrderEntity>> {
         return orderDao.getOrderHistory()
+    }
+
+    suspend fun getAllCategories(): List<CategoryEntity> {
+        return foodDao.getAllCategories()
     }
 }

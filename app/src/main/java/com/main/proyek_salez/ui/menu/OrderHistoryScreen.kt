@@ -1,4 +1,4 @@
-package com.main.proyek_salez.ui.order
+package com.main.proyek_salez.ui.menu
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

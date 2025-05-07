@@ -48,11 +48,6 @@ fun CheckoutScreen(
     var errorMessage by remember { mutableStateOf("") }
     val showConfirmationDialog = remember { mutableStateOf(false) }
 
-    // Update total price when cartItems change
-    LaunchedEffect(cartItems) {
-        totalPrice = cartViewModel.getTotalPrice()
-    }
-
     if (showConfirmationDialog.value) {
         AlertDialog(
             onDismissRequest = { showConfirmationDialog.value = false },
@@ -170,7 +165,7 @@ fun CheckoutScreen(
                                 )
                             )
                             Text(
-                                text = totalPrice,
+                                text = "Total Harga: Rp $totalPrice",
                                 style = MaterialTheme.typography.bodyLarge.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = UnguTua
@@ -271,10 +266,12 @@ fun CheckoutScreen(
                         if (paymentMethod.isEmpty()) {
                             errorMessage = "Pilih metode pembayaran"
                         } else {
-                            cartViewModel.createOrder(paymentMethod)
-                            cartViewModel.clearCart()
-                            navController.navigate("cashier_dashboard") {
-                                popUpTo("cart_screen") { inclusive = false }
+                            scope.launch {
+                                cartViewModel.createOrder(paymentMethod)
+                                cartViewModel.clearCart()
+                                navController.navigate("completion_screen") {
+                                    popUpTo("cart_screen") { inclusive = true }
+                                }
                             }
                         }
                     },

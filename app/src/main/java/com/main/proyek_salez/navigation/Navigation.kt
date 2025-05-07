@@ -1,13 +1,10 @@
 package com.main.proyek_salez.navigation
 
-import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,7 +13,6 @@ import com.main.proyek_salez.data.model.User
 import com.main.proyek_salez.data.model.UserRole
 import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import com.main.proyek_salez.data.viewmodel.CartViewModel
-import com.main.proyek_salez.data.viewmodel.CashierViewModel
 import com.main.proyek_salez.ui.HomeScreen
 import com.main.proyek_salez.ui.LoginScreen
 import com.main.proyek_salez.ui.OnboardingApp
@@ -27,13 +23,14 @@ import com.main.proyek_salez.ui.manager.ManagerScreen
 import com.main.proyek_salez.ui.menu.DrinkMenuScreen
 import com.main.proyek_salez.ui.menu.FoodMenuScreen
 import com.main.proyek_salez.ui.menu.OtherMenuScreen
-import com.main.proyek_salez.ui.order.OrderHistoryScreen
+import com.main.proyek_salez.ui.menu.OrderHistoryScreen
 import com.main.proyek_salez.ui.sidebar.ProfileScreen
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = hiltViewModel()
+    val cartViewModel: CartViewModel = hiltViewModel()
     val mainNavigation = remember { MainNavigation(navController) }
     val currentUserState = authViewModel.currentUser.observeAsState()
     val currentUser = currentUserState.value
@@ -65,7 +62,7 @@ fun AppNavigation() {
         }
 
         composable("cashier_dashboard") {
-            HomeScreen(navController = navController, viewModel = hiltViewModel())
+            HomeScreen(navController = navController)
         }
         composable("food_menu") {
             FoodMenuScreen(navController = navController, viewModel = hiltViewModel())
@@ -84,7 +81,8 @@ fun AppNavigation() {
         }
         composable("checkout_screen") {
             CheckoutScreen(
-                navController = navController
+                navController = navController,
+                cartViewModel = hiltViewModel<CartViewModel>()
             )
         }
         composable("completion_screen") {

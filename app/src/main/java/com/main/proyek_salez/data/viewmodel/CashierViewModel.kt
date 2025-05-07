@@ -2,11 +2,13 @@ package com.main.proyek_salez.data.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.main.proyek_salez.data.model.CartItemWithFood
+import com.main.proyek_salez.data.model.CategoryEntity
 import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.model.OrderEntity
 import com.main.proyek_salez.data.repository.CashierRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 @HiltViewModel
@@ -44,6 +46,11 @@ class CashierViewModel @Inject constructor(
 
     suspend fun getallCartItems(): Flow<List<CartItemWithFood>> {
         return repository.getAllCartItems()
+    }
 
+    fun getAllCategories(): Flow<List<CategoryEntity>> {
+        return flow {
+            emit(repository.getAllCategories())
+        }
     }
 }

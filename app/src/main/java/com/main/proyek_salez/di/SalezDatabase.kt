@@ -14,7 +14,7 @@ import com.main.proyek_salez.data.model.OrderEntity
 
 @Database(
     entities = [FoodItemEntity::class, CartItemEntity::class, OrderEntity::class, CategoryEntity::class],
-    version = 1,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

@@ -4,14 +4,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -33,11 +33,12 @@ fun FoodMenuScreen(
     navController: NavController,
     viewModel: CashierViewModel = hiltViewModel()
 ) {
-    // Mengambil daftar menu makanan dari ViewModel
+
     val foodItems by viewModel.getFoodItemsByCategory("Makanan").collectAsState(initial = emptyList<FoodItemEntity>())
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val gradientBackground = Brush.verticalGradient(colors = listOf(Putih, Jingga, UnguTua))
+    val searchQuery by remember { mutableStateOf("") }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -86,11 +87,14 @@ fun FoodMenuScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                LazyColumn {
-                    items(
-                        items = foodItems,
-                        key = { item -> item.id }
-                    ) { foodItem ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    foodItems.filter {
+                        it.name.contains(searchQuery, ignoreCase = true)
+                    }.forEach { foodItem ->
                         MenuItemCard(
                             foodItem = foodItem,
                             onAddToCart = {

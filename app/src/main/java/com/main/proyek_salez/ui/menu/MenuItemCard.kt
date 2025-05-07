@@ -15,7 +15,7 @@ import com.main.proyek_salez.ui.theme.*
 @Composable
 fun MenuItemCard(
     foodItem: FoodItemEntity,
-    onAddToCart: (FoodItemEntity) -> Unit
+    onAddToCart: (FoodItemEntity) -> Unit,
 ) {
     Card(
         modifier = Modifier

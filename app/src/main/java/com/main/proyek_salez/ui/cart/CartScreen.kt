@@ -43,9 +43,11 @@ fun CartScreen(
     val gradientBackground = Brush.verticalGradient(colors = listOf(Putih, Jingga, UnguTua))
     var errorMessage by remember { mutableStateOf("") }
 
-    // Update total price when cartItems change
-    LaunchedEffect(cartItems) {
-        totalPrice = cartViewModel.getTotalPrice()
+    LaunchedEffect(cartViewModel.checkoutRequested.value) {
+        if (cartViewModel.checkoutRequested.value) {
+            navController.navigate("checkout_screen")
+            cartViewModel.checkoutRequested.value = false
+        }
     }
 
     if (showConfirmationDialog.value) {
@@ -154,7 +156,7 @@ fun CartScreen(
                         } else if (cartItems.isEmpty()) {
                             errorMessage = "Keranjang kosong"
                         } else {
-                            navController.navigate("checkout_screen")
+                            cartViewModel.checkoutRequested.value = true
                         }
                     },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp).height(48.dp),
@@ -230,7 +232,7 @@ fun CartScreen(
                                     )
                                 )
                                 Text(
-                                    text = totalPrice,
+                                    text = "Total Harga: $totalPrice",
                                     style = MaterialTheme.typography.bodyLarge.copy(
                                         fontWeight = FontWeight.Bold,
                                         color = UnguTua
