@@ -68,7 +68,7 @@ class ManagerRepository @Inject constructor(
 
     suspend fun updateFoodItem(foodItem: FoodItemEntity): Result<Unit> {
         return try {
-            foodDao.insertFoodItem(foodItem) // Room updates if ID exists
+            foodDao.updateFoodItem(foodItem)
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error("Gagal memperbarui menu: ${e.message}")

@@ -3,6 +3,7 @@ package com.main.proyek_salez.data.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.main.proyek_salez.data.model.CategoryEntity
 import com.main.proyek_salez.data.model.FoodItemEntity
 import kotlinx.coroutines.flow.Flow
@@ -12,17 +13,20 @@ interface FoodDao {
     @Insert
     suspend fun insertCategory(category: CategoryEntity)
 
-    @Query("SELECT * FROM categories")
-    suspend fun getAllCategories(): List<CategoryEntity>
-
-    @Query("SELECT EXISTS(SELECT 1 FROM categories WHERE name = :name)")
-    suspend fun categoryNameExists(name: String): Boolean
+    @Update
+    suspend fun updateFoodItem(foodItem: FoodItemEntity)
 
     @Insert
     suspend fun insertFoodItem(foodItem: FoodItemEntity)
 
     @Insert
     suspend fun insertAll(foodItems: List<FoodItemEntity>)
+
+    @Query("SELECT * FROM categories")
+    suspend fun getAllCategories(): List<CategoryEntity>
+
+    @Query("SELECT EXISTS(SELECT 1 FROM categories WHERE name = :name)")
+    suspend fun categoryNameExists(name: String): Boolean
 
     @Query("SELECT * FROM food_items")
     fun getAllFoodItems(): Flow<List<FoodItemEntity>>
@@ -47,4 +51,5 @@ interface FoodDao {
 
     @Query("SELECT * FROM food_items WHERE categoryId = :categoryId")
     suspend fun getFoodItemsByCategoryId(categoryId: Long): List<FoodItemEntity>
+
 }

@@ -181,13 +181,14 @@ fun ManagerScreen(viewModel: ManagerViewModel = hiltViewModel()) {
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    OutlinedTextField(
-                        value = foodId,
-                        onValueChange = { foodId = it.filter { it.isDigit() } },
-                        label = { Text("ID Menu") },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = editingFoodItem == null // ID tidak bisa diubah saat edit
-                    )
+                    if (editingFoodItem == null) {
+                        OutlinedTextField(
+                            value = foodId,
+                            onValueChange = { foodId = it.filter { it.isDigit() } },
+                            label = { Text("ID Menu") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                     OutlinedTextField(
                         value = foodName,
                         onValueChange = { foodName = it },
