@@ -1,4 +1,5 @@
-package com.main.proyek_salez.ui.checkout
+package com.main.proyek_salez.ui.cart
+
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,17 +28,16 @@ import com.main.proyek_salez.R
 import com.main.proyek_salez.data.viewmodel.CartViewModel
 import com.main.proyek_salez.ui.SidebarMenu
 import com.main.proyek_salez.ui.theme.*
-import com.main.proyek_salez.ui.cart.CartItemCard
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CheckoutScreen(
     navController: NavController,
-    cartViewModel: CartViewModel = hiltViewModel()
+    cartViewModel: CartViewModel
 ) {
     val cartItems by cartViewModel.cartItems.collectAsState(initial = emptyList())
-    var totalPrice by remember { mutableStateOf("Rp 0") }
+    val totalPrice by cartViewModel.totalPrice.collectAsState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
@@ -265,13 +265,14 @@ fun CheckoutScreen(
                     onClick = {
                         if (paymentMethod.isEmpty()) {
                             errorMessage = "Pilih metode pembayaran"
+                        } else if (cartViewModel.customerName.value.isBlank()) {
+                            errorMessage = "Nama pelanggan tidak boleh kosong"
+                            println("CheckoutScreen: customerName is blank")
                         } else {
                             scope.launch {
                                 cartViewModel.createOrder(paymentMethod)
                                 cartViewModel.clearCart()
-                                navController.navigate("completion_screen") {
-                                    popUpTo("cart_screen") { inclusive = true }
-                                }
+                                navController.navigate("cart_screen")
                             }
                         }
                     },

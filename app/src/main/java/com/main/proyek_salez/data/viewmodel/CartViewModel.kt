@@ -13,7 +13,11 @@ import com.main.proyek_salez.data.model.OrderEntity
 import com.main.proyek_salez.data.repository.CashierRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -28,6 +32,10 @@ class CartViewModel @Inject constructor(
     val customerName = mutableStateOf("")
     val cartItems: Flow<List<CartItemWithFood>> = cartItemDao.getCartItemsWithFood()
     val checkoutRequested = mutableStateOf(false)
+    val totalPrice: StateFlow<String> = cartItems.map { items ->
+        val total = items.sumOf { it.foodItem.price * it.cartItem.quantity.toDouble() }.toLong()
+        "Rp $total"
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Rp 0")
 
     fun addToCart(foodItem: FoodItemEntity) {
         viewModelScope.launch {
@@ -62,8 +70,11 @@ class CartViewModel @Inject constructor(
     fun clearCart() {
         viewModelScope.launch {
             cartItemDao.clearCart()
-            customerName.value = ""
         }
+    }
+
+    fun resetCustomerName() {
+        customerName.value = ""
     }
 
     suspend fun getTotalPrice(): Long {
@@ -75,11 +86,19 @@ class CartViewModel @Inject constructor(
         viewModelScope.launch {
             val items = cartItems.first()
             if (items.isNotEmpty()) {
+                if (customerName.value.isBlank()) {
+                    println("Error: customerName is blank")
+                    return@launch
+                }
+                println("Creating order with customerName: ${customerName.value}")
                 cashierRepository.createOrder(
                     customerName = customerName.value,
                     cartItems = items,
                     paymentMethod = paymentMethod
                 )
+                println("Order created successfully for customer: ${customerName.value}")
+            } else {
+                println("Error: cartItems is empty")
             }
         }
     }

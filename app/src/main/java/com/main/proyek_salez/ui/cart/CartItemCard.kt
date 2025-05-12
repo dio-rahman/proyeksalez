@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.ui.theme.*
 
@@ -45,16 +46,17 @@ fun CartItemCard(
                 .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            /*Image(
-                painter = painterResource(id = foodItem.imageRes),
-                contentDescription = foodItem.name,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .clip(RoundedCornerShape(8.dp))
-            )*/
-
+            if (foodItem.imagePath != null) {
+                AsyncImage(
+                    model = foodItem.imagePath,
+                    contentDescription = foodItem.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                )
+            }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = foodItem.name,
@@ -70,7 +72,7 @@ fun CartItemCard(
 
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Rp ${foodItem.price}",
+                text = "Rp ${foodItem.price.toLong()}",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = AbuAbuGelap,
                     fontSize = 10.sp,

@@ -20,7 +20,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
 import com.main.proyek_salez.data.viewmodel.CartViewModel
@@ -32,10 +31,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun CartScreen(
     navController: NavController,
-    cartViewModel: CartViewModel = hiltViewModel()
+    cartViewModel: CartViewModel
 ) {
     val cartItems by cartViewModel.cartItems.collectAsState(initial = emptyList())
-    var totalPrice by remember { mutableStateOf("Rp 0") }
+    val totalPrice by cartViewModel.totalPrice.collectAsState()
     val showConfirmationDialog = remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -232,7 +231,7 @@ fun CartScreen(
                                     )
                                 )
                                 Text(
-                                    text = "Total Harga: $totalPrice",
+                                    text = totalPrice,
                                     style = MaterialTheme.typography.bodyLarge.copy(
                                         fontWeight = FontWeight.Bold,
                                         color = UnguTua
@@ -281,3 +280,5 @@ fun CartScreen(
         }
     }
 }
+
+

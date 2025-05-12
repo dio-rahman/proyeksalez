@@ -17,7 +17,7 @@ import com.main.proyek_salez.ui.HomeScreen
 import com.main.proyek_salez.ui.LoginScreen
 import com.main.proyek_salez.ui.OnboardingApp
 import com.main.proyek_salez.ui.cart.CartScreen
-import com.main.proyek_salez.ui.checkout.CheckoutScreen
+import com.main.proyek_salez.ui.cart.CheckoutScreen
 import com.main.proyek_salez.ui.checkout.CompletionScreen
 import com.main.proyek_salez.ui.manager.ManagerScreen
 import com.main.proyek_salez.ui.menu.DrinkMenuScreen
@@ -76,13 +76,13 @@ fun AppNavigation() {
         composable("cart_screen") {
             CartScreen(
                 navController = navController,
-                cartViewModel = hiltViewModel<CartViewModel>()
+                cartViewModel = cartViewModel
             )
         }
         composable("checkout_screen") {
             CheckoutScreen(
                 navController = navController,
-                cartViewModel = hiltViewModel<CartViewModel>()
+                cartViewModel = cartViewModel
             )
         }
         composable("completion_screen") {
