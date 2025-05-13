@@ -60,7 +60,7 @@ fun AppNavigation() {
         }
 
         composable("manager_dashboard") {
-            ManagerScreen()
+            ManagerScreen(navController = navController)
         }
 
         composable("cashier_dashboard") {
