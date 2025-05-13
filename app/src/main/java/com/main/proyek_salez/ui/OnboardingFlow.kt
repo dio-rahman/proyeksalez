@@ -168,7 +168,7 @@ fun OnboardingAlur(onFinish: () -> Unit) {
                 onSelanjutnya = onSelanjutnya
             )
             2 -> OnboardingTampilan(
-                headline = "BERIKAN CERITA!",
+                headline = "BERIKAN MERITA!",
                 description = "Bentuk momen - momen keseharianmu jadi lebih berwarna dan ciptakan pengalaman baru!",
                 onSelanjutnya = onSelanjutnya
             )

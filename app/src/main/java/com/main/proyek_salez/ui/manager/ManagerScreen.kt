@@ -438,7 +438,8 @@ fun ManagerScreen(
                                             selectedCategoryId == null -> viewModel.setErrorMessage("Pilih kategori terlebih dahulu")
                                             else -> {
                                                 val imagePath: String? = selectedImageUri?.let { uri ->
-                                                    saveImageToInternalStorage(context, uri.toUri())                                                }
+                                                    saveImageToInternalStorage(context, uri.toUri())
+                                                }
                                                 if (editingFoodItem == null) {
                                                     viewModel.addFoodItem(
                                                         id = foodId.toLongOrNull() ?: 0,

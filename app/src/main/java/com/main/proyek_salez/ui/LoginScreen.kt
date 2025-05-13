@@ -2,7 +2,6 @@ package com.main.proyek_salez.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -25,23 +24,14 @@ import com.main.proyek_salez.R
 import com.main.proyek_salez.data.model.User
 import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import androidx.activity.compose.BackHandler
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import com.main.proyek_salez.utils.Event
 import com.main.proyek_salez.ui.theme.*
-
-// cek
-private val _loginResult = MutableLiveData<Event<Result<User>>>()
-val loginResult: LiveData<Event<Result<User>>> = _loginResult
-
 
 @Composable
 fun LoginScreen(
+    modifier: Modifier = Modifier,
     viewModel: AuthViewModel = hiltViewModel(),
-    onLoginSuccess: (User) -> Unit,
-    modifier: Modifier = Modifier
+    onLoginSuccess: (User) -> Unit
 ) {
-
     BackHandler(enabled = true) {
     }
     var email by remember { mutableStateOf("") }
@@ -100,7 +90,7 @@ fun LoginScreen(
                 .offset(x = 20.dp, y = (-200).dp)
         )
 
-            Column(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)

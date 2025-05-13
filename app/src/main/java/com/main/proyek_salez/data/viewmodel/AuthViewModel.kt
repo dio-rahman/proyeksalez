@@ -26,7 +26,6 @@ class AuthViewModel @Inject constructor(
     private val _currentUser = MutableLiveData<User?>()
     val currentUser: LiveData<User?> = _currentUser
 
-    // Check role saat login
     fun login(email: String, password: String) {
         viewModelScope.launch {
             val result = authRepository.loginWithRoleCheck(email, password)
@@ -34,7 +33,6 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    // Register user baru
     fun registerUser(email: String, password: String, name: String, phone: String, role: UserRole) {
         viewModelScope.launch {
             val result = authRepository.registerUser(email, password, name, phone, role)
@@ -42,14 +40,12 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    // Dapatkan user saat ini
     fun getCurrentUser() {
         viewModelScope.launch {
             _currentUser.value = authRepository.getCurrentUser()
         }
     }
 
-    // Logout
     fun logout() {
         authRepository.logout()
         _currentUser.value = null

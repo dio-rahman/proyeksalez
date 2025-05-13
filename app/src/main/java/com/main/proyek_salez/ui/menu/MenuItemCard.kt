@@ -119,7 +119,6 @@ fun MenuItemCard(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Kosong untuk mempertahankan tata letak asli
             }
 
             Spacer(modifier = Modifier.height(2.dp))

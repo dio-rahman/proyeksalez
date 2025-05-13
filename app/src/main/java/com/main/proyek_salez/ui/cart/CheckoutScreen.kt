@@ -1,4 +1,4 @@
-package com.main.proyek_salez.ui.checkout
+package com.main.proyek_salez.ui.cart
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
