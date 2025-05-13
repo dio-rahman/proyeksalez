@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -37,6 +36,7 @@ import com.main.proyek_salez.ui.theme.*
 import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -438,8 +438,7 @@ fun ManagerScreen(
                                             selectedCategoryId == null -> viewModel.setErrorMessage("Pilih kategori terlebih dahulu")
                                             else -> {
                                                 val imagePath: String? = selectedImageUri?.let { uri ->
-                                                    saveImageToInternalStorage(context, Uri.parse(uri))
-                                                }
+                                                    saveImageToInternalStorage(context, uri.toUri())                                                }
                                                 if (editingFoodItem == null) {
                                                     viewModel.addFoodItem(
                                                         id = foodId.toLongOrNull() ?: 0,
