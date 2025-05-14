@@ -3,12 +3,14 @@ package com.main.proyek_salez.ui.manager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.main.proyek_salez.data.model.CategoryEntity
+import com.main.proyek_salez.data.model.DailySummaryEntity
 import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.repository.ManagerRepository
 import com.main.proyek_salez.data.repository.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,9 +27,21 @@ class ManagerViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
+    private val _summary = MutableStateFlow<DailySummaryEntity?>(null)
+    val summary: StateFlow<DailySummaryEntity?> = _summary.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+
+    val percentageRevenue = if (summary.value?.previousRevenue != null && summary.value?.previousRevenue!! > 0) {
+        val change = ((summary.value?.totalRevenue!! - summary.value?.previousRevenue!!) / summary.value?.previousRevenue!!) * 100
+        "${"%.2f".format(change)}%"
+    } else "0.00%"
+
     init {
         loadCategories()
         loadFoodItems()
+        loadLatestSummary()
     }
 
     private fun loadCategories() {
@@ -151,4 +165,17 @@ class ManagerViewModel @Inject constructor(
     fun setErrorMessage(message: String?) {
         _errorMessage.value = message
     }
+
+    fun loadLatestSummary() {
+        viewModelScope.launch {
+            try {
+                val latestSummary = repository.getLatestSummary()
+                _summary.value = latestSummary
+                _error.value = null
+            } catch (e: Exception) {
+                _error.value = "Gagal memuat data: ${e.message}"
+            }
+        }
+    }
+
 }

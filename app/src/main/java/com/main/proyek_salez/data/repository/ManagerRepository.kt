@@ -1,7 +1,9 @@
 package com.main.proyek_salez.data.repository
 
+import com.main.proyek_salez.data.dao.DailySummaryDao
 import com.main.proyek_salez.data.dao.FoodDao
 import com.main.proyek_salez.data.model.CategoryEntity
+import com.main.proyek_salez.data.model.DailySummaryEntity
 import com.main.proyek_salez.data.model.FoodItemEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -14,13 +16,14 @@ sealed class Result<out T> {
 
 @Singleton
 class ManagerRepository @Inject constructor(
-    private val foodDao: FoodDao
+    private val foodDao: FoodDao,
+    private val dailySummaryDao: DailySummaryDao
 ) {
     suspend fun getAllCategories(): List<CategoryEntity> {
         return foodDao.getAllCategories()
     }
 
-    suspend fun getAllFoodItems(): Flow<List<FoodItemEntity>> {
+    fun getAllFoodItems(): Flow<List<FoodItemEntity>> {
         return foodDao.getAllFoodItems()
     }
 
@@ -82,5 +85,9 @@ class ManagerRepository @Inject constructor(
         } catch (e: Exception) {
             Result.Error("Gagal menghapus menu: ${e.message}")
         }
+    }
+
+    suspend fun getLatestSummary(): DailySummaryEntity? {
+        return dailySummaryDao.getLatestSummary()
     }
 }

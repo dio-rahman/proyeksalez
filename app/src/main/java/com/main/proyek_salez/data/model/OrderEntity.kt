@@ -11,5 +11,6 @@ data class OrderEntity(
     val totalPrice: Long,
     val orderDate: LocalDateTime,
     val items: List<CartItemEntity>,
-    val paymentMethod: String
+    val paymentMethod: String,
+    val status: String = "open"
 )

@@ -62,28 +62,13 @@ fun SidebarMenu(
 
         Spacer(modifier = Modifier.height(40.dp))
         Text(
-            text = "Halo",
+            text = "Halo, Dio!",
             style = MaterialTheme.typography.headlineLarge.copy(
                 color = Putih,
                 fontWeight = FontWeight.Bold
             )
         )
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = "Dio!",
-            style = MaterialTheme.typography.headlineLarge.copy(
-                color = UnguTua,
-                fontWeight = FontWeight.Bold
-            )
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = "Periksa Aktivitas Keseharian Anda Disini!",
-            style = MaterialTheme.typography.headlineLarge.copy(
-                color = Putih,
-                fontWeight = FontWeight.Bold
-            )
-        )
+
         Spacer(modifier = Modifier.height(40.dp))
         MenuItem(
             text = "Profil",
@@ -119,6 +104,17 @@ fun SidebarMenu(
                 navController.navigate("order_history")
                 onCloseDrawer()
             }
+        )
+        MenuItem(
+            text = "Close Order",
+            style = MaterialTheme.typography.bodyLarge.copy(
+                color = Putih,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            ),
+            onClick = {
+                navController.navigate("close_order")
+                onCloseDrawer()}
         )
         MenuItem(
             text = "Log Out",

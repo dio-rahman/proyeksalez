@@ -1,6 +1,7 @@
 package com.main.proyek_salez.data.repository
 
 import com.main.proyek_salez.data.dao.CartItemDao
+import com.main.proyek_salez.data.dao.DailySummaryDao
 import com.main.proyek_salez.data.dao.FoodDao
 import com.main.proyek_salez.data.dao.OrderDao
 import com.main.proyek_salez.data.model.CartItemEntity
@@ -8,14 +9,17 @@ import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.model.OrderEntity
 import com.main.proyek_salez.data.model.CartItemWithFood
 import com.main.proyek_salez.data.model.CategoryEntity
+import com.main.proyek_salez.data.model.DailySummaryEntity
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import java.time.LocalDateTime
 
 class CashierRepository @Inject constructor(
     private val cartItemDao: CartItemDao,
     private val orderDao: OrderDao,
-    private val foodDao: FoodDao
+    private val foodDao: FoodDao,
+    private val dailySummaryDao: DailySummaryDao
 ) {
     fun getAllCartItems(): Flow<List<CartItemWithFood>> {
         return cartItemDao.getCartItemsWithFood()
@@ -51,7 +55,7 @@ class CashierRepository @Inject constructor(
         cartItemDao.clearCart()
     }
 
-    suspend fun getTotalPrice(cartItems: List<CartItemWithFood>): Long {
+    fun getTotalPrice(cartItems: List<CartItemWithFood>): Long {
         return cartItems.sumOf { it.foodItem.price.toLong() * it.cartItem.quantity.toLong() }
     }
 
@@ -91,5 +95,47 @@ class CashierRepository @Inject constructor(
 
     suspend fun getAllCategories(): List<CategoryEntity> {
         return foodDao.getAllCategories()
+    }
+
+    fun getDailyOrders(date: String): Flow<List<OrderEntity>> {
+        return orderDao.getDailyOrders(date)
+    }
+
+    suspend fun closeDailyOrders(date: String) {
+        val orders = orderDao.getDailyOrders(date).first()
+        if (orders.isNotEmpty()) {
+            // Validasi: Pastikan tidak ada pesanan dengan totalPrice <= 0
+            if (orders.any { it.totalPrice <= 0 }) {
+                throw IllegalStateException("Ada pesanan dengan total harga tidak valid")
+            }
+
+            // Update status pesanan
+            val closedOrders = orders.map { it.copy(status = "closed") }
+            orderDao.updateOrders(*closedOrders.toTypedArray())
+
+            // Hitung metrik
+            val totalRevenue = orders.sumOf { it.totalPrice }.toDouble()
+            val totalMenuItems = orders.sumOf { order ->
+                order.items.sumOf { it.quantity }
+            }
+            val totalCustomers = orders.map { it.customerName }.distinct().size
+
+            // Simpan ringkasan harian
+            val summary = DailySummaryEntity(
+                id = 0,
+                date = date,
+                totalRevenue = totalRevenue,
+                totalMenuItems = totalMenuItems,
+                totalCustomers = totalCustomers,
+                closedAt = LocalDateTime.now()
+            )
+            dailySummaryDao.insert(summary)
+        } else {
+            throw IllegalStateException("Tidak ada pesanan untuk hari ini")
+        }
+    }
+
+    suspend fun getLatestSummary(): DailySummaryEntity? {
+        return dailySummaryDao.getLatestSummary()
     }
 }

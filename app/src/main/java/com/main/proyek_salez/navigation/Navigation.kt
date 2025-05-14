@@ -13,6 +13,7 @@ import com.main.proyek_salez.data.model.User
 import com.main.proyek_salez.data.model.UserRole
 import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import com.main.proyek_salez.data.viewmodel.CartViewModel
+import com.main.proyek_salez.ui.CloseOrderScreen
 import com.main.proyek_salez.ui.HomeScreen
 import com.main.proyek_salez.ui.LoginScreen
 import com.main.proyek_salez.ui.OnboardingApp
@@ -57,7 +58,7 @@ fun AppNavigation() {
             )
         }
 
-        composable("manager_dashboard") {
+        composable("manager_screen") {
             ManagerScreen(navController = navController)
         }
 
@@ -96,6 +97,13 @@ fun AppNavigation() {
         composable("order_history") {
             OrderHistoryScreen(navController = navController)
         }
+        composable("close_order") {
+            CloseOrderScreen(navController = navController)
+        }
+        composable("dashboard_manager") {
+            CloseOrderScreen(navController = navController)
+        }
+
     }
 
     LaunchedEffect(currentUserState.value) {
@@ -115,7 +123,7 @@ class MainNavigation(
             }
 
             UserRole.CHEF -> TODO()
-            UserRole.MANAGER -> navController.navigate(Screen.ManagerDashboard.route) {
+            UserRole.MANAGER -> navController.navigate(Screen.ManagerScreen.route) {
                 popUpTo(Screen.Login.route) { inclusive = true }
             }
         }
@@ -125,5 +133,5 @@ class MainNavigation(
 sealed class Screen(val route: String) {
     object Login : Screen("login")
     object CashierDashboard : Screen("cashier_dashboard")
-    object ManagerDashboard : Screen("manager_dashboard")
+    object ManagerScreen : Screen("manager_screen")
 }

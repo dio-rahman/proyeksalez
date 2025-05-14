@@ -5,15 +5,17 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.main.proyek_salez.data.converters.Converters
 import com.main.proyek_salez.data.dao.CartItemDao
+import com.main.proyek_salez.data.dao.DailySummaryDao
 import com.main.proyek_salez.data.dao.FoodDao
 import com.main.proyek_salez.data.dao.OrderDao
 import com.main.proyek_salez.data.model.CartItemEntity
 import com.main.proyek_salez.data.model.CategoryEntity
+import com.main.proyek_salez.data.model.DailySummaryEntity
 import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.model.OrderEntity
 
 @Database(
-    entities = [FoodItemEntity::class, CartItemEntity::class, OrderEntity::class, CategoryEntity::class],
+    entities = [FoodItemEntity::class, CartItemEntity::class, OrderEntity::class, CategoryEntity::class, DailySummaryEntity::class],
     version = 3,
     exportSchema = false
 )
@@ -22,4 +24,5 @@ abstract class SalezDatabase : RoomDatabase() {
     abstract fun cartItemDao(): CartItemDao
     abstract fun orderDao(): OrderDao
     abstract fun FoodDao(): FoodDao
+    abstract fun dailySummaryDao(): DailySummaryDao
 }
