@@ -21,7 +21,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -31,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.data.model.FoodItemEntity
+import com.main.proyek_salez.data.model.CategoryEntity
+import com.main.proyek_salez.data.viewmodel.ManagerViewModel
 import com.main.proyek_salez.ui.SidebarMenu
 import com.main.proyek_salez.ui.theme.*
 import java.io.File
@@ -46,15 +48,15 @@ fun ManagerScreen(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    var categoryName by remember { mutableStateOf("") }
-    var foodId by remember { mutableStateOf("") }
-    var foodName by remember { mutableStateOf("") }
-    var foodDesc by remember { mutableStateOf("") }
-    var foodPrice by remember { mutableStateOf("") }
-    var selectedCategoryId by remember { mutableStateOf<Long?>(null) }
+    var categoryName by rememberSaveable { mutableStateOf("") }
+    var foodId by rememberSaveable { mutableStateOf("") }
+    var foodName by rememberSaveable { mutableStateOf("") }
+    var foodDesc by rememberSaveable { mutableStateOf("") }
+    var foodPrice by rememberSaveable { mutableStateOf("") }
+    var selectedCategoryId by rememberSaveable { mutableStateOf<Long?>(null) }
     var isCategoryDropdownExpanded by remember { mutableStateOf(false) }
-    var selectedImageUri by remember { mutableStateOf<String?>(null) }
-    var editingFoodItem by remember { mutableStateOf<FoodItemEntity?>(null) }
+    var selectedImageUri by rememberSaveable { mutableStateOf<String?>(null) }
+    var editingFoodItem by rememberSaveable { mutableStateOf<FoodItemEntity?>(null) }
     var showDeleteCategoryDialog by remember { mutableStateOf<Long?>(null) }
     var showDeleteFoodItemDialog by remember { mutableStateOf<Long?>(null) }
 
@@ -402,7 +404,8 @@ fun ManagerScreen(
                                             onClick = {
                                                 selectedCategoryId = category.id
                                                 isCategoryDropdownExpanded = false
-                                            }
+                                            },
+                                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                                         )
                                     }
                                 }
@@ -430,43 +433,46 @@ fun ManagerScreen(
                                 }
                                 Button(
                                     onClick = {
-                                        viewModel.clearErrorMessage()
-                                        when {
-                                            foodId.isBlank() -> viewModel.setErrorMessage("ID menu tidak boleh kosong")
-                                            foodName.isBlank() -> viewModel.setErrorMessage("Nama menu tidak boleh kosong")
-                                            foodPrice.isBlank() -> viewModel.setErrorMessage("Harga menu tidak boleh kosong")
-                                            selectedCategoryId == null -> viewModel.setErrorMessage("Pilih kategori terlebih dahulu")
-                                            else -> {
-                                                val imagePath: String? = selectedImageUri?.let { uri ->
-                                                    saveImageToInternalStorage(context, uri.toUri())
-                                                }
-                                                if (editingFoodItem == null) {
-                                                    viewModel.addFoodItem(
-                                                        id = foodId.toLongOrNull() ?: 0,
-                                                        name = foodName,
-                                                        description = foodDesc,
-                                                        price = foodPrice.toDoubleOrNull() ?: 0.0,
-                                                        imagePath = imagePath,
-                                                        categoryId = selectedCategoryId!!
-                                                    )
-                                                } else {
-                                                    viewModel.updateFoodItem(
-                                                        id = editingFoodItem!!.id,
-                                                        name = foodName,
-                                                        description = foodDesc,
-                                                        price = foodPrice.toDoubleOrNull() ?: 0.0,
-                                                        imagePath = imagePath,
-                                                        categoryId = selectedCategoryId!!
-                                                    )
-                                                }
-                                                if (viewModel.errorMessage.value == null) {
-                                                    foodId = ""
-                                                    foodName = ""
-                                                    foodDesc = ""
-                                                    foodPrice = ""
-                                                    selectedImageUri = null
-                                                    selectedCategoryId = null
-                                                    editingFoodItem = null
+                                        scope.launch(Dispatchers.IO) {
+                                            val imagePath = selectedImageUri?.let { uri ->
+                                                saveImageToInternalStorage(context, uri.toUri())
+                                            }
+                                            when {
+                                                foodId.isBlank() -> viewModel.setErrorMessage("ID menu tidak boleh kosong")
+                                                foodName.isBlank() -> viewModel.setErrorMessage("Nama menu tidak boleh kosong")
+                                                foodPrice.isBlank() -> viewModel.setErrorMessage("Harga menu tidak boleh kosong")
+                                                selectedCategoryId == null -> viewModel.setErrorMessage("Pilih kategori terlebih dahulu")
+                                                else -> {
+                                                    if (editingFoodItem == null) {
+                                                        viewModel.addFoodItem(
+                                                            id = foodId.toLongOrNull() ?: 0,
+                                                            name = foodName,
+                                                            description = foodDesc,
+                                                            price = foodPrice.toDoubleOrNull() ?: 0.0,
+                                                            imagePath = imagePath,
+                                                            categoryId = selectedCategoryId!!
+                                                        )
+                                                    } else {
+                                                        viewModel.updateFoodItem(
+                                                            id = editingFoodItem!!.id,
+                                                            name = foodName,
+                                                            description = foodDesc,
+                                                            price = foodPrice.toDoubleOrNull() ?: 0.0,
+                                                            imagePath = imagePath,
+                                                            categoryId = selectedCategoryId!!
+                                                        )
+                                                    }
+                                                    withContext(Dispatchers.Main) {
+                                                        if (viewModel.errorMessage.value == null) {
+                                                            foodId = ""
+                                                            foodName = ""
+                                                            foodDesc = ""
+                                                            foodPrice = ""
+                                                            selectedImageUri = null
+                                                            selectedCategoryId = null
+                                                            editingFoodItem = null
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
@@ -483,13 +489,10 @@ fun ManagerScreen(
                                         )
                                     )
                                 }
-                            }
-                        }
-                    }
 
-                    errorMessage?.let {
+                    errorMessage?.let { message ->
                         Text(
-                            text = it,
+                            text = message,
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 color = Merah,
                                 fontWeight = FontWeight.Medium
@@ -547,36 +550,36 @@ fun ManagerScreen(
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            "Daftar Menu",
-                            style = MaterialTheme.typography.headlineLarge.copy(
-                                color = UnguTua,
-                                fontWeight = FontWeight.Bold
-                            )
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        LazyColumn(
-                            modifier = Modifier.heightIn(max = 200.dp)
-                        ) {
-                            items(foodItems) { foodItem ->
-                                FoodItemCard(
-                                    foodItem = foodItem,
-                                    categoryName = categories.find { it.id == foodItem.categoryId }?.name ?: "Unknown",
-                                    onEdit = {
-                                        editingFoodItem = foodItem
-                                        foodId = foodItem.id.toString()
-                                        foodName = foodItem.name
-                                        foodDesc = foodItem.description
-                                        foodPrice = foodItem.price.toString()
-                                        selectedImageUri = foodItem.imagePath
-                                        selectedCategoryId = foodItem.categoryId
-                                        viewModel.clearErrorMessage()
-                                    },
-                                    onDelete = { showDeleteFoodItemDialog = foodItem.id }
+                            Text(
+                                "Daftar Menu",
+                                style = MaterialTheme.typography.headlineLarge.copy(
+                                    color = UnguTua,
+                                    fontWeight = FontWeight.Bold
                                 )
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            LazyColumn(
+                                modifier = Modifier.heightIn(max = 200.dp)
+                            ) {
+                                items(foodItems) { foodItem ->
+                                    FoodItemCard(
+                                        foodItem = foodItem,
+                                        categoryName = categories.find { it.id == foodItem.categoryId }?.name ?: "Unknown",
+                                        onEdit = {
+                                            editingFoodItem = foodItem
+                                            foodId = foodItem.id.toString()
+                                            foodName = foodItem.name
+                                            foodDesc = foodItem.description
+                                            foodPrice = foodItem.price.toString()
+                                            selectedImageUri = foodItem.imagePath
+                                            selectedCategoryId = foodItem.categoryId
+                                            viewModel.clearErrorMessage()
+                                        },
+                                        onDelete = { showDeleteFoodItemDialog = foodItem.id }
+                                    )
+                                }
                             }
                         }
-                    }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
