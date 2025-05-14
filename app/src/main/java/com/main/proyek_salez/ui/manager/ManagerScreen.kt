@@ -5,42 +5,58 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.main.proyek_salez.data.model.FoodItemEntity
+import com.main.proyek_salez.data.model.CategoryEntity
+import com.main.proyek_salez.ui.manager.ManagerViewModel
+import com.main.proyek_salez.ui.SidebarMenu
+import com.main.proyek_salez.ui.theme.*
 import java.io.File
 import java.io.FileOutputStream
+import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ManagerScreen(viewModel: ManagerViewModel = hiltViewModel()) {
-    var categoryName by remember { mutableStateOf("") }
-    var categoryDesc by remember { mutableStateOf("") }
-    var foodId by remember { mutableStateOf("") }
-    var foodName by remember { mutableStateOf("") }
-    var foodDesc by remember { mutableStateOf("") }
-    var foodPrice by remember { mutableStateOf("") }
-    var selectedCategoryId by remember { mutableStateOf<Long?>(null) }
+fun ManagerScreen(
+    navController: NavController,
+    viewModel: ManagerViewModel = hiltViewModel()
+) {
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    var categoryName by rememberSaveable { mutableStateOf("") }
+    var foodId by rememberSaveable { mutableStateOf("") }
+    var foodName by rememberSaveable { mutableStateOf("") }
+    var foodDesc by rememberSaveable { mutableStateOf("") }
+    var foodPrice by rememberSaveable { mutableStateOf("") }
+    var selectedCategoryId by rememberSaveable { mutableStateOf<Long?>(null) }
     var isCategoryDropdownExpanded by remember { mutableStateOf(false) }
-    var selectedImageUri by remember { mutableStateOf<String?>(null) }
-    var editingFoodItem by remember { mutableStateOf<FoodItemEntity?>(null) }
+    var selectedImageUri by rememberSaveable { mutableStateOf<String?>(null) }
+    var editingFoodItem by rememberSaveable { mutableStateOf<FoodItemEntity?>(null) }
     var showDeleteCategoryDialog by remember { mutableStateOf<Long?>(null) }
     var showDeleteFoodItemDialog by remember { mutableStateOf<Long?>(null) }
 
@@ -55,260 +71,352 @@ fun ManagerScreen(viewModel: ManagerViewModel = hiltViewModel()) {
         selectedImageUri = uri?.toString()
     }
 
-    // Delete Category Confirmation Dialog
+    val gradientBackground = Brush.verticalGradient(
+        colors = listOf(Putih, Jingga, UnguTua)
+    )
+
     showDeleteCategoryDialog?.let { categoryId ->
         AlertDialog(
             onDismissRequest = { showDeleteCategoryDialog = null },
-            title = { Text("Konfirmasi Hapus") },
-            text = { Text("Apakah anda yakin untuk menghapus kategori ini?") },
+            title = {
+                Text(
+                    "Konfirmasi Hapus",
+                    style = MaterialTheme.typography.headlineLarge.copy(color = UnguTua)
+                )
+            },
+            text = {
+                Text(
+                    "Apakah anda yakin untuk menghapus kategori ini?",
+                    style = MaterialTheme.typography.bodyMedium.copy(color = UnguTua)
+                )
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
                         viewModel.deleteCategory(categoryId)
                         showDeleteCategoryDialog = null
-                    }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = UnguTua)
                 ) {
                     Text("Ya")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteCategoryDialog = null }) {
+                TextButton(
+                    onClick = { showDeleteCategoryDialog = null },
+                    colors = ButtonDefaults.textButtonColors(contentColor = UnguTua)
+                ) {
                     Text("Batal")
                 }
             }
         )
     }
 
-    // Delete Food Item Confirmation Dialog
     showDeleteFoodItemDialog?.let { foodItemId ->
         AlertDialog(
             onDismissRequest = { showDeleteFoodItemDialog = null },
-            title = { Text("Konfirmasi Hapus") },
-            text = { Text("Apakah anda yakin untuk menghapus menu ini?") },
+            title = {
+                Text(
+                    "Konfirmasi Hapus",
+                    style = MaterialTheme.typography.headlineLarge.copy(color = UnguTua)
+                )
+            },
+            text = {
+                Text(
+                    "Apakah anda yakin untuk menghapus menu ini?",
+                    style = MaterialTheme.typography.bodyMedium.copy(color = UnguTua)
+                )
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
                         viewModel.deleteFoodItem(foodItemId)
                         showDeleteFoodItemDialog = null
-                    }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = UnguTua)
                 ) {
                     Text("Ya")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteFoodItemDialog = null }) {
+                TextButton(
+                    onClick = { showDeleteFoodItemDialog = null },
+                    colors = ButtonDefaults.textButtonColors(contentColor = UnguTua)
+                ) {
                     Text("Batal")
                 }
             }
         )
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Manajer Dashboard", style = MaterialTheme.typography.headlineSmall) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState())
-                .animateContentSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Form Tambah Kategori
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        "Tambah Kategori",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    OutlinedTextField(
-                        value = categoryName,
-                        onValueChange = { categoryName = it },
-                        label = { Text("Nama Kategori") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Button(
-                        onClick = {
-                            viewModel.clearErrorMessage()
-                            if (categoryName.isBlank()) {
-                                viewModel.setErrorMessage("Nama kategori tidak boleh kosong")
-                            } else {
-                                viewModel.addCategory(categoryName)
-                                if (viewModel.errorMessage.value == null) {
-                                    categoryName = ""
-                                    categoryDesc = ""
-                                }
-                            }
-                        },
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        Text("Tambah Kategori")
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            SidebarMenu(
+                navController = navController,
+                onCloseDrawer = {
+                    scope.launch {
+                        drawerState.close()
                     }
                 }
-            }
-
-            // Form Tambah/Edit Menu
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            )
+        }
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(brush = gradientBackground)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                drawerState.open()
+                            }
+                        },
+                        modifier = Modifier.padding(start = 2.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Menu",
+                            tint = UnguTua
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
                 Column(
                     modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .animateContentSize(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Spacer(modifier = Modifier.height(140.dp))
                     Text(
-                        if (editingFoodItem == null) "Tambah Menu" else "Edit Menu",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    if (editingFoodItem == null) {
-                        OutlinedTextField(
-                            value = foodId,
-                            onValueChange = { foodId = it.filter { it.isDigit() } },
-                            label = { Text("ID Menu") },
-                            modifier = Modifier.fillMaxWidth()
+                        text = "SELAMAT DATANG,",
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            color = Oranye,
+                            fontWeight = FontWeight.Bold
                         )
-                    }
-                    OutlinedTextField(
-                        value = foodName,
-                        onValueChange = { foodName = it },
-                        label = { Text("Nama Menu") },
-                        modifier = Modifier.fillMaxWidth()
                     )
-                    OutlinedTextField(
-                        value = foodDesc,
-                        onValueChange = { foodDesc = it },
-                        label = { Text("Deskripsi Menu") },
-                        modifier = Modifier.fillMaxWidth()
+                    Text(
+                        text = "DIO!",
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            color = UnguTua,
+                            fontWeight = FontWeight.Bold
+                        )
                     )
-                    OutlinedTextField(
-                        value = foodPrice,
-                        onValueChange = { foodPrice = it.filter { it.isDigit() || it == '.' } },
-                        label = { Text("Harga Menu") },
-                        modifier = Modifier.fillMaxWidth()
+                    Text(
+                        text = "ADA YANG BISA DIBANTU?",
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            color = Oranye,
+                            fontWeight = FontWeight.Bold
+                        )
                     )
-                    Button(
-                        onClick = { imagePickerLauncher.launch("image/*") },
-                        modifier = Modifier.fillMaxWidth()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Putih),
+                        elevation = CardDefaults.cardElevation(4.dp)
                     ) {
-                        Text(if (selectedImageUri == null) "Pilih Gambar (Opsional)" else "Gambar Dipilih")
-                    }
-                    Box {
-                        OutlinedTextField(
-                            value = categories.find { it.id == selectedCategoryId }?.name ?: "Pilih Kategori",
-                            onValueChange = {},
-                            readOnly = true,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { isCategoryDropdownExpanded = true },
-                            trailingIcon = {
-                                IconButton(onClick = { isCategoryDropdownExpanded = true }) {
-                                    Icon(
-                                        imageVector = if (isCategoryDropdownExpanded)
-                                            Icons.Default.ArrowDropUp
-                                        else
-                                            Icons.Default.ArrowDropDown,
-                                        contentDescription = null
-                                    )
-                                }
-                            }
-                        )
-                        DropdownMenu(
-                            expanded = isCategoryDropdownExpanded,
-                            onDismissRequest = { isCategoryDropdownExpanded = false },
-                            modifier = Modifier.fillMaxWidth()
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            categories.forEach { category ->
-                                DropdownMenuItem(
-                                    text = { Text(category.name) },
-                                    onClick = {
-                                        selectedCategoryId = category.id
-                                        isCategoryDropdownExpanded = false
+                            Text(
+                                "Tambah",
+                                style = MaterialTheme.typography.headlineLarge.copy(
+                                    color = UnguTua,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                            OutlinedTextField(
+                                value = categoryName,
+                                onValueChange = { categoryName = it },
+                                label = { Text("Nama Kategori") },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    unfocusedContainerColor = Putih,
+                                    focusedContainerColor = Putih,
+                                    focusedBorderColor = UnguTua,
+                                    unfocusedBorderColor = AbuAbu
+                                ),
+                                shape = RoundedCornerShape(50)
+                            )
+                            Button(
+                                onClick = {
+                                    viewModel.clearErrorMessage()
+                                    if (categoryName.isBlank()) {
+                                        viewModel.setErrorMessage("Nama kategori tidak boleh kosong")
+                                    } else {
+                                        viewModel.addCategory(categoryName)
+                                        if (viewModel.errorMessage.value == null) {
+                                            categoryName = ""
+                                        }
                                     }
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.End)
+                                    .height(48.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Oranye),
+                                shape = RoundedCornerShape(50)
+                            ) {
+                                Text(
+                                    "Tambah Kategori",
+                                    style = MaterialTheme.typography.headlineLarge.copy(
+                                        color = UnguTua,
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 )
                             }
                         }
                     }
-                    Row(
+
+                    Card(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        colors = CardDefaults.cardColors(containerColor = Putih),
+                        elevation = CardDefaults.cardElevation(4.dp)
                     ) {
-                        if (editingFoodItem != null) {
-                            TextButton(
-                                onClick = {
-                                    foodId = ""
-                                    foodName = ""
-                                    foodDesc = ""
-                                    foodPrice = ""
-                                    selectedImageUri = null
-                                    selectedCategoryId = null
-                                    editingFoodItem = null
-                                    viewModel.clearErrorMessage()
-                                }
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                if (editingFoodItem == null) "Tambah Menu" else "Edit Menu",
+                                style = MaterialTheme.typography.headlineLarge.copy(
+                                    color = UnguTua,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                            OutlinedTextField(
+                                value = foodId,
+                                onValueChange = { foodId = it.filter { it.isDigit() } },
+                                label = { Text("ID Menu") },
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = editingFoodItem == null,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    unfocusedContainerColor = Putih,
+                                    focusedContainerColor = Putih,
+                                    focusedBorderColor = UnguTua,
+                                    unfocusedBorderColor = AbuAbu
+                                ),
+                                shape = RoundedCornerShape(50)
+                            )
+                            OutlinedTextField(
+                                value = foodName,
+                                onValueChange = { foodName = it },
+                                label = { Text("Nama Menu") },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    unfocusedContainerColor = Putih,
+                                    focusedContainerColor = Putih,
+                                    focusedBorderColor = UnguTua,
+                                    unfocusedBorderColor = AbuAbu
+                                ),
+                                shape = RoundedCornerShape(50)
+                            )
+                            OutlinedTextField(
+                                value = foodDesc,
+                                onValueChange = { foodDesc = it },
+                                label = { Text("Deskripsi Menu") },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    unfocusedContainerColor = Putih,
+                                    focusedContainerColor = Putih,
+                                    focusedBorderColor = UnguTua,
+                                    unfocusedBorderColor = AbuAbu
+                                ),
+                                shape = RoundedCornerShape(50)
+                            )
+                            OutlinedTextField(
+                                value = foodPrice,
+                                onValueChange = { foodPrice = it.filter { it.isDigit() || it == '.' } },
+                                label = { Text("Harga Menu") },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    unfocusedContainerColor = Putih,
+                                    focusedContainerColor = Putih,
+                                    focusedBorderColor = UnguTua,
+                                    unfocusedBorderColor = AbuAbu
+                                ),
+                                shape = RoundedCornerShape(50)
+                            )
+                            Button(
+                                onClick = { imagePickerLauncher.launch("image/*") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(48.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Oranye),
+                                shape = RoundedCornerShape(50)
                             ) {
-                                Text("Batal")
+                                Text(
+                                    if (selectedImageUri == null) "Pilih Gambar (Opsional)" else "Gambar Dipilih",
+                                    style = MaterialTheme.typography.headlineLarge.copy(
+                                        color = UnguTua,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                )
                             }
-                        }
-                        Button(
-                            onClick = {
-                                viewModel.clearErrorMessage()
-                                when {
-                                    foodId.isBlank() -> {
-                                        viewModel.setErrorMessage("ID menu tidak boleh kosong")
-                                    }
-                                    foodName.isBlank() -> {
-                                        viewModel.setErrorMessage("Nama menu tidak boleh kosong")
-                                    }
-                                    foodPrice.isBlank() -> {
-                                        viewModel.setErrorMessage("Harga menu tidak boleh kosong")
-                                    }
-                                    selectedCategoryId == null -> {
-                                        viewModel.setErrorMessage("Pilih kategori terlebih dahulu")
-                                    }
-                                    else -> {
-                                        val imagePath = selectedImageUri?.let { uri ->
-                                            saveImageToInternalStorage(context, Uri.parse(uri))
-                                        }
-                                        if (editingFoodItem == null) {
-                                            viewModel.addFoodItem(
-                                                id = foodId.toLongOrNull() ?: 0,
-                                                name = foodName,
-                                                description = foodDesc,
-                                                price = foodPrice.toDoubleOrNull() ?: 0.0,
-                                                imagePath = imagePath,
-                                                categoryId = selectedCategoryId!!
-                                            )
-                                        } else {
-                                            viewModel.updateFoodItem(
-                                                id = editingFoodItem!!.id,
-                                                name = foodName,
-                                                description = foodDesc,
-                                                price = foodPrice.toDoubleOrNull() ?: 0.0,
-                                                imagePath = imagePath,
-                                                categoryId = selectedCategoryId!!
+                            Box {
+                                OutlinedTextField(
+                                    value = categories.find { it.id == selectedCategoryId }?.name ?: "Pilih Kategori",
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { isCategoryDropdownExpanded = true },
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        unfocusedContainerColor = Putih,
+                                        focusedContainerColor = Putih,
+                                        focusedBorderColor = UnguTua,
+                                        unfocusedBorderColor = AbuAbu
+                                    ),
+                                    shape = RoundedCornerShape(50),
+                                    trailingIcon = {
+                                        IconButton(onClick = { isCategoryDropdownExpanded = true }) {
+                                            Icon(
+                                                imageVector = if (isCategoryDropdownExpanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                                                contentDescription = null,
+                                                tint = UnguTua
                                             )
                                         }
-                                        if (viewModel.errorMessage.value == null) {
+                                    }
+                                )
+                                DropdownMenu(
+                                    expanded = isCategoryDropdownExpanded,
+                                    onDismissRequest = { isCategoryDropdownExpanded = false },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    categories.forEach { category ->
+                                        DropdownMenuItem(
+                                            text = { Text(category.name, style = MaterialTheme.typography.bodyLarge.copy(color = UnguTua)) },
+                                            onClick = {
+                                                selectedCategoryId = category.id
+                                                isCategoryDropdownExpanded = false
+                                            },
+                                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                                        )
+                                    }
+                                }
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                if (editingFoodItem != null) {
+                                    TextButton(
+                                        onClick = {
                                             foodId = ""
                                             foodName = ""
                                             foodDesc = ""
@@ -316,106 +424,167 @@ fun ManagerScreen(viewModel: ManagerViewModel = hiltViewModel()) {
                                             selectedImageUri = null
                                             selectedCategoryId = null
                                             editingFoodItem = null
-                                        }
+                                            viewModel.clearErrorMessage()
+                                        },
+                                        colors = ButtonDefaults.textButtonColors(contentColor = UnguTua)
+                                    ) {
+                                        Text("Batal", style = MaterialTheme.typography.bodyLarge.copy(color = UnguTua))
                                     }
                                 }
-                            }
-                        ) {
-                            Text(if (editingFoodItem == null) "Tambah Menu" else "Simpan Perubahan")
-                        }
-                    }
-                }
-            }
-
-            // Pesan Error
-            errorMessage?.let {
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            }
-
-            // Daftar Kategori
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        "Daftar Kategori",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    LazyColumn(
-                        modifier = Modifier.heightIn(max = 100.dp)
-                    ) {
-                        items(categories) { category ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    category.name,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                IconButton(
-                                    onClick = { showDeleteCategoryDialog = category.id }
+                                Button(
+                                    onClick = {
+                                        viewModel.clearErrorMessage()
+                                        when {
+                                            foodId.isBlank() -> viewModel.setErrorMessage("ID menu tidak boleh kosong")
+                                            foodName.isBlank() -> viewModel.setErrorMessage("Nama menu tidak boleh kosong")
+                                            foodPrice.isBlank() -> viewModel.setErrorMessage("Harga menu tidak boleh kosong")
+                                            selectedCategoryId == null -> viewModel.setErrorMessage("Pilih kategori terlebih dahulu")
+                                            else -> {
+                                                val imagePath: String? = selectedImageUri?.let { uri ->
+                                                    saveImageToInternalStorage(context, uri.toUri())
+                                                }
+                                                if (editingFoodItem == null) {
+                                                    viewModel.addFoodItem(
+                                                        id = foodId.toLongOrNull() ?: 0,
+                                                        name = foodName,
+                                                        description = foodDesc,
+                                                        price = foodPrice.toDoubleOrNull() ?: 0.0,
+                                                        imagePath = imagePath,
+                                                        categoryId = selectedCategoryId!!
+                                                    )
+                                                } else {
+                                                    viewModel.updateFoodItem(
+                                                        id = editingFoodItem!!.id,
+                                                        name = foodName,
+                                                        description = foodDesc,
+                                                        price = foodPrice.toDoubleOrNull() ?: 0.0,
+                                                        imagePath = imagePath,
+                                                        categoryId = selectedCategoryId!!
+                                                    )
+                                                }
+                                                if (viewModel.errorMessage.value == null) {
+                                                    foodId = ""
+                                                    foodName = ""
+                                                    foodDesc = ""
+                                                    foodPrice = ""
+                                                    selectedImageUri = null
+                                                    selectedCategoryId = null
+                                                    editingFoodItem = null
+                                                }
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier.height(48.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Oranye),
+                                    shape = RoundedCornerShape(50)
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = "Hapus Kategori",
-                                        tint = MaterialTheme.colorScheme.error
+                                    Text(
+                                        if (editingFoodItem == null) "Tambah Menu" else "Simpan Perubahan",
+                                        style = MaterialTheme.typography.headlineLarge.copy(
+                                            color = UnguTua,
+                                            fontWeight = FontWeight.Bold
+                                        )
                                     )
                                 }
                             }
                         }
                     }
-                }
-            }
 
-            // Daftar Menu
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        "Daftar Menu",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    LazyColumn(
-                        modifier = Modifier.heightIn(max = 200.dp)
+                    errorMessage?.let { message ->
+                        Text(
+                            text = message,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = Merah,
+                                fontWeight = FontWeight.Medium
+                            ),
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Putih),
+                        elevation = CardDefaults.cardElevation(4.dp)
                     ) {
-                        items(foodItems) { foodItem ->
-                            FoodItemCard(
-                                foodItem = foodItem,
-                                categoryName = categories.find { it.id == foodItem.categoryId }?.name ?: "Unknown",
-                                onEdit = {
-                                    editingFoodItem = foodItem
-                                    foodId = foodItem.id.toString()
-                                    foodName = foodItem.name
-                                    foodDesc = foodItem.description
-                                    foodPrice = foodItem.price.toString()
-                                    selectedImageUri = foodItem.imagePath
-                                    selectedCategoryId = foodItem.categoryId
-                                    viewModel.clearErrorMessage()
-                                },
-                                onDelete = { showDeleteFoodItemDialog = foodItem.id }
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                "Daftar Kategori",
+                                style = MaterialTheme.typography.headlineLarge.copy(
+                                    color = UnguTua,
+                                    fontWeight = FontWeight.Bold
+                                )
                             )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            LazyColumn(
+                                modifier = Modifier.heightIn(max = 100.dp)
+                            ) {
+                                items(categories) { category ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            category.name,
+                                            style = MaterialTheme.typography.bodyLarge.copy(color = UnguTua),
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        IconButton(onClick = { showDeleteCategoryDialog = category.id }) {
+                                            Icon(
+                                                imageVector = Icons.Default.Delete,
+                                                contentDescription = "Hapus Kategori",
+                                                tint = Merah
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Putih),
+                        elevation = CardDefaults.cardElevation(4.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                "Daftar Menu",
+                                style = MaterialTheme.typography.headlineLarge.copy(
+                                    color = UnguTua,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            LazyColumn(
+                                modifier = Modifier.heightIn(max = 200.dp)
+                            ) {
+                                items(foodItems) { foodItem ->
+                                    FoodItemCard(
+                                        foodItem = foodItem,
+                                        categoryName = categories.find { it.id == foodItem.categoryId }?.name ?: "Unknown",
+                                        onEdit = {
+                                            editingFoodItem = foodItem
+                                            foodId = foodItem.id.toString()
+                                            foodName = foodItem.name
+                                            foodDesc = foodItem.description
+                                            foodPrice = foodItem.price.toString()
+                                            selectedImageUri = foodItem.imagePath
+                                            selectedCategoryId = foodItem.categoryId
+                                            viewModel.clearErrorMessage()
+                                        },
+                                        onDelete = { showDeleteFoodItemDialog = foodItem.id }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
-
-            // Spacer untuk memastikan konten terakhir tidak terpotong
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -431,7 +600,8 @@ fun FoodItemCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = Putih),
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Row(
             modifier = Modifier
@@ -443,16 +613,18 @@ fun FoodItemCard(
             Column {
                 Text(
                     foodItem.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = UnguTua
+                    )
                 )
                 Text(
                     "Kategori: $categoryName",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodyMedium.copy(color = UnguTua)
                 )
                 Text(
                     "Harga: Rp ${foodItem.price}",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodyMedium.copy(color = UnguTua)
                 )
             }
             Row {
@@ -460,17 +632,15 @@ fun FoodItemCard(
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Edit Menu",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = UnguTua
                     )
                 }
                 IconButton(onClick = onDelete) {
-                    IconButton(onClick = onDelete) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Hapus Menu",
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Hapus Menu",
+                        tint = Merah
+                    )
                 }
             }
         }
