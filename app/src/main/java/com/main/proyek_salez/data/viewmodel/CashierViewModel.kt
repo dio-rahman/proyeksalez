@@ -44,7 +44,7 @@ class CashierViewModel @Inject constructor(
         repository.clearCart()
     }
 
-    suspend fun getallCartItems(): Flow<List<CartItemWithFood>> {
+    fun getallCartItems(): Flow<List<CartItemWithFood>> {
         return repository.getAllCartItems()
     }
 

@@ -9,7 +9,6 @@ import com.main.proyek_salez.data.dao.OrderDao
 import com.main.proyek_salez.data.model.CartItemEntity
 import com.main.proyek_salez.data.model.CartItemWithFood
 import com.main.proyek_salez.data.model.FoodItemEntity
-import com.main.proyek_salez.data.model.OrderEntity
 import com.main.proyek_salez.data.repository.CashierRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -19,7 +18,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel

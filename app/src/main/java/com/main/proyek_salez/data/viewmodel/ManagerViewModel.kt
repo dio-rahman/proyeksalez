@@ -1,4 +1,4 @@
-package com.main.proyek_salez.ui.manager
+package com.main.proyek_salez.data.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
