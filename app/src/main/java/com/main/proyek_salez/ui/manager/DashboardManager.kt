@@ -24,12 +24,12 @@ import java.util.*
 @Composable
 fun DashboardManager(
     navController: NavController,
-    viewModel: ManagerViewModel = hiltViewModel()) {
+    viewModel: ManagerViewModel = hiltViewModel()
+) {
     val summary by viewModel.summary.collectAsState()
     val error by viewModel.error.collectAsState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -44,7 +44,6 @@ fun DashboardManager(
             )
         }
     ) {
-
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
@@ -61,38 +60,53 @@ fun DashboardManager(
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(32.dp))
-                summary?.let { summaryData ->
-                    DashboardCard(
-                        title = "Total Revenue",
-                        value = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
-                            .format(summaryData.totalRevenue.toLong()),
-                        percentageChange = "+32.40%",
-                        isPositive = true,
-                        icon = painterResource(id = R.drawable.ic_menu_gallery) // Ganti dengan ikon Anda
-                    )
-                    DashboardCard(
-                        title = "Total Dish Ordered",
-                        value = summaryData.totalMenuItems.toString(),
-                        percentageChange = "-12.40%",
-                        isPositive = false,
-                        icon = painterResource(id = R.drawable.ic_menu_gallery) // Ganti dengan ikon Anda
-                    )
-                    DashboardCard(
-                        title = "Total Customer",
-                        value = summaryData.totalCustomers.toString(),
-                        percentageChange = "+2.40%",
-                        isPositive = true,
-                        icon = painterResource(id = R.drawable.ic_menu_gallery) // Ganti dengan ikon Anda
-                    )
-                } ?: run {
-                    CircularProgressIndicator()
-                }
-                error?.let {
-                    Text(
-                        text = it,
-                        color = Color.Red,
-                        modifier = Modifier.padding(top = 16.dp)
-                    )
+                when {
+                    error != null -> {
+                        Text(
+                            text = error ?: "Unknown error",
+                            color = Color.Red,
+                            modifier = Modifier.padding(top = 16.dp)
+                        )
+                    }
+                    summary != null -> {
+                        summary?.let { summaryData ->
+                            DashboardCard(
+                                title = "Total Revenue",
+                                value = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
+                                    .format(summaryData.totalRevenue.toLong()),
+                                percentageChange = viewModel.percentageRevenue, // Gunakan dari ViewModel
+                                isPositive = summaryData.totalRevenue >= (summaryData.previousRevenue ?: 0.0),
+                                icon = painterResource(id = R.drawable.ic_menu_gallery)
+                            )
+                            DashboardCard(
+                                title = "Total Dish Ordered",
+                                value = summaryData.totalMenuItems.toString(),
+                                percentageChange = if (summaryData.previousMenuItems != null && summaryData.previousMenuItems > 0) {
+                                    val change = ((summaryData.totalMenuItems - summaryData.previousMenuItems) * 100.0) / summaryData.previousMenuItems
+                                    "${"%.2f".format(change)}%"
+                                } else "0.00%",
+                                isPositive = summaryData.totalMenuItems >= (summaryData.previousMenuItems ?: 0),
+                                icon = painterResource(id = R.drawable.ic_menu_gallery)
+                            )
+                            DashboardCard(
+                                title = "Total Customer",
+                                value = summaryData.totalCustomers.toString(),
+                                percentageChange = if (summaryData.previousCustomers != null && summaryData.previousCustomers > 0) {
+                                    val change = ((summaryData.totalCustomers - summaryData.previousCustomers) * 100.0) / summaryData.previousCustomers
+                                    "${"%.2f".format(change)}%"
+                                } else "0.00%",
+                                isPositive = summaryData.totalCustomers >= (summaryData.previousCustomers ?: 0),
+                                icon = painterResource(id = R.drawable.ic_menu_gallery)
+                            )
+                        }
+                    }
+                    else -> {
+                        Text(
+                            text = "Tidak ada data ringkasan tersedia",
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(top = 16.dp)
+                        )
+                    }
                 }
             }
         }
