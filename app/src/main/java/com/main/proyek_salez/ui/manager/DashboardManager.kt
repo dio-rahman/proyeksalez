@@ -10,66 +10,90 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.main.proyek_salez.data.viewmodel.ManagerViewModel
+import com.main.proyek_salez.ui.sidebar.SidebarManager
+import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.*
 
 @Composable
-fun DashboardScreen(viewModel: ManagerViewModel = hiltViewModel()) {
+fun DashboardManager(
+    navController: NavController,
+    viewModel: ManagerViewModel = hiltViewModel()) {
     val summary by viewModel.summary.collectAsState()
     val error by viewModel.error.collectAsState()
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "SALEZ",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            SidebarManager(
+                navController = navController,
+                onCloseDrawer = {
+                    scope.launch {
+                        drawerState.close()
+                    }
+                }
             )
-            Spacer(modifier = Modifier.height(32.dp))
-            summary?.let { summaryData ->
-                DashboardCard(
-                    title = "Total Revenue",
-                    value = NumberFormat.getCurrencyInstance(Locale("id", "ID")).format(summaryData.totalRevenue.toLong()),
-                    percentageChange = "+32.40%",
-                    isPositive = true,
-                    icon = painterResource(id = R.drawable.ic_menu_gallery) // Ganti dengan ikon Anda
-                )
-                DashboardCard(
-                    title = "Total Dish Ordered",
-                    value = summaryData.totalMenuItems.toString(),
-                    percentageChange = "-12.40%",
-                    isPositive = false,
-                    icon = painterResource(id = R.drawable.ic_menu_gallery) // Ganti dengan ikon Anda
-                )
-                DashboardCard(
-                    title = "Total Customer",
-                    value = summaryData.totalCustomers.toString(),
-                    percentageChange = "+2.40%",
-                    isPositive = true,
-                    icon = painterResource(id = R.drawable.ic_menu_gallery) // Ganti dengan ikon Anda
-                )
-            } ?: run {
-                CircularProgressIndicator()
-            }
-            error?.let {
+        }
+    ) {
+
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(
-                    text = it,
-                    color = Color.Red,
-                    modifier = Modifier.padding(top = 16.dp)
+                    text = "SALEZ",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
                 )
+                Spacer(modifier = Modifier.height(32.dp))
+                summary?.let { summaryData ->
+                    DashboardCard(
+                        title = "Total Revenue",
+                        value = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
+                            .format(summaryData.totalRevenue.toLong()),
+                        percentageChange = "+32.40%",
+                        isPositive = true,
+                        icon = painterResource(id = R.drawable.ic_menu_gallery) // Ganti dengan ikon Anda
+                    )
+                    DashboardCard(
+                        title = "Total Dish Ordered",
+                        value = summaryData.totalMenuItems.toString(),
+                        percentageChange = "-12.40%",
+                        isPositive = false,
+                        icon = painterResource(id = R.drawable.ic_menu_gallery) // Ganti dengan ikon Anda
+                    )
+                    DashboardCard(
+                        title = "Total Customer",
+                        value = summaryData.totalCustomers.toString(),
+                        percentageChange = "+2.40%",
+                        isPositive = true,
+                        icon = painterResource(id = R.drawable.ic_menu_gallery) // Ganti dengan ikon Anda
+                    )
+                } ?: run {
+                    CircularProgressIndicator()
+                }
+                error?.let {
+                    Text(
+                        text = it,
+                        color = Color.Red,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                }
             }
         }
     }

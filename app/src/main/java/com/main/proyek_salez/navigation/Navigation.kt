@@ -20,6 +20,7 @@ import com.main.proyek_salez.ui.OnboardingApp
 import com.main.proyek_salez.ui.cart.CartScreen
 import com.main.proyek_salez.ui.cart.CheckoutScreen
 import com.main.proyek_salez.ui.checkout.CompletionScreen
+import com.main.proyek_salez.ui.manager.DashboardManager
 import com.main.proyek_salez.ui.manager.ManagerScreen
 import com.main.proyek_salez.ui.menu.DrinkMenuScreen
 import com.main.proyek_salez.ui.menu.FoodMenuScreen
@@ -100,8 +101,8 @@ fun AppNavigation() {
         composable("close_order") {
             CloseOrderScreen(navController = navController)
         }
-        composable("dashboard_manager") {
-            CloseOrderScreen(navController = navController)
+        composable("manager_dashboard") {
+            DashboardManager(navController = navController)
         }
 
     }
