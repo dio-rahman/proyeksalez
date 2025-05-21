@@ -134,8 +134,4 @@ class CashierRepository @Inject constructor(
             throw IllegalStateException("Tidak ada pesanan untuk hari ini")
         }
     }
-
-    suspend fun getLatestSummary(): DailySummaryEntity? {
-        return dailySummaryDao.getLatestSummary()
-    }
 }
