@@ -8,6 +8,7 @@ import com.main.proyek_salez.data.dao.FoodDao
 import com.main.proyek_salez.data.dao.OrderDao
 import com.main.proyek_salez.data.model.DailySummaryEntity
 import com.main.proyek_salez.data.repository.CashierRepository
+import com.main.proyek_salez.data.repository.ManagerRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -63,5 +64,15 @@ object DatabaseModule {
     @Singleton
     fun provideDailySummaryDao(database: SalezDatabase): DailySummaryDao {
         return database.dailySummaryDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideManagerRepository(
+        foodDao: FoodDao,
+        dailySummaryDao: DailySummaryDao,
+        orderDao: OrderDao
+    ): ManagerRepository {
+        return ManagerRepository(foodDao, dailySummaryDao, orderDao)
     }
 }

@@ -2,10 +2,12 @@ package com.main.proyek_salez.data.repository
 
 import com.main.proyek_salez.data.dao.DailySummaryDao
 import com.main.proyek_salez.data.dao.FoodDao
+import com.main.proyek_salez.data.dao.OrderDao
 import com.main.proyek_salez.data.model.CategoryEntity
 import com.main.proyek_salez.data.model.DailySummaryEntity
 import com.main.proyek_salez.data.model.FoodItemEntity
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,7 +19,8 @@ sealed class Result<out T> {
 @Singleton
 class ManagerRepository @Inject constructor(
     private val foodDao: FoodDao,
-    private val dailySummaryDao: DailySummaryDao
+    private val dailySummaryDao: DailySummaryDao,
+    private val orderDao: OrderDao
 ) {
     suspend fun getAllCategories(): List<CategoryEntity> {
         return foodDao.getAllCategories()
@@ -89,5 +92,27 @@ class ManagerRepository @Inject constructor(
 
     suspend fun getLatestSummary(): DailySummaryEntity? {
         return dailySummaryDao.getLatestSummary()
+    }
+
+    suspend fun getPopularFoodItems(limit: Int = 5): List<Pair<FoodItemEntity, Int>> {
+
+        val orders = orderDao.getAllOrders().first()
+
+        val itemCount = mutableMapOf<Long, Int>()
+        orders.forEach { order ->
+            order.items.forEach { cartItem ->
+                itemCount[cartItem.foodItemId] = itemCount.getOrDefault(cartItem.foodItemId, 0) + cartItem.quantity
+            }
+        }
+
+        val sortedItems = itemCount.entries
+            .sortedByDescending { it.value }
+            .take(limit)
+
+        return sortedItems.mapNotNull { entry ->
+            foodDao.getFoodItemById(entry.key)?.let { foodItem ->
+                foodItem to entry.value
+            }
+        }
     }
 }

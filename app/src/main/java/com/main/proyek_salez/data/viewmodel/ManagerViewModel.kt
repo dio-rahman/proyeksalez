@@ -24,6 +24,9 @@ class ManagerViewModel @Inject constructor(
     private val _foodItems = MutableStateFlow<List<FoodItemEntity>>(emptyList())
     val foodItems: StateFlow<List<FoodItemEntity>> = _foodItems
 
+    private val _popularFoodItems = MutableStateFlow<List<Pair<FoodItemEntity, Int>>>(emptyList())
+    val popularFoodItems: StateFlow<List<Pair<FoodItemEntity, Int>>> = _popularFoodItems
+
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
@@ -42,6 +45,7 @@ class ManagerViewModel @Inject constructor(
         loadCategories()
         loadFoodItems()
         loadLatestSummary()
+        loadPopularFoodItems()
     }
 
     private fun loadCategories() {
@@ -54,6 +58,17 @@ class ManagerViewModel @Inject constructor(
         viewModelScope.launch {
             repository.getAllFoodItems().collect { items ->
                 _foodItems.value = items
+            }
+        }
+    }
+
+    private fun loadPopularFoodItems() {
+        viewModelScope.launch {
+            try {
+                _popularFoodItems.value = repository.getPopularFoodItems()
+                _error.value = null
+            } catch (e: Exception) {
+                _error.value = "Gagal memuat menu populer: ${e.message}"
             }
         }
     }
