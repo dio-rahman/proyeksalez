@@ -31,13 +31,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.data.model.FoodItemEntity
-import com.main.proyek_salez.ui.SidebarMenu
 import com.main.proyek_salez.ui.theme.*
 import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.launch
 import androidx.core.net.toUri
 import com.main.proyek_salez.data.viewmodel.ManagerViewModel
+import com.main.proyek_salez.ui.sidebar.SidebarManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -151,7 +151,7 @@ fun ManagerScreen(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            SidebarMenu(
+            SidebarManager(
                 navController = navController,
                 onCloseDrawer = {
                     scope.launch {
