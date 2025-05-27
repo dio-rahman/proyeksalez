@@ -28,7 +28,8 @@ import com.main.proyek_salez.data.viewmodel.CashierViewModel
 import com.main.proyek_salez.ui.SidebarMenu
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.launch
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,21 +119,21 @@ fun OrderHistoryScreen(
                                         )
                                     )
                                     Text(
-                                        text = "Total: ${order.totalPrice}",
+                                        text = "Total: Rp ${order.totalPrice}",
                                         style = MaterialTheme.typography.bodyMedium.copy(
                                             color = AbuAbuGelap,
                                             fontSize = 12.sp
                                         )
                                     )
                                     Text(
-                                        text = "Tanggal: ${order.orderDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm"))}",
+                                        text = "Tanggal: ${SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault()).format(order.orderDate.toDate())}",
                                         style = MaterialTheme.typography.bodyMedium.copy(
                                             color = AbuAbuGelap,
                                             fontSize = 12.sp
                                         )
                                     )
                                     Text(
-                                        text = "Jumlah Item: ${order.items.sumOf { it.quantity }}",
+                                        text = "Jumlah Item: ${order.items.sumOf { (it["quantity"] as? Number)?.toInt() ?: 0 }}",
                                         style = MaterialTheme.typography.bodyMedium.copy(
                                             color = AbuAbuGelap,
                                             fontSize = 12.sp
@@ -160,13 +161,14 @@ fun OrderHistoryScreen(
 
     // Dialog untuk detail pesanan
     selectedOrder?.let { order ->
-        val foodItems by produceState<Map<Int, FoodItemEntity?>>(
+        val foodItems by produceState<Map<Long, FoodItemEntity?>>(
             initialValue = emptyMap(),
             key1 = order
         ) {
-            val map = mutableMapOf<Int, FoodItemEntity?>()
-            order.items.forEach { cartItem ->
-                map[cartItem.cartItemId] = cashierViewModel.getFoodItemById(cartItem.foodItemId)
+            val map = mutableMapOf<Long, FoodItemEntity?>()
+            order.items.forEach { item ->
+                val foodItemId = (item["foodItemId"] as? Number)?.toLong() ?: 0L
+                map[foodItemId] = cashierViewModel.getFoodItemById(foodItemId)
             }
             value = map
         }
@@ -184,14 +186,14 @@ fun OrderHistoryScreen(
                         )
                     )
                     Text(
-                        text = "Total: ${order.totalPrice}",
+                        text = "Total: Rp ${order.totalPrice}",
                         style = MaterialTheme.typography.bodyMedium.copy(
                             color = AbuAbuGelap,
                             fontSize = 14.sp
                         )
                     )
                     Text(
-                        text = "Tanggal: ${order.orderDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm"))}",
+                        text = "Tanggal: ${SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault()).format(order.orderDate.toDate())}",
                         style = MaterialTheme.typography.bodyMedium.copy(
                             color = AbuAbuGelap,
                             fontSize = 14.sp
@@ -206,11 +208,13 @@ fun OrderHistoryScreen(
                             fontSize = 14.sp
                         )
                     )
-                    order.items.forEach { cartItem ->
-                        val foodItem = foodItems[cartItem.cartItemId]
+                    order.items.forEach { item ->
+                        val foodItemId = (item["foodItemId"] as? Number)?.toLong() ?: 0L
+                        val quantity = (item["quantity"] as? Number)?.toInt() ?: 0
+                        val foodItem = foodItems[foodItemId]
                         if (foodItem != null) {
                             Text(
-                                text = "${foodItem.name} x ${cartItem.quantity} (Rp ${foodItem.price * cartItem.quantity})",
+                                text = "${foodItem.name} x $quantity (Rp ${(foodItem.price * quantity).toLong()})",
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     color = AbuAbuGelap,
                                     fontSize = 12.sp
@@ -218,7 +222,7 @@ fun OrderHistoryScreen(
                             )
                         } else {
                             Text(
-                                text = "Item tidak ditemukan x ${cartItem.quantity}",
+                                text = "Item tidak ditemukan x $quantity",
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     color = AbuAbuGelap,
                                     fontSize = 12.sp

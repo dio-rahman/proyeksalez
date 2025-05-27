@@ -36,6 +36,9 @@ class ManagerViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     val percentageRevenue = if (summary.value?.previousRevenue != null && summary.value?.previousRevenue!! > 0) {
         val change = ((summary.value?.totalRevenue!! - summary.value?.previousRevenue!!) / summary.value?.previousRevenue!!) * 100
         "${"%.2f".format(change)}%"
@@ -50,7 +53,9 @@ class ManagerViewModel @Inject constructor(
 
     private fun loadCategories() {
         viewModelScope.launch {
-            _categories.value = repository.getAllCategories()
+            repository.getAllCategories().collect { categories ->
+                _categories.value = categories
+            }
         }
     }
 
@@ -77,7 +82,6 @@ class ManagerViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = repository.addCategory(CategoryEntity(name = name))) {
                 is Result.Success -> {
-                    loadCategories()
                     _errorMessage.value = null
                 }
                 is Result.Error -> {
@@ -87,11 +91,10 @@ class ManagerViewModel @Inject constructor(
         }
     }
 
-    fun deleteCategory(categoryId: Long) {
+    fun deleteCategory(categoryId: String) {
         viewModelScope.launch {
             when (val result = repository.deleteCategory(categoryId)) {
                 is Result.Success -> {
-                    loadCategories()
                     _errorMessage.value = null
                 }
                 is Result.Error -> {
@@ -107,7 +110,7 @@ class ManagerViewModel @Inject constructor(
         description: String,
         price: Double,
         imagePath: String?,
-        categoryId: Long
+        categoryId: String
     ) {
         viewModelScope.launch {
             val foodItem = FoodItemEntity(
@@ -121,7 +124,6 @@ class ManagerViewModel @Inject constructor(
             )
             when (val result = repository.addFoodItem(foodItem)) {
                 is Result.Success -> {
-                    loadFoodItems()
                     _errorMessage.value = null
                 }
                 is Result.Error -> {
@@ -137,7 +139,7 @@ class ManagerViewModel @Inject constructor(
         description: String,
         price: Double,
         imagePath: String?,
-        categoryId: Long
+        categoryId: String
     ) {
         viewModelScope.launch {
             val foodItem = FoodItemEntity(
@@ -151,7 +153,6 @@ class ManagerViewModel @Inject constructor(
             )
             when (val result = repository.updateFoodItem(foodItem)) {
                 is Result.Success -> {
-                    loadFoodItems()
                     _errorMessage.value = null
                 }
                 is Result.Error -> {
@@ -165,7 +166,6 @@ class ManagerViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = repository.deleteFoodItem(id)) {
                 is Result.Success -> {
-                    loadFoodItems()
                     _errorMessage.value = null
                 }
                 is Result.Error -> {
@@ -192,6 +192,35 @@ class ManagerViewModel @Inject constructor(
             } catch (e: Exception) {
                 _error.value = "Gagal memuat data: ${e.message}"
             }
+        }
+    }
+
+    // Setup initial data function
+    fun setupInitialData() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+
+            when (val result = repository.setupInitialData()) {
+                is Result.Success -> {
+                    _errorMessage.value = "Data awal berhasil dibuat!"
+                    // Reload data after setup
+                    loadCategories()
+                    loadFoodItems()
+                }
+                is Result.Error -> {
+                    _errorMessage.value = result.message
+                }
+            }
+
+            _isLoading.value = false
+        }
+    }
+
+    // Debug function
+    fun debugFirestoreData() {
+        viewModelScope.launch {
+            repository.debugFirestoreData()
         }
     }
 }

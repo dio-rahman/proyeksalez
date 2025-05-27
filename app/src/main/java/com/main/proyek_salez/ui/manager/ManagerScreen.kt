@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -69,11 +70,11 @@ fun ManagerScreen(
     var foodName by rememberSaveable { mutableStateOf("") }
     var foodDesc by rememberSaveable { mutableStateOf("") }
     var foodPrice by rememberSaveable { mutableStateOf("") }
-    var selectedCategoryId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var selectedCategoryId by rememberSaveable { mutableStateOf<String?>(null) } // Changed to String?
     var isCategoryDropdownExpanded by remember { mutableStateOf(false) }
-    var selectedImageUri by rememberSaveable { mutableStateOf<Uri?>(null) } // Changed to Uri?
+    var selectedImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     var editingFoodItem by rememberSaveable { mutableStateOf<FoodItemEntity?>(null) }
-    var showDeleteCategoryDialog by remember { mutableStateOf<Long?>(null) }
+    var showDeleteCategoryDialog by remember { mutableStateOf<String?>(null) } // Changed to String?
     var showDeleteFoodItemDialog by remember { mutableStateOf<Long?>(null) }
 
     val categories by viewModel.categories.collectAsState()
@@ -84,7 +85,7 @@ fun ManagerScreen(
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        selectedImageUri = uri // Store Uri directly
+        selectedImageUri = uri
     }
 
     val gradientBackground = Brush.verticalGradient(
@@ -357,7 +358,9 @@ fun ManagerScreen(
                             )
                             OutlinedTextField(
                                 value = foodPrice,
-                                onValueChange = { foodPrice = it.filter { it.isDigit() || it == '.' } },
+                                onValueChange = {
+                                    foodPrice = it.filter { it.isDigit() || it == '.' }
+                                },
                                 label = { Text("Harga Menu") },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = OutlinedTextFieldDefaults.colors(
@@ -403,7 +406,9 @@ fun ManagerScreen(
                                     ),
                                     shape = RoundedCornerShape(50),
                                     trailingIcon = {
-                                        IconButton(onClick = { isCategoryDropdownExpanded = true }) {
+                                        IconButton(onClick = {
+                                            isCategoryDropdownExpanded = true
+                                        }) {
                                             Icon(
                                                 imageVector = if (isCategoryDropdownExpanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                                                 contentDescription = null,
@@ -484,9 +489,10 @@ fun ManagerScreen(
                                             )
 
                                             else -> {
-                                                val imagePath: String? = selectedImageUri?.let { uri ->
-                                                    saveImageToInternalStorage(context, uri)
-                                                } ?: editingFoodItem?.imagePath // Use existing imagePath if no new image
+                                                val imagePath: String? =
+                                                    selectedImageUri?.let { uri ->
+                                                        saveImageToInternalStorage(context, uri)
+                                                    } ?: editingFoodItem?.imagePath
                                                 if (editingFoodItem == null) {
                                                     viewModel.addFoodItem(
                                                         id = foodId.toLongOrNull() ?: 0,
@@ -575,7 +581,9 @@ fun ManagerScreen(
                                             style = MaterialTheme.typography.bodyLarge.copy(color = UnguTua),
                                             modifier = Modifier.weight(1f)
                                         )
-                                        IconButton(onClick = { showDeleteCategoryDialog = category.id }) {
+                                        IconButton(onClick = {
+                                            showDeleteCategoryDialog = category.id
+                                        }) {
                                             Icon(
                                                 imageVector = Icons.Default.Delete,
                                                 contentDescription = "Hapus Kategori",
@@ -616,7 +624,7 @@ fun ManagerScreen(
                                             foodName = foodItem.name
                                             foodDesc = foodItem.description
                                             foodPrice = foodItem.price.toString()
-                                            selectedImageUri = null // Reset to null, rely on imagePath
+                                            selectedImageUri = null
                                             selectedCategoryId = foodItem.categoryId
                                             viewModel.clearErrorMessage()
                                         },
@@ -626,8 +634,86 @@ fun ManagerScreen(
                             }
                         }
                     }
-
                     Spacer(modifier = Modifier.height(16.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Putih),
+                        elevation = CardDefaults.cardElevation(4.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                "Debug & Setup",
+                                style = MaterialTheme.typography.headlineLarge.copy(
+                                    color = UnguTua,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+
+                            val isLoadingState by viewModel.isLoading.collectAsState()
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Button(
+                                    onClick = {
+                                        viewModel.setupInitialData()
+                                    },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(48.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Putih),
+                                    shape = RoundedCornerShape(8.dp),
+                                    enabled = !isLoadingState
+                                ) {
+                                    if (isLoadingState) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(16.dp),
+                                            color = Putih
+                                        )
+                                    } else {
+                                        Text(
+                                            "Setup Data",
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                color = Putih,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        )
+                                    }
+                                }
+
+                                Button(
+                                    onClick = {
+                                        viewModel.debugFirestoreData()
+                                    },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(48.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = Oranye),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Text(
+                                        "Debug Log",
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            color = Putih,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    )
+                                }
+                            }
+
+                            Text(
+                                "Setup Data: Membuat kategori dan menu contoh\nDebug Log: Cek data di Logcat",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = AbuAbuGelap,
+                                    fontSize = 10.sp
+                                )
+                            )
+                        }
+                    }
                 }
             }
         }

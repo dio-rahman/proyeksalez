@@ -1,6 +1,5 @@
 package com.main.proyek_salez.ui.cart
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -16,22 +15,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.main.proyek_salez.data.model.FoodItemEntity
+import com.main.proyek_salez.data.model.CartItemWithFood
 import com.main.proyek_salez.ui.theme.*
 
 @Composable
 fun CartItemCard(
-    foodItem: FoodItemEntity,
-    quantity: Int,
+    cartItemWithFood: CartItemWithFood,
     onIncrement: () -> Unit,
     onDecrement: () -> Unit
 ) {
+    val foodItem = cartItemWithFood.foodItem
+    val quantity = cartItemWithFood.cartItem.quantity
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -69,7 +69,6 @@ fun CartItemCard(
                 maxLines = 1,
                 modifier = Modifier.fillMaxWidth()
             )
-
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Rp ${foodItem.price.toLong()}",
@@ -80,7 +79,6 @@ fun CartItemCard(
                 ),
                 modifier = Modifier.padding(vertical = 2.dp)
             )
-
             Spacer(modifier = Modifier.weight(1f))
             Row(
                 modifier = Modifier

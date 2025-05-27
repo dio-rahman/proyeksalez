@@ -1,12 +1,11 @@
 package com.main.proyek_salez.ui.cart
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Menu
@@ -25,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
-import com.main.proyek_salez.data.viewmodel.CartViewModel
+import com.main.proyek_salez.data.viewmodel.CashierViewModel
 import com.main.proyek_salez.ui.SidebarMenu
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.launch
@@ -34,13 +33,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun CheckoutScreen(
     navController: NavController,
-    cartViewModel: CartViewModel
+    viewModel: CashierViewModel = hiltViewModel()
 ) {
-    val cartItems by cartViewModel.cartItems.collectAsState(initial = emptyList())
-    val totalPrice by cartViewModel.totalPrice.collectAsState()
+    val cartItems by viewModel.cartItems.collectAsState(initial = emptyList())
+    val totalPrice by viewModel.totalPrice.collectAsState(initial = "Rp 0")
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val scrollState = rememberScrollState()
     val gradientBackground = Brush.verticalGradient(colors = listOf(Putih, Jingga, UnguTua))
     var paymentMethod by remember { mutableStateOf("Tunai") }
     var expanded by remember { mutableStateOf(false) }
@@ -84,7 +82,6 @@ fun CheckoutScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp)
-                    .verticalScroll(scrollState)
             ) {
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = { scope.launch { drawerState.open() } }, modifier = Modifier.padding(start = 10.dp)) {
@@ -109,12 +106,18 @@ fun CheckoutScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Card(
-                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
                     shape = RoundedCornerShape(8.dp),
                     colors = CardDefaults.cardColors(containerColor = Putih),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    elevation = CardDefaults.cardElevation()
                 ) {
-                    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
                         Text(
                             text = "Ringkasan Pesanan",
                             style = MaterialTheme.typography.bodyLarge.copy(
@@ -124,17 +127,23 @@ fun CheckoutScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Pelanggan: ${cartViewModel.customerName.value}",
+                            text = "Pelanggan: ${viewModel.customerName.value}",
                             style = MaterialTheme.typography.bodyMedium.copy(color = AbuAbuGelap)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        cartItems.forEach { cartItemWithFood ->
-                            CartItemCard(
-                                foodItem = cartItemWithFood.foodItem,
-                                quantity = cartItemWithFood.cartItem.quantity,
-                                onIncrement = {}, // Nonaktif di Checkout
-                                onDecrement = {}  // Nonaktif di Checkout
-                            )
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 200.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(cartItems) { cartItemWithFood ->
+                                CartItemCard(
+                                    cartItemWithFood = cartItemWithFood,
+                                    onIncrement = {}, // Nonaktif di Checkout
+                                    onDecrement = {}  // Nonaktif di Checkout
+                                )
+                            }
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(
@@ -165,7 +174,7 @@ fun CheckoutScreen(
                                 )
                             )
                             Text(
-                                text = "Total Harga: Rp $totalPrice",
+                                text = totalPrice,
                                 style = MaterialTheme.typography.bodyLarge.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = UnguTua
@@ -265,21 +274,24 @@ fun CheckoutScreen(
                     onClick = {
                         if (paymentMethod.isEmpty()) {
                             errorMessage = "Pilih metode pembayaran"
-                        } else if (cartViewModel.customerName.value.isBlank()) {
+                        } else if (viewModel.customerName.value.isBlank()) {
                             errorMessage = "Nama pelanggan tidak boleh kosong"
                             println("CheckoutScreen: customerName is blank")
                         } else {
                             scope.launch {
-                                cartViewModel.createOrder(paymentMethod)
-                                cartViewModel.clearCart()
-                                navController.navigate("cart_screen")
+                                viewModel.createOrder(paymentMethod)
+                                navController.navigate("cart_screen") {
+                                    popUpTo("checkout_screen") { inclusive = true }
+                                }
                             }
                         }
                     },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp).height(48.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 40.dp)
+                        .height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Oranye),
-                    shape = RoundedCornerShape(50),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 15.dp)
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
                         text = "Selesaikan Pembayaran",
@@ -293,10 +305,12 @@ fun CheckoutScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = { showConfirmationDialog.value = true },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp).height(48.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 40.dp)
+                        .height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                    shape = RoundedCornerShape(50),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 15.dp)
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
                         text = "Batalkan Pembayaran",

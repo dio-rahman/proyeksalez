@@ -4,8 +4,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
@@ -20,9 +20,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
-import com.main.proyek_salez.data.viewmodel.CartViewModel
+import com.main.proyek_salez.data.viewmodel.CashierViewModel
 import com.main.proyek_salez.ui.SidebarMenu
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.launch
@@ -31,21 +32,20 @@ import kotlinx.coroutines.launch
 @Composable
 fun CartScreen(
     navController: NavController,
-    cartViewModel: CartViewModel
+    viewModel: CashierViewModel = hiltViewModel()
 ) {
-    val cartItems by cartViewModel.cartItems.collectAsState(initial = emptyList())
-    val totalPrice by cartViewModel.totalPrice.collectAsState()
+    val cartItems by viewModel.cartItems.collectAsState(initial = emptyList())
+    val totalPrice by viewModel.totalPrice.collectAsState(initial = "Rp 0")
     val showConfirmationDialog = remember { mutableStateOf(false) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val scrollState = rememberScrollState()
     val gradientBackground = Brush.verticalGradient(colors = listOf(Putih, Jingga, UnguTua))
     var errorMessage by remember { mutableStateOf("") }
 
-    LaunchedEffect(cartViewModel.checkoutRequested.value) {
-        if (cartViewModel.checkoutRequested.value) {
+    LaunchedEffect(viewModel.checkoutRequested.value) {
+        if (viewModel.checkoutRequested.value) {
             navController.navigate("checkout_screen")
-            cartViewModel.checkoutRequested.value = false
+            viewModel.checkoutRequested.value = false
         }
     }
 
@@ -56,9 +56,11 @@ fun CartScreen(
             text = { Text("Apakah Anda yakin ingin membatalkan pesanan?", color = AbuAbuGelap) },
             confirmButton = {
                 TextButton(onClick = {
-                    cartViewModel.clearCart()
-                    showConfirmationDialog.value = false
-                    navController.navigate("cashier_dashboard")
+                    scope.launch {
+                        viewModel.clearCart()
+                        showConfirmationDialog.value = false
+                        navController.navigate("cashier_dashboard")
+                    }
                 }) { Text("Iya", color = UnguTua) }
             },
             dismissButton = {
@@ -84,7 +86,6 @@ fun CartScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(5.dp)
-                    .verticalScroll(scrollState)
             ) {
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = { scope.launch { drawerState.open() } }, modifier = Modifier.padding(start = 10.dp)) {
@@ -99,24 +100,73 @@ fun CartScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "KERANJANG",
-                    style = MaterialTheme.typography.headlineLarge.copy(color = UnguTua, fontWeight = FontWeight.Bold, letterSpacing = 6.sp),
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        color = UnguTua,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 6.sp
+                    ),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                viewModel.debugCartData()
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Debug Cart", color = Putih, fontSize = 12.sp)
+                    }
+
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                viewModel.clearCart()
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Clear Cart", color = Putih, fontSize = 12.sp)
+                    }
+                }
+
+                Text(
+                    text = "Items in cart: ${cartItems.size}",
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = UnguTua,
+                        textAlign = TextAlign.Center
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Masukkan nama pelanggan disini",
-                    style = MaterialTheme.typography.bodyMedium.copy(color = UnguTua, textAlign = TextAlign.Center, fontSize = 12.sp),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = UnguTua,
+                        textAlign = TextAlign.Center,
+                        fontSize = 12.sp
+                    ),
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = cartViewModel.customerName.value,
+                    value = viewModel.customerName.value,
                     onValueChange = {
-                        cartViewModel.customerName.value = it
+                        viewModel.customerName.value = it
                         errorMessage = ""
                     },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp).clip(RoundedCornerShape(50)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 40.dp)
+                        .clip(RoundedCornerShape(50)),
                     placeholder = {
                         Text(
                             text = "Masukkan nama pelanggan disini",
@@ -150,18 +200,20 @@ fun CartScreen(
                 }
                 Button(
                     onClick = {
-                        if (cartViewModel.customerName.value.isBlank()) {
+                        if (viewModel.customerName.value.isBlank()) {
                             errorMessage = "Nama pelanggan harus diisi"
                         } else if (cartItems.isEmpty()) {
                             errorMessage = "Keranjang kosong"
                         } else {
-                            cartViewModel.checkoutRequested.value = true
+                            viewModel.checkoutRequested.value = true
                         }
                     },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp).height(48.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 40.dp)
+                        .height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Oranye),
-                    shape = RoundedCornerShape(50),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 15.dp)
+                    shape = RoundedCornerShape(50)
                 ) {
                     Text(
                         text = "Checkout",
@@ -174,7 +226,12 @@ fun CartScreen(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 if (cartItems.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Text(
                             text = "Keranjang kosong, silakan tambahkan menu terlebih dahulu.",
                             style = MaterialTheme.typography.bodyLarge.copy(
@@ -185,24 +242,42 @@ fun CartScreen(
                         )
                     }
                 } else {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        cartItems.forEach { cartItemWithFood ->
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(cartItems) { cartItemWithFood ->
                             CartItemCard(
-                                foodItem = cartItemWithFood.foodItem,
-                                quantity = cartItemWithFood.cartItem.quantity,
-                                onIncrement = { cartViewModel.addToCart(cartItemWithFood.foodItem) },
-                                onDecrement = { cartViewModel.decrementItem(cartItemWithFood.foodItem) }
+                                cartItemWithFood = cartItemWithFood,
+                                onIncrement = {
+                                    scope.launch {
+                                        viewModel.addToCart(cartItemWithFood.foodItem)
+                                    }
+                                },
+                                onDecrement = {
+                                    scope.launch {
+                                        viewModel.decrementItem(cartItemWithFood.foodItem)
+                                    }
+                                }
                             )
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     Card(
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
                         shape = RoundedCornerShape(8.dp),
                         colors = CardDefaults.cardColors(containerColor = Putih),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        elevation = CardDefaults.cardElevation()
                     ) {
-                        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -213,7 +288,7 @@ fun CartScreen(
                                     style = MaterialTheme.typography.bodyLarge.copy(color = AbuAbuGelap)
                                 )
                                 Text(
-                                    text = cartItems.sumOf { it.cartItem.quantity }.toString(),
+                                    text = cartItems.sumOf { item -> item.cartItem.quantity }.toString(),
                                     style = MaterialTheme.typography.bodyLarge.copy(color = AbuAbuGelap)
                                 )
                             }
@@ -243,10 +318,11 @@ fun CartScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = { showConfirmationDialog.value = true },
-                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                        shape = RoundedCornerShape(50),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 15.dp)
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
                             text = "Batalkan Pesanan",
@@ -261,10 +337,11 @@ fun CartScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = { navController.navigate("cashier_dashboard") },
-                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Oranye),
-                    shape = RoundedCornerShape(50),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 15.dp)
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
                         text = "Pilih Jenis Hidangan",
@@ -280,5 +357,3 @@ fun CartScreen(
         }
     }
 }
-
-

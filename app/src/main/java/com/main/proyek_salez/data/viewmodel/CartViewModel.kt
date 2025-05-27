@@ -3,8 +3,8 @@ package com.main.proyek_salez.data.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.main.proyek_salez.data.model.CartItemWithFood
 import com.main.proyek_salez.data.model.FoodItemEntity
+import com.main.proyek_salez.data.model.CartItemWithFood // Correct import
 import com.main.proyek_salez.data.repository.CashierRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +24,7 @@ class CartViewModel @Inject constructor(
     val cartItems: Flow<List<CartItemWithFood>> = cashierRepository.getAllCartItems()
     val checkoutRequested = mutableStateOf(false)
     val totalPrice: StateFlow<String> = cartItems.map { items ->
-        val total = items.sumOf { it.foodItem.price * it.cartItem.quantity.toDouble() }.toLong()
+        val total = items.sumOf { item -> (item.foodItem.price * item.cartItem.quantity).toLong() }
         "Rp $total"
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Rp 0")
 
@@ -52,7 +52,7 @@ class CartViewModel @Inject constructor(
 
     suspend fun getTotalPrice(): Long {
         val items = cartItems.first()
-        return items.sumOf { it.foodItem.price * it.cartItem.quantity.toDouble() }.toLong()
+        return items.sumOf { item -> (item.foodItem.price * item.cartItem.quantity).toLong() }
     }
 
     fun createOrder(paymentMethod: String) {

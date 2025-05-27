@@ -111,10 +111,10 @@ fun AppNavigation() {
             OtherMenuScreen(navController = navController, viewModel = hiltViewModel())
         }
         composable("cart_screen") {
-            CartScreen(navController = navController, cartViewModel = cartViewModel)
+            CartScreen(navController = navController)
         }
         composable("checkout_screen") {
-            CheckoutScreen(navController = navController, cartViewModel = cartViewModel)
+            CheckoutScreen(navController = navController)
         }
         composable("completion_screen") {
             CompletionScreen(navController = navController)
