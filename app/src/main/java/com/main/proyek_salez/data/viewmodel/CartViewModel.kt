@@ -3,12 +3,8 @@ package com.main.proyek_salez.data.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.main.proyek_salez.data.dao.CartItemDao
-import com.main.proyek_salez.data.dao.FoodDao
-import com.main.proyek_salez.data.dao.OrderDao
-import com.main.proyek_salez.data.model.CartItemEntity
-import com.main.proyek_salez.data.model.CartItemWithFood
 import com.main.proyek_salez.data.model.FoodItemEntity
+import com.main.proyek_salez.data.model.CartItemWithFood // Correct import
 import com.main.proyek_salez.data.repository.CashierRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -22,52 +18,31 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CartViewModel @Inject constructor(
-    private val cartItemDao: CartItemDao,
-    private val orderDao: OrderDao,
-    private val foodDao: FoodDao,
     private val cashierRepository: CashierRepository
 ) : ViewModel() {
     val customerName = mutableStateOf("")
-    val cartItems: Flow<List<CartItemWithFood>> = cartItemDao.getCartItemsWithFood()
+    val cartItems: Flow<List<CartItemWithFood>> = cashierRepository.getAllCartItems()
     val checkoutRequested = mutableStateOf(false)
     val totalPrice: StateFlow<String> = cartItems.map { items ->
-        val total = items.sumOf { it.foodItem.price * it.cartItem.quantity.toDouble() }.toLong()
+        val total = items.sumOf { item -> (item.foodItem.price * item.cartItem.quantity).toLong() }
         "Rp $total"
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Rp 0")
 
     fun addToCart(foodItem: FoodItemEntity) {
         viewModelScope.launch {
-            val existingItem = cartItemDao.getCartItemByFoodId(foodItem.id)
-            if (existingItem != null) {
-                cartItemDao.update(
-                    existingItem.copy(quantity = existingItem.quantity + 1)
-                )
-            } else {
-                cartItemDao.insert(
-                    CartItemEntity(foodItemId = foodItem.id, quantity = 1)
-                )
-            }
+            cashierRepository.addToCart(foodItem)
         }
     }
 
     fun decrementItem(foodItem: FoodItemEntity) {
         viewModelScope.launch {
-            val existingItem = cartItemDao.getCartItemByFoodId(foodItem.id)
-            if (existingItem != null) {
-                if (existingItem.quantity > 1) {
-                    cartItemDao.update(
-                        existingItem.copy(quantity = existingItem.quantity - 1)
-                    )
-                } else {
-                    cartItemDao.delete(existingItem)
-                }
-            }
+            cashierRepository.decrementItem(foodItem)
         }
     }
 
     fun clearCart() {
         viewModelScope.launch {
-            cartItemDao.clearCart()
+            cashierRepository.clearCart()
         }
     }
 
@@ -77,7 +52,7 @@ class CartViewModel @Inject constructor(
 
     suspend fun getTotalPrice(): Long {
         val items = cartItems.first()
-        return items.sumOf { it.foodItem.price * it.cartItem.quantity.toDouble() }.toLong()
+        return items.sumOf { item -> (item.foodItem.price * item.cartItem.quantity).toLong() }
     }
 
     fun createOrder(paymentMethod: String) {
@@ -101,7 +76,7 @@ class CartViewModel @Inject constructor(
         }
     }
 
-    fun searchFoodItems(query: String): Flow<List<FoodItemEntity>> {
-            return foodDao.searchFoodItems(query)
+    fun searchFoodItems(query: String): Flow<List<FoodItemEntity>> = cashierRepository.getAllFoodItems().map { items ->
+        items.filter { it.searchKeywords.contains(query.lowercase()) }
     }
 }

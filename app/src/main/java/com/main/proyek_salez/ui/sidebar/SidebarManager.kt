@@ -121,7 +121,6 @@ fun SidebarManager(
                     println("Logout button pressed")
                     Button(onClick = {
                         authViewModel.logout()
-                        authViewModel.clearLoginState()
                         showDialog.value = false
                         println("Navigating to login screen")
                         navController.navigate(Screen.Login.route) {

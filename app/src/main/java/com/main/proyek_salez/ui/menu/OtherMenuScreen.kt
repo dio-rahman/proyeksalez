@@ -78,7 +78,7 @@ fun OtherMenuScreen(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "MENU LAINNYA ——",
+                    text = "MENU LAINNYA",
                     style = MaterialTheme.typography.headlineLarge.copy(
                         color = UnguTua,
                         fontWeight = FontWeight.Bold,

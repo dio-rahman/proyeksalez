@@ -1,12 +1,14 @@
 package com.main.proyek_salez.data.repository
 
-import com.google.firebase.Timestamp
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.Timestamp
 import com.main.proyek_salez.data.model.User
 import com.main.proyek_salez.data.model.UserRole
 import kotlinx.coroutines.tasks.await
-import kotlin.Result
+import java.text.SimpleDateFormat
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,117 +19,187 @@ class AuthRepository @Inject constructor(
 ) {
     suspend fun login(email: String, password: String): Result<User> {
         return try {
-            val authResult = auth.signInWithEmailAndPassword(email, password).await()
-            val firebaseUser = authResult.user
-                ?: return Result.failure(Exception("Login failed: User is null"))
-
-            val userDoc = firestore.collection("users").document(firebaseUser.uid).get().await()
-
-
-            if (userDoc.exists()) {
-                val data = userDoc.data
-                if (data != null) {
-                    val user = User(
-                        userId = userDoc.id,
-                        name = data["name"] as? String ?: "",
-                        email = data["email"] as? String ?: "",
-                        phone = data["phone"] as? String ?: "",
-                        role = try {
-                            UserRole.valueOf(data["role"] as? String ?: UserRole.CASHIER.name)
-                        } catch (e: Exception) {
-                            UserRole.CASHIER
-                        },
-                        // Handle createdAt conversion properly
-                        createdAt = when (val timestamp = data["createdAt"]) {
-                            is Timestamp -> timestamp.toDate().time
-                            is Long -> timestamp
-                            else -> System.currentTimeMillis()
-                        }
-                    )
-                    Result.success(user)
-                } else {
-                    Result.failure(Exception("User data is null"))
-                }
-            } else {
-                Result.failure(Exception("User document not found"))
+            Log.d("AuthRepository", "Mencoba login dengan email: $email")
+            val result = auth.signInWithEmailAndPassword(email, password).await()
+            if (result.user == null) {
+                Log.e("AuthRepository", "Gagal mendapatkan UID pengguna")
+                return Result.Error("Gagal mendapatkan ID pengguna")
             }
+            val userId = result.user!!.uid
+            Log.d("AuthRepository", "Login berhasil, UID: $userId, Authenticated: ${auth.currentUser != null}")
+
+            val userDoc = firestore.collection("users").document(userId).get().await()
+            if (!userDoc.exists()) {
+                Log.e("AuthRepository", "Dokumen pengguna tidak ditemukan untuk UID: $userId")
+                return Result.Error("Dokumen pengguna tidak ditemukan di Firestore")
+            }
+            Log.d("AuthRepository", "Dokumen ditemukan: ${userDoc.data}")
+
+            if (userDoc.getString("role") == null) {
+                Log.e("AuthRepository", "Field 'role' tidak ditemukan di dokumen")
+                return Result.Error("Peran pengguna tidak ditemukan")
+            }
+            val role = userDoc.getString("role")!!
+            Log.d("AuthRepository", "Role ditemukan: $role")
+
+            val createdAt = when (val createdAtValue = userDoc.get("createdAt")) {
+                is Long -> createdAtValue
+                is String -> {
+                    try {
+                        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault()).parse(createdAtValue)?.time
+                            ?: System.currentTimeMillis()
+                    } catch (e: Exception) {
+                        Log.e("AuthRepository", "Gagal parsing createdAt: $createdAtValue", e)
+                        System.currentTimeMillis()
+                    }
+                }
+                is Timestamp -> createdAtValue.toDate().time
+                else -> {
+                    Log.w("AuthRepository", "createdAt tidak valid atau null, menggunakan default")
+                    System.currentTimeMillis()
+                }
+            }
+
+            val user = User(
+                userId = userId,
+                name = userDoc.getString("name") ?: "",
+                email = email,
+                phone = userDoc.getString("phone") ?: "",
+                role = when (role) {
+                    "MANAGER" -> UserRole.MANAGER
+                    "CASHIER" -> UserRole.CASHIER
+                    "CHEF" -> UserRole.CHEF
+                    else -> {
+                        Log.e("AuthRepository", "Peran tidak valid: $role")
+                        return Result.Error("Peran tidak valid: $role")
+                    }
+                },
+                createdAt = createdAt
+            )
+            Log.d("AuthRepository", "User dibuat: $user")
+            Result.Success(user)
         } catch (e: Exception) {
-            Result.failure(e)
+            Log.e("AuthRepository", "Gagal login: ${e.message}", e)
+            Result.Error("Gagal login: ${e.message}")
         }
     }
 
-
-    suspend fun loginWithRoleCheck(email: String, password: String): Result<User> {
-        return login(email, password)
-    }
-
-    suspend fun registerUser(
-        email: String,
-        password: String,
-        name: String,
-        phone: String,
-        role: UserRole
-    ): Result<User> {
+    suspend fun register(email: String, password: String, role: String, name: String = "", phone: String = ""): Result<Unit> {
         return try {
-            val authResult = auth.createUserWithEmailAndPassword(email, password).await()
-            val firebaseUser = authResult.user
-                ?: return Result.failure(Exception("Registration failed: User is null"))
-
-            val newUser = User(
-                userId = firebaseUser.uid,
-                name = name,
-                email = email,
-                phone = phone,
-                role = role
-            )
-
-            firestore.collection("users").document(firebaseUser.uid).set(newUser).await()
-            Result.success(newUser)
+            Log.d("AuthRepository", "Mencoba registrasi dengan email: $email, role: $role")
+            val result = auth.createUserWithEmailAndPassword(email, password).await()
+            if (result.user == null) {
+                Log.e("AuthRepository", "Gagal mendapatkan UID pengguna")
+                return Result.Error("Gagal mendapatkan ID pengguna")
+            }
+            val userId = result.user!!.uid
+            firestore.collection("users").document(userId).set(
+                mapOf(
+                    "userId" to userId,
+                    "email" to email,
+                    "role" to role,
+                    "name" to name,
+                    "phone" to phone,
+                    "createdAt" to Timestamp.now()
+                )
+            ).await()
+            Log.d("AuthRepository", "Registrasi berhasil, UID: $userId")
+            Result.Success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            Log.e("AuthRepository", "Gagal registrasi: ${e.message}", e)
+            Result.Error("Gagal registrasi: ${e.message}")
         }
     }
 
     suspend fun getCurrentUser(): User? {
-        val firebaseUser = auth.currentUser ?: return null
-        try {
-            val userDoc = firestore.collection("users").document(firebaseUser.uid).get().await()
+        if (auth.currentUser == null) {
+            Log.e("AuthRepository", "Tidak ada pengguna yang login")
+            return null
+        }
+        val userId = auth.currentUser!!.uid
+        Log.d("AuthRepository", "Mengambil pengguna saat ini, UID: $userId")
 
-            // Sama seperti di fungsi login, kita handle conversion manual
-            if (userDoc.exists()) {
-                val data = userDoc.data
-                if (data != null) {
-                    return User(
-                        userId = userDoc.id,
-                        name = data["name"] as? String ?: "",
-                        email = data["email"] as? String ?: "",
-                        phone = data["phone"] as? String ?: "",
-                        role = try {
-                            UserRole.valueOf(data["role"] as? String ?: UserRole.CASHIER.name)
-                        } catch (e: Exception) {
-                            UserRole.CASHIER
-                        },
+        return try {
+            val userDoc = firestore.collection("users").document(userId).get().await()
+            if (!userDoc.exists()) {
+                Log.e("AuthRepository", "Dokumen pengguna tidak ditemukan untuk UID: $userId")
+                return null
+            }
+            Log.d("AuthRepository", "Dokumen ditemukan: ${userDoc.data}")
+            if (userDoc.getString("role") == null) {
+                Log.e("AuthRepository", "Field 'role' tidak ditemukan")
+                return null
+            }
+            val role = userDoc.getString("role")!!
+            Log.d("AuthRepository", "Role ditemukan: $role")
 
-                        createdAt = when (val timestamp = data["createdAt"]) {
-                            is Timestamp -> timestamp.toDate().time
-                            is Long -> timestamp
-                            else -> System.currentTimeMillis()
-                        }
-                    )
+            val createdAt = when (val createdAtValue = userDoc.get("createdAt")) {
+                is Long -> createdAtValue
+                is String -> {
+                    try {
+                        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault()).parse(createdAtValue)?.time
+                            ?: System.currentTimeMillis()
+                    } catch (e: Exception) {
+                        Log.e("AuthRepository", "Gagal parsing createdAt: $createdAtValue", e)
+                        System.currentTimeMillis()
+                    }
+                }
+                is Timestamp -> createdAtValue.toDate().time
+                else -> {
+                    Log.w("AuthRepository", "createdAt tidak valid atau null, menggunakan default")
+                    System.currentTimeMillis()
                 }
             }
+
+            User(
+                userId = userId,
+                name = userDoc.getString("name") ?: "",
+                email = userDoc.getString("email") ?: "",
+                phone = userDoc.getString("phone") ?: "",
+                role = when (role) {
+                    "MANAGER" -> UserRole.MANAGER
+                    "CASHIER" -> UserRole.CASHIER
+                    "CHEF" -> UserRole.CHEF
+                    else -> {
+                        Log.e("AuthRepository", "Peran tidak valid: $role")
+                        return null
+                    }
+                },
+                createdAt = createdAt
+            )
         } catch (e: Exception) {
-            // Log error jika diperlukan
+            Log.e("AuthRepository", "Gagal mengambil pengguna saat ini: ${e.message}", e)
+            return null
         }
-        return null
     }
 
-    fun logout(): Result<Unit> {
-        return try {
-            auth.signOut()
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
+    suspend fun getCurrentUserRole(): String? {
+        if (auth.currentUser == null) {
+            Log.e("AuthRepository", "Tidak ada pengguna yang login")
+            return null
         }
+        val userId = auth.currentUser!!.uid
+        Log.d("AuthRepository", "Mengambil peran pengguna, UID: $userId")
+
+        return try {
+            val userDoc = firestore.collection("users").document(userId).get().await()
+            userDoc.getString("role").also {
+                Log.d("AuthRepository", "Peran ditemukan: $it")
+            }
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Gagal mengambil peran: ${e.message}", e)
+            null
+        }
+    }
+
+    fun isUserLoggedIn(): Boolean {
+        val isLoggedIn = auth.currentUser != null
+        Log.d("AuthRepository", "isUserLoggedIn: $isLoggedIn")
+        return isLoggedIn
+    }
+
+    fun logout() {
+        Log.d("AuthRepository", "Logout dipanggil")
+        auth.signOut()
     }
 }

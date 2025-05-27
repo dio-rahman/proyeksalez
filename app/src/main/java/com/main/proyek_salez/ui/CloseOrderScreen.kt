@@ -1,5 +1,6 @@
 package com.main.proyek_salez.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -18,6 +19,9 @@ import com.main.proyek_salez.data.viewmodel.CloseOrderViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun CloseOrderScreen(
@@ -32,6 +36,7 @@ fun CloseOrderScreen(
     var showDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        Log.d("CloseOrderScreen", "Loading orders for date: $currentDate")
         viewModel.loadDailyOrders(currentDate)
     }
 
@@ -54,22 +59,57 @@ fun CloseOrderScreen(
                     text = "Pesanan Harian - $currentDate",
                     style = MaterialTheme.typography.headlineSmall
                 )
-                LazyColumn {
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Total pesanan: ${orders.size}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
+                if (orders.isEmpty()) {
+                    Text(
+                        text = "Tidak ada pesanan untuk hari ini",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                } else {
+                    val totalRevenue = orders.sumOf { it.totalPrice }
+                    Text(
+                        text = "Total pendapatan: Rp ${String.format("%,d", totalRevenue)}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                LazyColumn(modifier = Modifier.weight(1f)) {
                     items(orders) { order ->
                         OrderItem(order)
                     }
                 }
+
                 Spacer(Modifier.height(16.dp))
-                Button(onClick = { showDialog = true }) {
+
+                Button(
+                    onClick = { showDialog = true },
+                    enabled = orders.isNotEmpty()
+                ) {
                     Text("Tutup Pesanan Harian")
                 }
+
                 if (showDialog) {
                     AlertDialog(
                         onDismissRequest = { showDialog = false },
                         title = { Text("Konfirmasi") },
-                        text = { Text("Tutup semua pesanan hari ini?") },
+                        text = {
+                            Text("Tutup ${orders.size} pesanan untuk hari ini?\n\nTotal pendapatan: Rp ${String.format("%,d", orders.sumOf { it.totalPrice })}")
+                        },
                         confirmButton = {
                             Button(onClick = {
+                                Log.d("CloseOrderScreen", "Closing orders for date: $currentDate")
                                 viewModel.closeOrders(currentDate)
                                 showDialog = false
                             }) {
@@ -83,10 +123,13 @@ fun CloseOrderScreen(
                         }
                     )
                 }
+
                 closeStatus?.let {
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = it,
-                        color = if (it.contains("Gagal")) Color.Red else Color.Green
+                        color = if (it.contains("Gagal")) Color.Red else Color.Green,
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }
@@ -94,17 +137,64 @@ fun CloseOrderScreen(
     }
 }
 
-
-
 @Composable
 fun OrderItem(order: OrderEntity) {
-    Card(modifier = Modifier.padding(8.dp)) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("ID: ${order.orderId}")
-            Text("Pelanggan: ${order.customerName}")
-            Text("Total: Rp ${order.totalPrice}")
-            Text("Status: ${order.status}")
-            Text("Tanggal: ${order.orderDate}")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Pelanggan: ${order.customerName}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = "Rp ${String.format("%,d", order.totalPrice)}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "Pembayaran: ${order.paymentMethod}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Text(
+                text = "Status: ${order.status}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (order.status == "open") MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Text(
+                text = "Waktu: ${formatTimestamp(order.orderDate)}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Text(
+                text = "Items: ${order.items.sumOf { (it["quantity"] as? Number)?.toInt() ?: 0 }} item",
+                style = MaterialTheme.typography.bodySmall
+            )
         }
+    }
+}
+
+@Composable
+private fun formatTimestamp(timestamp: com.google.firebase.Timestamp): String {
+    return try {
+        val date = timestamp.toDate()
+        val formatter = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
+        formatter.format(date)
+    } catch (e: Exception) {
+        "Invalid time"
     }
 }

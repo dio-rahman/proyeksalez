@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,23 +29,40 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.data.model.FoodItemEntity
-import com.main.proyek_salez.ui.theme.*
-import java.io.File
-import java.io.FileOutputStream
-import kotlinx.coroutines.launch
-import androidx.core.net.toUri
+import com.main.proyek_salez.data.model.UserRole
+import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import com.main.proyek_salez.data.viewmodel.ManagerViewModel
 import com.main.proyek_salez.ui.sidebar.SidebarManager
+import com.main.proyek_salez.ui.theme.*
+import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManagerScreen(
     navController: NavController,
-    viewModel: ManagerViewModel = hiltViewModel()
+    viewModel: ManagerViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
+    val isLoggedIn by authViewModel.isLoggedIn.observeAsState(initial = false)
+    val currentUser by authViewModel.currentUser.observeAsState()
+
+    if (!isLoggedIn || currentUser?.role != UserRole.MANAGER) {
+        LaunchedEffect(Unit) {
+            navController.navigate("login") {
+                popUpTo(navController.graph.startDestinationId)
+                launchSingleTop = true
+            }
+        }
+        return
+    }
+
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var categoryName by rememberSaveable { mutableStateOf("") }
@@ -52,11 +70,11 @@ fun ManagerScreen(
     var foodName by rememberSaveable { mutableStateOf("") }
     var foodDesc by rememberSaveable { mutableStateOf("") }
     var foodPrice by rememberSaveable { mutableStateOf("") }
-    var selectedCategoryId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var selectedCategoryId by rememberSaveable { mutableStateOf<String?>(null) } // Changed to String?
     var isCategoryDropdownExpanded by remember { mutableStateOf(false) }
-    var selectedImageUri by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     var editingFoodItem by rememberSaveable { mutableStateOf<FoodItemEntity?>(null) }
-    var showDeleteCategoryDialog by remember { mutableStateOf<Long?>(null) }
+    var showDeleteCategoryDialog by remember { mutableStateOf<String?>(null) } // Changed to String?
     var showDeleteFoodItemDialog by remember { mutableStateOf<Long?>(null) }
 
     val categories by viewModel.categories.collectAsState()
@@ -67,7 +85,7 @@ fun ManagerScreen(
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        selectedImageUri = uri?.toString()
+        selectedImageUri = uri
     }
 
     val gradientBackground = Brush.verticalGradient(
@@ -340,7 +358,9 @@ fun ManagerScreen(
                             )
                             OutlinedTextField(
                                 value = foodPrice,
-                                onValueChange = { foodPrice = it.filter { it.isDigit() || it == '.' } },
+                                onValueChange = {
+                                    foodPrice = it.filter { it.isDigit() || it == '.' }
+                                },
                                 label = { Text("Harga Menu") },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = OutlinedTextFieldDefaults.colors(
@@ -360,7 +380,9 @@ fun ManagerScreen(
                                 shape = RoundedCornerShape(50)
                             ) {
                                 Text(
-                                    if (selectedImageUri == null) "Pilih Gambar (Opsional)" else "Gambar Dipilih",
+                                    if (selectedImageUri == null) {
+                                        if (editingFoodItem?.imagePath != null) "Gambar Ada (Pilih untuk Ganti)" else "Pilih Gambar (Opsional)"
+                                    } else "Gambar Dipilih",
                                     style = MaterialTheme.typography.headlineLarge.copy(
                                         color = UnguTua,
                                         fontWeight = FontWeight.Bold
@@ -369,7 +391,8 @@ fun ManagerScreen(
                             }
                             Box {
                                 OutlinedTextField(
-                                    value = categories.find { it.id == selectedCategoryId }?.name ?: "Pilih Kategori",
+                                    value = categories.find { it.id == selectedCategoryId }?.name
+                                        ?: "Pilih Kategori",
                                     onValueChange = {},
                                     readOnly = true,
                                     modifier = Modifier
@@ -383,7 +406,9 @@ fun ManagerScreen(
                                     ),
                                     shape = RoundedCornerShape(50),
                                     trailingIcon = {
-                                        IconButton(onClick = { isCategoryDropdownExpanded = true }) {
+                                        IconButton(onClick = {
+                                            isCategoryDropdownExpanded = true
+                                        }) {
                                             Icon(
                                                 imageVector = if (isCategoryDropdownExpanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                                                 contentDescription = null,
@@ -399,12 +424,22 @@ fun ManagerScreen(
                                 ) {
                                     categories.forEach { category ->
                                         DropdownMenuItem(
-                                            text = { Text(category.name, style = MaterialTheme.typography.bodyLarge.copy(color = UnguTua)) },
+                                            text = {
+                                                Text(
+                                                    category.name,
+                                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                                        color = UnguTua
+                                                    )
+                                                )
+                                            },
                                             onClick = {
                                                 selectedCategoryId = category.id
                                                 isCategoryDropdownExpanded = false
                                             },
-                                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                                            contentPadding = PaddingValues(
+                                                horizontal = 16.dp,
+                                                vertical = 8.dp
+                                            )
                                         )
                                     }
                                 }
@@ -427,21 +462,37 @@ fun ManagerScreen(
                                         },
                                         colors = ButtonDefaults.textButtonColors(contentColor = UnguTua)
                                     ) {
-                                        Text("Batal", style = MaterialTheme.typography.bodyLarge.copy(color = UnguTua))
+                                        Text(
+                                            "Batal",
+                                            style = MaterialTheme.typography.bodyLarge.copy(color = UnguTua)
+                                        )
                                     }
                                 }
                                 Button(
                                     onClick = {
                                         viewModel.clearErrorMessage()
                                         when {
-                                            foodId.isBlank() -> viewModel.setErrorMessage("ID menu tidak boleh kosong")
-                                            foodName.isBlank() -> viewModel.setErrorMessage("Nama menu tidak boleh kosong")
-                                            foodPrice.isBlank() -> viewModel.setErrorMessage("Harga menu tidak boleh kosong")
-                                            selectedCategoryId == null -> viewModel.setErrorMessage("Pilih kategori terlebih dahulu")
+                                            foodId.isBlank() -> viewModel.setErrorMessage(
+                                                "ID menu tidak boleh kosong"
+                                            )
+
+                                            foodName.isBlank() -> viewModel.setErrorMessage(
+                                                "Nama menu tidak boleh kosong"
+                                            )
+
+                                            foodPrice.isBlank() -> viewModel.setErrorMessage(
+                                                "Harga menu tidak boleh kosong"
+                                            )
+
+                                            selectedCategoryId == null -> viewModel.setErrorMessage(
+                                                "Pilih kategori terlebih dahulu"
+                                            )
+
                                             else -> {
-                                                val imagePath: String? = selectedImageUri?.let { uri ->
-                                                    saveImageToInternalStorage(context, uri.toUri())
-                                                }
+                                                val imagePath: String? =
+                                                    selectedImageUri?.let { uri ->
+                                                        saveImageToInternalStorage(context, uri)
+                                                    } ?: editingFoodItem?.imagePath
                                                 if (editingFoodItem == null) {
                                                     viewModel.addFoodItem(
                                                         id = foodId.toLongOrNull() ?: 0,
@@ -530,7 +581,9 @@ fun ManagerScreen(
                                             style = MaterialTheme.typography.bodyLarge.copy(color = UnguTua),
                                             modifier = Modifier.weight(1f)
                                         )
-                                        IconButton(onClick = { showDeleteCategoryDialog = category.id }) {
+                                        IconButton(onClick = {
+                                            showDeleteCategoryDialog = category.id
+                                        }) {
                                             Icon(
                                                 imageVector = Icons.Default.Delete,
                                                 contentDescription = "Hapus Kategori",
@@ -563,14 +616,15 @@ fun ManagerScreen(
                                 items(foodItems) { foodItem ->
                                     FoodItemCard(
                                         foodItem = foodItem,
-                                        categoryName = categories.find { it.id == foodItem.categoryId }?.name ?: "Unknown",
+                                        categoryName = categories.find { it.id == foodItem.categoryId }?.name
+                                            ?: "Unknown",
                                         onEdit = {
                                             editingFoodItem = foodItem
                                             foodId = foodItem.id.toString()
                                             foodName = foodItem.name
                                             foodDesc = foodItem.description
                                             foodPrice = foodItem.price.toString()
-                                            selectedImageUri = foodItem.imagePath
+                                            selectedImageUri = null
                                             selectedCategoryId = foodItem.categoryId
                                             viewModel.clearErrorMessage()
                                         },
@@ -580,8 +634,6 @@ fun ManagerScreen(
                             }
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
@@ -647,12 +699,17 @@ fun FoodItemCard(
 }
 
 fun saveImageToInternalStorage(context: Context, uri: Uri): String? {
-    val inputStream = context.contentResolver.openInputStream(uri) ?: return null
-    val file = File(context.filesDir, "menu_${System.currentTimeMillis()}.jpg")
-    inputStream.use { input ->
-        FileOutputStream(file).use { output ->
-            input.copyTo(output)
+    return try {
+        val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+        val file = File(context.filesDir, "menu_${System.currentTimeMillis()}.jpg")
+        inputStream.use { input ->
+            FileOutputStream(file).use { output ->
+                input.copyTo(output)
+            }
         }
+        file.absolutePath
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
-    return file.absolutePath
 }

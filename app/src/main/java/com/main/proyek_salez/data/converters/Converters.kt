@@ -31,4 +31,15 @@ class Converters {
         val listType = object : TypeToken<List<CartItemEntity>>() {}.type
         return gson.fromJson(value, listType)
     }
+
+    @TypeConverter
+    fun fromStringList(value: List<String>?): String? {
+        return value?.let { gson.toJson(it) }
+    }
+
+    @TypeConverter
+    fun toStringList(value: String?): List<String>? {
+        val listType = object : TypeToken<List<String>>() {}.type
+        return gson.fromJson(value, listType)
+    }
 }
