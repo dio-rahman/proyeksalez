@@ -1,5 +1,6 @@
 package com.main.proyek_salez.ui.cart
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -45,6 +46,17 @@ fun CheckoutScreen(
     val paymentMethods = listOf("Tunai", "Kartu", "QRIS")
     var errorMessage by remember { mutableStateOf("") }
     val showConfirmationDialog = remember { mutableStateOf(false) }
+    // Debug customer name on screen load
+    LaunchedEffect(Unit) {
+        Log.d("CheckoutScreen", "CheckoutScreen loaded")
+        Log.d("CheckoutScreen", "Customer name from ViewModel: '${viewModel.customerName.value}'")
+        Log.d("CheckoutScreen", "Cart items: ${cartItems.size}")
+    }
+
+    // Monitor changes to customer name
+    LaunchedEffect(viewModel.customerName.value) {
+        Log.d("CheckoutScreen", "Customer name changed to: '${viewModel.customerName.value}'")
+    }
 
     if (showConfirmationDialog.value) {
         AlertDialog(
@@ -126,11 +138,34 @@ fun CheckoutScreen(
                             )
                         )
                         Spacer(modifier = Modifier.height(8.dp))
+
+                        // Customer name display with debug info
                         Text(
                             text = "Pelanggan: ${viewModel.customerName.value}",
                             style = MaterialTheme.typography.bodyMedium.copy(color = AbuAbuGelap)
                         )
+
+                        // Debug info
+                        Text(
+                            text = "Debug - Customer: '${viewModel.customerName.value}' (Length: ${viewModel.customerName.value.length})",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = Color.Red,
+                                fontSize = 10.sp
+                            )
+                        )
+
+                        if (viewModel.customerName.value.isBlank()) {
+                            Text(
+                                text = "⚠️ NAMA PELANGGAN KOSONG!",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = Color.Red,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                        }
+
                         Spacer(modifier = Modifier.height(8.dp))
+
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -272,16 +307,38 @@ fun CheckoutScreen(
                 }
                 Button(
                     onClick = {
-                        if (paymentMethod.isEmpty()) {
-                            errorMessage = "Pilih metode pembayaran"
-                        } else if (viewModel.customerName.value.isBlank()) {
-                            errorMessage = "Nama pelanggan tidak boleh kosong"
-                            println("CheckoutScreen: customerName is blank")
-                        } else {
-                            scope.launch {
-                                viewModel.createOrder(paymentMethod)
-                                navController.navigate("cart_screen") {
-                                    popUpTo("checkout_screen") { inclusive = true }
+                        Log.d("CheckoutScreen", "=== CHECKOUT BUTTON CLICKED ===")
+                        Log.d("CheckoutScreen", "Payment method: $paymentMethod")
+                        Log.d("CheckoutScreen", "Customer name: '${viewModel.customerName.value}'")
+                        Log.d("CheckoutScreen", "Customer name length: ${viewModel.customerName.value.length}")
+                        Log.d("CheckoutScreen", "Cart items: ${cartItems.size}")
+
+                        when {
+                            paymentMethod.isEmpty() -> {
+                                errorMessage = "Pilih metode pembayaran"
+                                Log.e("CheckoutScreen", "Payment method is empty")
+                            }
+                            viewModel.customerName.value.isBlank() -> {
+                                errorMessage = "Nama pelanggan tidak boleh kosong"
+                                Log.e("CheckoutScreen", "Customer name is blank: '${viewModel.customerName.value}'")
+                            }
+                            cartItems.isEmpty() -> {
+                                errorMessage = "Keranjang kosong"
+                                Log.e("CheckoutScreen", "Cart is empty")
+                            }
+                            else -> {
+                                Log.d("CheckoutScreen", "Creating order...")
+                                scope.launch {
+                                    try {
+                                        viewModel.createOrder(paymentMethod)
+                                        Log.d("CheckoutScreen", "Order created successfully")
+                                        navController.navigate("cart_screen") {
+                                            popUpTo("checkout_screen") { inclusive = true }
+                                        }
+                                    } catch (e: Exception) {
+                                        Log.e("CheckoutScreen", "Error creating order: ${e.message}")
+                                        errorMessage = "Gagal membuat pesanan: ${e.message}"
+                                    }
                                 }
                             }
                         }

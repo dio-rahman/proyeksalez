@@ -13,6 +13,7 @@ import com.main.proyek_salez.data.model.User
 import com.main.proyek_salez.data.model.UserRole
 import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import com.main.proyek_salez.data.viewmodel.CartViewModel
+import com.main.proyek_salez.data.viewmodel.CashierViewModel
 import com.main.proyek_salez.ui.CloseOrderScreen
 import com.main.proyek_salez.ui.HomeScreen
 import com.main.proyek_salez.ui.LoginScreen
@@ -32,7 +33,7 @@ import com.main.proyek_salez.ui.sidebar.ProfileScreen
 fun AppNavigation() {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = hiltViewModel()
-    val cartViewModel: CartViewModel = hiltViewModel()
+    val cashierViewModel: CashierViewModel = hiltViewModel()
     val mainNavigation = MainNavigation(navController)
     val currentUserState = authViewModel.currentUser.observeAsState()
     val isLoggedIn = authViewModel.isLoggedIn.observeAsState(initial = false)
@@ -111,10 +112,10 @@ fun AppNavigation() {
             OtherMenuScreen(navController = navController, viewModel = hiltViewModel())
         }
         composable("cart_screen") {
-            CartScreen(navController = navController)
+            CartScreen(navController = navController, viewModel = cashierViewModel)
         }
         composable("checkout_screen") {
-            CheckoutScreen(navController = navController)
+            CheckoutScreen(navController = navController, viewModel = cashierViewModel)
         }
         composable("completion_screen") {
             CompletionScreen(navController = navController)

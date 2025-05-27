@@ -118,15 +118,6 @@ fun DrinkMenuScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Debug button
-                Button(
-                    onClick = { loadFoodItems() },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
-                    modifier = Modifier.fillMaxWidth().padding(8.dp)
-                ) {
-                    Text("Reload Minuman", color = Putih)
-                }
-
                 Spacer(modifier = Modifier.height(16.dp))
 
                 when {

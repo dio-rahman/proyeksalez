@@ -1,5 +1,6 @@
 package com.main.proyek_salez.ui.cart
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -41,13 +42,28 @@ fun CartScreen(
     val scope = rememberCoroutineScope()
     val gradientBackground = Brush.verticalGradient(colors = listOf(Putih, Jingga, UnguTua))
     var errorMessage by remember { mutableStateOf("") }
+    var customerName by remember { mutableStateOf(viewModel.customerName.value) }
+
+    LaunchedEffect(customerName) {
+        viewModel.customerName.value = customerName
+        Log.d("CartScreen", "Customer name updated to: $customerName")
+    }
+
+    LaunchedEffect(viewModel.customerName.value) {
+        if (customerName != viewModel.customerName.value) {
+            customerName = viewModel.customerName.value
+            Log.d("CartScreen", "Customer name synced from ViewModel: ${viewModel.customerName.value}")
+        }
+    }
 
     LaunchedEffect(viewModel.checkoutRequested.value) {
         if (viewModel.checkoutRequested.value) {
+            Log.d("CartScreen", "Navigating to checkout with customer: ${viewModel.customerName.value}")
             navController.navigate("checkout_screen")
             viewModel.checkoutRequested.value = false
         }
     }
+
 
     if (showConfirmationDialog.value) {
         AlertDialog(
@@ -108,34 +124,6 @@ fun CartScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                viewModel.debugCartData()
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("Debug Cart", color = Putih, fontSize = 12.sp)
-                    }
-
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                viewModel.clearCart()
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("Clear Cart", color = Putih, fontSize = 12.sp)
-                    }
-                }
 
                 Text(
                     text = "Items in cart: ${cartItems.size}",
@@ -157,11 +145,13 @@ fun CartScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+
                 OutlinedTextField(
-                    value = viewModel.customerName.value,
-                    onValueChange = {
-                        viewModel.customerName.value = it
+                    value = customerName,
+                    onValueChange = { newValue ->
+                        customerName = newValue
                         errorMessage = ""
+                        Log.d("CartScreen", "Customer name input changed to: $newValue")
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -198,14 +188,28 @@ fun CartScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
+
                 Button(
                     onClick = {
-                        if (viewModel.customerName.value.isBlank()) {
-                            errorMessage = "Nama pelanggan harus diisi"
-                        } else if (cartItems.isEmpty()) {
-                            errorMessage = "Keranjang kosong"
-                        } else {
-                            viewModel.checkoutRequested.value = true
+                        Log.d("CartScreen", "Checkout button clicked")
+                        Log.d("CartScreen", "Customer name: '$customerName'")
+                        Log.d("CartScreen", "ViewModel customer name: '${viewModel.customerName.value}'")
+                        Log.d("CartScreen", "Cart items: ${cartItems.size}")
+
+                        when {
+                            customerName.isBlank() -> {
+                                errorMessage = "Nama pelanggan harus diisi"
+                                Log.e("CartScreen", "Customer name is blank")
+                            }
+                            cartItems.isEmpty() -> {
+                                errorMessage = "Keranjang kosong"
+                                Log.e("CartScreen", "Cart is empty")
+                            }
+                            else -> {
+                                viewModel.customerName.value = customerName
+                                viewModel.checkoutRequested.value = true
+                                Log.d("CartScreen", "Setting checkout requested to true with customer: ${viewModel.customerName.value}")
+                            }
                         }
                     },
                     modifier = Modifier

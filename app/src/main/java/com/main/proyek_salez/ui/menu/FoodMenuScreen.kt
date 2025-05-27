@@ -64,7 +64,6 @@ fun FoodMenuScreen(
         }
     }
 
-    // Load data saat pertama kali
     LaunchedEffect(Unit) {
         loadFoodItems()
     }
@@ -117,27 +116,6 @@ fun FoodMenuScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
-
-                // Debug buttons (Remove in production)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button(
-                        onClick = { loadFoodItems() },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("Reload", color = Putih)
-                    }
-                    Button(
-                        onClick = { viewModel.debugFirestoreData() },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("Debug", color = Putih)
-                    }
-                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
