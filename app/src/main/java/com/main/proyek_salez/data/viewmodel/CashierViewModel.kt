@@ -189,14 +189,4 @@ class CashierViewModel @Inject constructor(
     fun clearError() {
         _errorMessage.value = null
     }
-    fun debugFirestoreData() {
-        viewModelScope.launch {
-            repository.debugFirestoreData()
-        }
-    }
-    fun debugCartData() {
-        viewModelScope.launch {
-            repository.debugCartData()
-        }
-    }
 }

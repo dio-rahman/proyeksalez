@@ -3,6 +3,7 @@ package com.main.proyek_salez.data.repository
 import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.main.proyek_salez.data.model.CartItemEntity
 import com.main.proyek_salez.data.model.CategoryEntity
 import com.main.proyek_salez.data.model.DailySummaryEntity
@@ -12,9 +13,7 @@ import com.main.proyek_salez.data.model.CartItemWithFood
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.time.LocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,23 +27,18 @@ class CashierRepository @Inject constructor(
     fun getAllCartItems(): Flow<List<CartItemWithFood>> = flow {
         try {
             Log.d("CashierRepository", "=== GET ALL CART ITEMS ===")
-
-            // Get cart data
             val cartSnapshot = firestore.collection("carts")
                 .document(cartId)
                 .get()
                 .await()
-
             if (!cartSnapshot.exists()) {
                 Log.d("CashierRepository", "Cart document doesn't exist")
                 emit(emptyList<CartItemWithFood>())
                 return@flow
             }
-
             val cartItems = try {
                 val itemsData = cartSnapshot.get("items") as? List<Map<String, Any>>
                 Log.d("CashierRepository", "Raw cart data: $itemsData")
-
                 itemsData?.mapNotNull { item ->
                     try {
                         val cartItemId = (item["cartItemId"] as? Number)?.toInt() ?: 0
@@ -54,9 +48,7 @@ class CashierRepository @Inject constructor(
                             else -> 0L
                         }
                         val quantity = (item["quantity"] as? Number)?.toInt() ?: 0
-
                         Log.d("CashierRepository", "Cart item: cartItemId=$cartItemId, foodItemId=$foodItemId, quantity=$quantity")
-
                         CartItemEntity(
                             cartItemId = cartItemId,
                             foodItemId = foodItemId,
@@ -71,27 +63,20 @@ class CashierRepository @Inject constructor(
                 Log.e("CashierRepository", "Failed to parse cart items: ${e.message}")
                 emptyList()
             }
-
             Log.d("CashierRepository", "Parsed ${cartItems.size} cart items")
-
             if (cartItems.isEmpty()) {
                 emit(emptyList<CartItemWithFood>())
                 return@flow
             }
-
-            // Get food items for each cart item
             val foodItemIds = cartItems.map { it.foodItemId }.distinct()
             Log.d("CashierRepository", "Getting food items for IDs: $foodItemIds")
-
             val foodItemsMap = mutableMapOf<Long, FoodItemEntity>()
-
             // Get food items in batches of 10 (Firestore limit)
             foodItemIds.chunked(10).forEach { batch ->
                 val foodItemsSnapshot = firestore.collection("food_items")
                     .whereIn("id", batch)
                     .get()
                     .await()
-
                 foodItemsSnapshot.documents.forEach { doc ->
                     try {
                         val id = doc.id.toLongOrNull() ?: 0L
@@ -101,7 +86,6 @@ class CashierRepository @Inject constructor(
                         val imagePath = doc.getString("imagePath") ?: ""
                         val categoryId = doc.getString("categoryId") ?: ""
                         val searchKeywords = doc.get("searchKeywords") as? List<String> ?: emptyList()
-
                         val foodItem = FoodItemEntity(
                             id = id,
                             name = name,
@@ -111,7 +95,6 @@ class CashierRepository @Inject constructor(
                             categoryId = categoryId,
                             searchKeywords = searchKeywords
                         )
-
                         foodItemsMap[id] = foodItem
                         Log.d("CashierRepository", "Food item loaded: ${foodItem.name} (ID: $id)")
                     } catch (e: Exception) {
@@ -119,8 +102,6 @@ class CashierRepository @Inject constructor(
                     }
                 }
             }
-
-            // Combine cart items with food items
             val cartWithFood = cartItems.mapNotNull { cartItem ->
                 val foodItem = foodItemsMap[cartItem.foodItemId]
                 if (foodItem != null) {
@@ -131,10 +112,8 @@ class CashierRepository @Inject constructor(
                     null
                 }
             }
-
             Log.d("CashierRepository", "Final result: ${cartWithFood.size} cart items with food")
             emit(cartWithFood)
-
         } catch (e: Exception) {
             Log.e("CashierRepository", "Error getting cart items: ${e.message}")
             emit(emptyList<CartItemWithFood>())
@@ -144,10 +123,8 @@ class CashierRepository @Inject constructor(
     private suspend fun fetchFoodItemsMap(foodItemIds: List<Long>): Map<Long, FoodItemEntity> {
         if (foodItemIds.isEmpty()) return emptyMap()
         return try {
-            // Split into chunks of 10 due to Firestore whereIn limit
             val batches = foodItemIds.chunked(10)
             val allFoodItems = mutableMapOf<Long, FoodItemEntity>()
-
             for (batch in batches) {
                 val foodItemDocs = firestore.collection("food_items")
                     .whereIn("id", batch)
@@ -176,16 +153,13 @@ class CashierRepository @Inject constructor(
     suspend fun addToCart(foodItem: FoodItemEntity) {
         try {
             Log.d("CashierRepository", "=== ADD TO CART: ${foodItem.name} ===")
-
             val cartSnapshot = firestore.collection("carts")
                 .document(cartId)
                 .get()
                 .await()
-
             val currentItems = if (cartSnapshot.exists()) {
                 val itemsData = cartSnapshot.get("items") as? List<Map<String, Any>> ?: emptyList()
                 Log.d("CashierRepository", "Current cart has ${itemsData.size} items")
-
                 itemsData.mapNotNull { item ->
                     try {
                         CartItemEntity(
@@ -206,8 +180,6 @@ class CashierRepository @Inject constructor(
                 Log.d("CashierRepository", "Cart document doesn't exist, creating new cart")
                 emptyList()
             }
-
-            // Check if item already exists in cart
             val existingItem = currentItems.find { it.foodItemId == foodItem.id }
             val updatedItems = if (existingItem != null) {
                 Log.d("CashierRepository", "Item already in cart, updating quantity from ${existingItem.quantity} to ${existingItem.quantity + 1}")
@@ -228,8 +200,6 @@ class CashierRepository @Inject constructor(
                 Log.d("CashierRepository", "Adding new item to cart: ${foodItem.name} with cartItemId: $newCartItemId")
                 currentItems + newItem
             }
-
-            // Convert to Map for Firestore
             val itemsAsMap = updatedItems.map { item ->
                 mapOf(
                     "cartItemId" to item.cartItemId,
@@ -237,19 +207,15 @@ class CashierRepository @Inject constructor(
                     "quantity" to item.quantity
                 )
             }
-
             Log.d("CashierRepository", "Saving cart with ${itemsAsMap.size} items")
             itemsAsMap.forEachIndexed { index, item ->
                 Log.d("CashierRepository", "Item $index: foodItemId=${item["foodItemId"]}, quantity=${item["quantity"]}")
             }
-
             firestore.collection("carts")
                 .document(cartId)
                 .set(mapOf("items" to itemsAsMap))
                 .await()
-
             Log.d("CashierRepository", "Successfully added ${foodItem.name} to cart")
-
         } catch (e: Exception) {
             Log.e("CashierRepository", "Failed to add to cart: ${e.message}")
             throw e
@@ -262,9 +228,7 @@ class CashierRepository @Inject constructor(
                 .document(cartId)
                 .get()
                 .await()
-
             if (!cartSnapshot.exists()) return
-
             val currentItems = (cartSnapshot.get("items") as? List<Map<String, Any>>)?.mapNotNull { item ->
                 try {
                     CartItemEntity(
@@ -287,14 +251,12 @@ class CashierRepository @Inject constructor(
                     if (item.quantity > 1) {
                         item.copy(quantity = item.quantity - 1)
                     } else {
-                        null // Remove item if quantity becomes 0
+                        null
                     }
                 } else {
                     item
                 }
             }
-
-            // Convert to Map for Firestore
             val itemsAsMap = updatedItems.map { item ->
                 mapOf(
                     "cartItemId" to item.cartItemId,
@@ -302,7 +264,6 @@ class CashierRepository @Inject constructor(
                     "quantity" to item.quantity
                 )
             }
-
             firestore.collection("carts")
                 .document(cartId)
                 .set(mapOf("items" to itemsAsMap))
@@ -329,8 +290,6 @@ class CashierRepository @Inject constructor(
         try {
             if (cartItems.isNotEmpty()) {
                 val totalPrice = cartItems.sumOf { it.foodItem.price.toLong() * it.cartItem.quantity.toLong() }
-
-                // Convert cart items to Map format for Firestore
                 val itemsAsMap = cartItems.map { cartWithFood ->
                     mapOf(
                         "cartItemId" to cartWithFood.cartItem.cartItemId,
@@ -338,7 +297,6 @@ class CashierRepository @Inject constructor(
                         "quantity" to cartWithFood.cartItem.quantity
                     )
                 }
-
                 val order = OrderEntity(
                     customerName = customerName,
                     totalPrice = totalPrice,
@@ -346,7 +304,6 @@ class CashierRepository @Inject constructor(
                     items = itemsAsMap,
                     paymentMethod = paymentMethod
                 )
-
                 firestore.collection("orders").add(order).await()
                 clearCart()
             }
@@ -488,7 +445,6 @@ class CashierRepository @Inject constructor(
                     Log.e("CashierRepository", "Failed to parse orders: ${e.message}")
                     emptyList()
                 }
-
                 trySend(orders)
             }
         awaitClose { listener.remove() }
@@ -533,192 +489,176 @@ class CashierRepository @Inject constructor(
     }.flowOn(Dispatchers.IO)
 
     fun getDailyOrders(date: String): Flow<List<OrderEntity>> = callbackFlow {
-        val listener = firestore.collection("orders")
-            .whereEqualTo("orderDate", date)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    Log.e("CashierRepository", "Error fetching daily orders: ${error.message}")
-                    trySend(emptyList<OrderEntity>())
-                    return@addSnapshotListener
+        Log.d("CashierRepository", "=== GET DAILY ORDERS FOR DATE: $date ===")
+
+        var listener: ListenerRegistration? = null
+
+        try {
+            // Parse the date string to get start and end of day
+            val localDate = java.time.LocalDate.parse(date)
+            val startOfDay = localDate.atStartOfDay()
+            val endOfDay = localDate.atTime(23, 59, 59)
+
+            // Convert to Timestamp
+            val startTimestamp = Timestamp(
+                java.util.Date.from(
+                    startOfDay.atZone(java.time.ZoneId.systemDefault()).toInstant()
+                )
+            )
+            val endTimestamp = Timestamp(
+                java.util.Date.from(
+                    endOfDay.atZone(java.time.ZoneId.systemDefault()).toInstant()
+                )
+            )
+
+            Log.d("CashierRepository", "Querying orders from $startTimestamp to $endTimestamp")
+
+            listener = firestore.collection("orders")
+                .whereGreaterThanOrEqualTo("orderDate", startTimestamp)
+                .whereLessThanOrEqualTo("orderDate", endTimestamp)
+                .addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        Log.e("CashierRepository", "Error fetching daily orders: ${error.message}")
+                        // Don't close the flow on error, just send empty list
+                        trySend(emptyList<OrderEntity>())
+                        return@addSnapshotListener
+                    }
+
+                    val orders = try {
+                        snapshot?.documents?.mapNotNull { doc ->
+                            try {
+                                val order = doc.toObject(OrderEntity::class.java)
+                                order?.copy(orderId = doc.id.hashCode()) // Use document ID hash as orderId
+                            } catch (e: Exception) {
+                                Log.e("CashierRepository", "Failed to deserialize order: ${e.message}")
+                                null
+                            }
+                        } ?: emptyList()
+                    } catch (e: Exception) {
+                        Log.e("CashierRepository", "Failed to parse orders: ${e.message}")
+                        emptyList()
+                    }
+
+                    Log.d("CashierRepository", "Found ${orders.size} orders for date $date")
+                    orders.forEach { order ->
+                        Log.d("CashierRepository", "Order: ${order.customerName} - Rp ${order.totalPrice} - ${order.orderDate}")
+                    }
+
+                    trySend(orders)
                 }
 
-                val orders = try {
-                    snapshot?.documents?.mapNotNull { doc ->
-                        try {
-                            doc.toObject(OrderEntity::class.java)
-                        } catch (e: Exception) {
-                            Log.e("CashierRepository", "Failed to deserialize order: ${e.message}")
-                            null
-                        }
-                    } ?: emptyList()
-                } catch (e: Exception) {
-                    Log.e("CashierRepository", "Failed to parse orders: ${e.message}")
-                    emptyList()
-                }
+        } catch (e: Exception) {
+            Log.e("CashierRepository", "Error in getDailyOrders: ${e.message}")
+            trySend(emptyList<OrderEntity>())
+        }
 
-                trySend(orders)
-            }
-        awaitClose { listener.remove() }
+        // awaitClose MUST be outside try-catch and at the end of callbackFlow block
+        awaitClose {
+            listener?.remove()
+            Log.d("CashierRepository", "Removed listener for daily orders")
+        }
     }.flowOn(Dispatchers.IO)
 
     suspend fun closeDailyOrders(date: String) {
         try {
-            val orders = firestore.collection("orders")
-                .whereEqualTo("orderDate", date)
+            Log.d("CashierRepository", "=== CLOSING DAILY ORDERS FOR DATE: $date ===")
+
+            // Parse the date string to get start and end of day
+            val localDate = java.time.LocalDate.parse(date)
+            val startOfDay = localDate.atStartOfDay()
+            val endOfDay = localDate.atTime(23, 59, 59)
+
+            // Convert to Timestamp
+            val startTimestamp = Timestamp(
+                java.util.Date.from(
+                    startOfDay.atZone(java.time.ZoneId.systemDefault()).toInstant()
+                )
+            )
+            val endTimestamp = Timestamp(
+                java.util.Date.from(
+                    endOfDay.atZone(java.time.ZoneId.systemDefault()).toInstant()
+                )
+            )
+
+            Log.d("CashierRepository", "Querying orders from $startTimestamp to $endTimestamp")
+
+            // Simple approach: Get all orders from today first, then filter by status
+            // This only requires a single field index on orderDate
+            val ordersSnapshot = firestore.collection("orders")
+                .whereGreaterThanOrEqualTo("orderDate", startTimestamp)
+                .whereLessThanOrEqualTo("orderDate", endTimestamp)
                 .get()
                 .await()
-                .documents
-                .mapNotNull { doc ->
-                    try {
-                        doc.toObject(OrderEntity::class.java)?.copy(orderId = doc.id.hashCode())
-                    } catch (e: Exception) {
-                        Log.e("CashierRepository", "Failed to deserialize order: ${e.message}")
-                        null
-                    }
+
+            // Filter by status in code (since we already have today's orders)
+            val todayOpenOrders = ordersSnapshot.documents.filter { doc ->
+                try {
+                    val order = doc.toObject(OrderEntity::class.java)
+                    order?.status == "open"
+                } catch (e: Exception) {
+                    Log.e("CashierRepository", "Failed to check order status: ${e.message}")
+                    false
                 }
+            }
+
+            val orders = todayOpenOrders.mapNotNull { doc ->
+                try {
+                    val order = doc.toObject(OrderEntity::class.java)
+                    order?.copy(orderId = doc.id.hashCode())
+                } catch (e: Exception) {
+                    Log.e("CashierRepository", "Failed to deserialize order: ${e.message}")
+                    null
+                }
+            }
+
+            Log.d("CashierRepository", "Found ${orders.size} open orders to close for date $date")
 
             if (orders.isNotEmpty()) {
+                // Validate orders
                 if (orders.any { it.totalPrice <= 0 }) {
                     throw IllegalStateException("Ada pesanan dengan total harga tidak valid")
                 }
 
-                // Update order status
+                // Update order status to closed
                 val batch = firestore.batch()
-                orders.forEach { order ->
-                    val orderRef = firestore.collection("orders").document(order.orderId.toString())
-                    batch.update(orderRef, "status", "closed")
+                todayOpenOrders.forEach { doc ->
+                    batch.update(doc.reference, "status", "closed")
                 }
                 batch.commit().await()
+
+                Log.d("CashierRepository", "Updated ${orders.size} orders to closed status")
 
                 // Calculate summary
                 val totalRevenue = orders.sumOf { it.totalPrice }.toDouble()
                 val totalMenuItems = orders.sumOf { order ->
-                    order.items.sumOf {
-                        (it["quantity"] as? Number)?.toInt() ?: 0
+                    order.items.sumOf { item ->
+                        (item["quantity"] as? Number)?.toInt() ?: 0
                     }
                 }
                 val totalCustomers = orders.map { it.customerName }.distinct().size
+
+                Log.d("CashierRepository", "Summary - Revenue: $totalRevenue, Items: $totalMenuItems, Customers: $totalCustomers")
 
                 val summary = DailySummaryEntity.createWithLocalDateTime(
                     date = date,
                     totalRevenue = totalRevenue,
                     totalMenuItems = totalMenuItems,
                     totalCustomers = totalCustomers,
-                    closedAt = LocalDateTime.now()
+                    closedAt = java.time.LocalDateTime.now()
                 )
 
                 firestore.collection("daily_summaries")
                     .document(date)
                     .set(summary)
                     .await()
+
+                Log.d("CashierRepository", "Daily summary saved for $date")
             } else {
-                throw IllegalStateException("Tidak ada pesanan untuk hari ini")
+                throw IllegalStateException("Tidak ada pesanan terbuka untuk hari ini")
             }
         } catch (e: Exception) {
             Log.e("CashierRepository", "Failed to close daily orders: ${e.message}")
             throw e
-        }
-    }
-    // Add this debug function to CashierRepository.kt
-
-    suspend fun debugFirestoreData() {
-        try {
-            Log.d("CashierRepository", "=== DEBUGGING FIRESTORE DATA ===")
-
-            // Debug Categories
-            val categoriesSnapshot = firestore.collection("categories").get().await()
-            Log.d("CashierRepository", "=== CATEGORIES (${categoriesSnapshot.documents.size}) ===")
-            categoriesSnapshot.documents.forEach { doc ->
-                Log.d("CashierRepository", "Category ID: ${doc.id}, Name: '${doc.getString("name")}'")
-            }
-
-            // Debug Food Items
-            val foodItemsSnapshot = firestore.collection("food_items").get().await()
-            Log.d("CashierRepository", "=== FOOD ITEMS (${foodItemsSnapshot.documents.size}) ===")
-            foodItemsSnapshot.documents.forEach { doc ->
-                Log.d("CashierRepository", "Food ID: ${doc.id}")
-                Log.d("CashierRepository", "  Name: '${doc.getString("name")}'")
-                Log.d("CashierRepository", "  CategoryId: '${doc.getString("categoryId")}'")
-                Log.d("CashierRepository", "  Price: ${doc.getDouble("price")}")
-            }
-
-            // Debug Category Mapping
-            Log.d("CashierRepository", "=== CATEGORY MAPPING ===")
-            categoriesSnapshot.documents.forEach { categoryDoc ->
-                val categoryName = categoryDoc.getString("name")
-                val categoryId = categoryDoc.id
-
-                val itemsInCategory = foodItemsSnapshot.documents.filter {
-                    it.getString("categoryId") == categoryId
-                }
-
-                Log.d("CashierRepository", "Category '$categoryName' (ID: $categoryId) has ${itemsInCategory.size} items:")
-                itemsInCategory.forEach { item ->
-                    Log.d("CashierRepository", "  - ${item.getString("name")}")
-                }
-            }
-
-            // Test specific category queries
-            val testCategories = listOf("Makanan", "Minuman", "Lainnya")
-            testCategories.forEach { categoryName ->
-                Log.d("CashierRepository", "=== Testing query for '$categoryName' ===")
-                val categoryQuery = firestore.collection("categories")
-                    .whereEqualTo("name", categoryName)
-                    .get()
-                    .await()
-
-                if (categoryQuery.documents.isNotEmpty()) {
-                    val foundCategoryId = categoryQuery.documents.first().id
-                    Log.d("CashierRepository", "Found category '$categoryName' with ID: $foundCategoryId")
-
-                    val foodQuery = firestore.collection("food_items")
-                        .whereEqualTo("categoryId", foundCategoryId)
-                        .get()
-                        .await()
-
-                    Log.d("CashierRepository", "Found ${foodQuery.documents.size} food items for '$categoryName'")
-                } else {
-                    Log.d("CashierRepository", "No category found for '$categoryName'")
-                }
-            }
-
-        } catch (e: Exception) {
-            Log.e("CashierRepository", "Error debugging Firestore: ${e.message}")
-        }
-    }
-    suspend fun debugCartData() {
-        try {
-            Log.d("CashierRepository", "=== DEBUG CART DATA ===")
-
-            val cartSnapshot = firestore.collection("carts")
-                .document(cartId)
-                .get()
-                .await()
-
-            if (cartSnapshot.exists()) {
-                val items = cartSnapshot.get("items")
-                Log.d("CashierRepository", "Cart document exists")
-                Log.d("CashierRepository", "Raw items data: $items")
-
-                if (items is List<*>) {
-                    Log.d("CashierRepository", "Items is a list with ${items.size} elements")
-                    items.forEachIndexed { index, item ->
-                        Log.d("CashierRepository", "Item $index: $item")
-                        if (item is Map<*, *>) {
-                            Log.d("CashierRepository", "  - cartItemId: ${item["cartItemId"]}")
-                            Log.d("CashierRepository", "  - foodItemId: ${item["foodItemId"]}")
-                            Log.d("CashierRepository", "  - quantity: ${item["quantity"]}")
-                        }
-                    }
-                } else {
-                    Log.d("CashierRepository", "Items is not a list: ${items?.javaClass?.simpleName}")
-                }
-            } else {
-                Log.d("CashierRepository", "Cart document does not exist")
-            }
-
-        } catch (e: Exception) {
-            Log.e("CashierRepository", "Error debugging cart: ${e.message}")
         }
     }
 }
