@@ -15,4 +15,17 @@ data class DailySummaryEntity(
     val previousRevenue: Double? = null,
     val previousMenuItems: Int? = null,
     val previousCustomers: Int? = null
-)
+) {
+    // No-arg constructor for Firestore deserialization
+    constructor() : this(
+        id = 0,
+        date = "",
+        totalRevenue = 0.0,
+        totalMenuItems = 0,
+        totalCustomers = 0,
+        closedAt = LocalDateTime.now(),
+        previousRevenue = null,
+        previousMenuItems = null,
+        previousCustomers = null
+    )
+}

@@ -23,7 +23,9 @@ data class CartItemEntity(
     @PrimaryKey(autoGenerate = true) val cartItemId: Int = 0,
     val foodItemId: Long,
     val quantity: Int
-)
+) {
+    constructor() : this(cartItemId = 0, foodItemId = 0L, quantity = 0)
+}
 
 data class CartItemWithFood(
     @Embedded val cartItem: CartItemEntity,

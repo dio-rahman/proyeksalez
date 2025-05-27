@@ -11,6 +11,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import com.google.firebase.Firebase
+import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.firestoreSettings
 import com.main.proyek_salez.ui.theme.ProyekSalezTheme
 import dagger.hilt.android.AndroidEntryPoint
 import com.main.proyek_salez.navigation.AppNavigation
@@ -44,6 +48,10 @@ class MainActivity : ComponentActivity() {
         askNotificationPermission()
         enableEdgeToEdge()
         setContent {
+            FirebaseApp.initializeApp(this)
+            Firebase.firestore.firestoreSettings = firestoreSettings {
+                isPersistenceEnabled = true // Dukungan offline
+            }
             ProyekSalezTheme {
                 AppNavigation()
             }

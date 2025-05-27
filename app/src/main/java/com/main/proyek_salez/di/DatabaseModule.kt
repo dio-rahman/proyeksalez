@@ -2,11 +2,10 @@ package com.main.proyek_salez.di
 
 import android.content.Context
 import androidx.room.Room
+import com.google.firebase.firestore.FirebaseFirestore
 import com.main.proyek_salez.data.dao.CartItemDao
-import com.main.proyek_salez.data.dao.DailySummaryDao
 import com.main.proyek_salez.data.dao.FoodDao
 import com.main.proyek_salez.data.dao.OrderDao
-import com.main.proyek_salez.data.model.DailySummaryEntity
 import com.main.proyek_salez.data.repository.CashierRepository
 import com.main.proyek_salez.data.repository.ManagerRepository
 import dagger.Module
@@ -39,40 +38,32 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideOrderDao(database: SalezDatabase): OrderDao {
-        return database.orderDao()
-    }
-
-    @Provides
-    @Singleton
     fun provideFoodDao(database: SalezDatabase): FoodDao {
         return database.FoodDao()
     }
 
     @Provides
     @Singleton
-    fun provideCashierRepository(
-        cartItemDao: CartItemDao,
-        orderDao: OrderDao,
-        foodDao: FoodDao,
-        dailySummarydao: DailySummaryDao
-    ): CashierRepository {
-        return CashierRepository(cartItemDao, orderDao, foodDao, dailySummarydao)
+    fun provideOrderDao(database: SalezDatabase): OrderDao {
+        return database.orderDao()
     }
 
     @Provides
     @Singleton
-    fun provideDailySummaryDao(database: SalezDatabase): DailySummaryDao {
-        return database.dailySummaryDao()
+    fun provideCashierRepository(
+        firestore: FirebaseFirestore,
+        cartItemDao: CartItemDao,
+        foodDao: FoodDao,
+        orderDao: OrderDao
+    ): CashierRepository {
+        return CashierRepository(firestore, cartItemDao, foodDao, orderDao)
     }
 
     @Provides
     @Singleton
     fun provideManagerRepository(
-        foodDao: FoodDao,
-        dailySummaryDao: DailySummaryDao,
-        orderDao: OrderDao
+        firestore: FirebaseFirestore
     ): ManagerRepository {
-        return ManagerRepository(foodDao, dailySummaryDao, orderDao)
+        return ManagerRepository(firestore)
     }
 }

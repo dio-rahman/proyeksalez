@@ -19,16 +19,16 @@ class ManagerViewModel @Inject constructor(
     private val repository: ManagerRepository
 ) : ViewModel() {
     private val _categories = MutableStateFlow<List<CategoryEntity>>(emptyList())
-    val categories: StateFlow<List<CategoryEntity>> = _categories
+    val categories: StateFlow<List<CategoryEntity>> = _categories.asStateFlow()
 
     private val _foodItems = MutableStateFlow<List<FoodItemEntity>>(emptyList())
-    val foodItems: StateFlow<List<FoodItemEntity>> = _foodItems
+    val foodItems: StateFlow<List<FoodItemEntity>> = _foodItems.asStateFlow()
 
     private val _popularFoodItems = MutableStateFlow<List<Pair<FoodItemEntity, Int>>>(emptyList())
-    val popularFoodItems: StateFlow<List<Pair<FoodItemEntity, Int>>> = _popularFoodItems
+    val popularFoodItems: StateFlow<List<Pair<FoodItemEntity, Int>>> = _popularFoodItems.asStateFlow()
 
     private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
     private val _summary = MutableStateFlow<DailySummaryEntity?>(null)
     val summary: StateFlow<DailySummaryEntity?> = _summary.asStateFlow()
@@ -115,8 +115,9 @@ class ManagerViewModel @Inject constructor(
                 name = name,
                 description = description,
                 price = price,
-                imagePath = imagePath,
-                categoryId = categoryId
+                imagePath = imagePath ?: "",
+                categoryId = categoryId,
+                searchKeywords = name.lowercase().split(" ")
             )
             when (val result = repository.addFoodItem(foodItem)) {
                 is Result.Success -> {
@@ -144,8 +145,9 @@ class ManagerViewModel @Inject constructor(
                 name = name,
                 description = description,
                 price = price,
-                imagePath = imagePath,
-                categoryId = categoryId
+                imagePath = imagePath ?: "",
+                categoryId = categoryId,
+                searchKeywords = name.lowercase().split(" ")
             )
             when (val result = repository.updateFoodItem(foodItem)) {
                 is Result.Success -> {
@@ -192,5 +194,4 @@ class ManagerViewModel @Inject constructor(
             }
         }
     }
-
 }

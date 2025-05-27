@@ -13,4 +13,14 @@ data class OrderEntity(
     val items: List<CartItemEntity>,
     val paymentMethod: String,
     val status: String = "open"
-)
+) {
+    constructor() : this(
+        orderId = 0,
+        customerName = "",
+        totalPrice = 0L,
+        orderDate = LocalDateTime.now(),
+        items = emptyList(),
+        paymentMethod = "",
+        status = "open"
+    )
+}

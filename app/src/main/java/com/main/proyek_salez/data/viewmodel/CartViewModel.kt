@@ -3,10 +3,6 @@ package com.main.proyek_salez.data.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.main.proyek_salez.data.dao.CartItemDao
-import com.main.proyek_salez.data.dao.FoodDao
-import com.main.proyek_salez.data.dao.OrderDao
-import com.main.proyek_salez.data.model.CartItemEntity
 import com.main.proyek_salez.data.model.CartItemWithFood
 import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.repository.CashierRepository
@@ -22,13 +18,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CartViewModel @Inject constructor(
-    private val cartItemDao: CartItemDao,
-    private val orderDao: OrderDao,
-    private val foodDao: FoodDao,
     private val cashierRepository: CashierRepository
 ) : ViewModel() {
     val customerName = mutableStateOf("")
-    val cartItems: Flow<List<CartItemWithFood>> = cartItemDao.getCartItemsWithFood()
+    val cartItems: Flow<List<CartItemWithFood>> = cashierRepository.getAllCartItems()
     val checkoutRequested = mutableStateOf(false)
     val totalPrice: StateFlow<String> = cartItems.map { items ->
         val total = items.sumOf { it.foodItem.price * it.cartItem.quantity.toDouble() }.toLong()
@@ -37,37 +30,19 @@ class CartViewModel @Inject constructor(
 
     fun addToCart(foodItem: FoodItemEntity) {
         viewModelScope.launch {
-            val existingItem = cartItemDao.getCartItemByFoodId(foodItem.id)
-            if (existingItem != null) {
-                cartItemDao.update(
-                    existingItem.copy(quantity = existingItem.quantity + 1)
-                )
-            } else {
-                cartItemDao.insert(
-                    CartItemEntity(foodItemId = foodItem.id, quantity = 1)
-                )
-            }
+            cashierRepository.addToCart(foodItem)
         }
     }
 
     fun decrementItem(foodItem: FoodItemEntity) {
         viewModelScope.launch {
-            val existingItem = cartItemDao.getCartItemByFoodId(foodItem.id)
-            if (existingItem != null) {
-                if (existingItem.quantity > 1) {
-                    cartItemDao.update(
-                        existingItem.copy(quantity = existingItem.quantity - 1)
-                    )
-                } else {
-                    cartItemDao.delete(existingItem)
-                }
-            }
+            cashierRepository.decrementItem(foodItem)
         }
     }
 
     fun clearCart() {
         viewModelScope.launch {
-            cartItemDao.clearCart()
+            cashierRepository.clearCart()
         }
     }
 
@@ -101,7 +76,7 @@ class CartViewModel @Inject constructor(
         }
     }
 
-    fun searchFoodItems(query: String): Flow<List<FoodItemEntity>> {
-            return foodDao.searchFoodItems(query)
+    fun searchFoodItems(query: String): Flow<List<FoodItemEntity>> = cashierRepository.getAllFoodItems().map { items ->
+        items.filter { it.searchKeywords.contains(query.lowercase()) }
     }
 }
