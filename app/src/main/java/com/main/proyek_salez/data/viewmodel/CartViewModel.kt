@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.main.proyek_salez.data.model.FoodItemEntity
-import com.main.proyek_salez.data.model.CartItemWithFood // Correct import
+import com.main.proyek_salez.data.model.CartItemWithFood
 import com.main.proyek_salez.data.repository.CashierRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -20,13 +20,21 @@ import javax.inject.Inject
 class CartViewModel @Inject constructor(
     private val cashierRepository: CashierRepository
 ) : ViewModel() {
-    val customerName = mutableStateOf("")
+
+    // Use customer name from repository instead of local state
+    val customerName: StateFlow<String> = cashierRepository.customerName
     val cartItems: Flow<List<CartItemWithFood>> = cashierRepository.getAllCartItems()
     val checkoutRequested = mutableStateOf(false)
+
     val totalPrice: StateFlow<String> = cartItems.map { items ->
         val total = items.sumOf { item -> (item.foodItem.price * item.cartItem.quantity).toLong() }
         "Rp $total"
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Rp 0")
+
+    // Add method to update customer name through repository
+    fun updateCustomerName(name: String) {
+        cashierRepository.updateCustomerName(name)
+    }
 
     fun addToCart(foodItem: FoodItemEntity) {
         viewModelScope.launch {
@@ -47,7 +55,7 @@ class CartViewModel @Inject constructor(
     }
 
     fun resetCustomerName() {
-        customerName.value = ""
+        cashierRepository.clearCustomerName()
     }
 
     suspend fun getTotalPrice(): Long {
@@ -58,25 +66,28 @@ class CartViewModel @Inject constructor(
     fun createOrder(paymentMethod: String) {
         viewModelScope.launch {
             val items = cartItems.first()
+            val currentCustomerName = customerName.value
+
             if (items.isNotEmpty()) {
-                if (customerName.value.isBlank()) {
+                if (currentCustomerName.isBlank()) {
                     println("Error: customerName is blank")
                     return@launch
                 }
-                println("Creating order with customerName: ${customerName.value}")
+                println("Creating order with customerName: $currentCustomerName")
                 cashierRepository.createOrder(
-                    customerName = customerName.value,
+                    customerName = currentCustomerName,
                     cartItems = items,
                     paymentMethod = paymentMethod
                 )
-                println("Order created successfully for customer: ${customerName.value}")
+                println("Order created successfully for customer: $currentCustomerName")
             } else {
                 println("Error: cartItems is empty")
             }
         }
     }
 
-    fun searchFoodItems(query: String): Flow<List<FoodItemEntity>> = cashierRepository.getAllFoodItems().map { items ->
-        items.filter { it.searchKeywords.contains(query.lowercase()) }
-    }
+    fun searchFoodItems(query: String): Flow<List<FoodItemEntity>> =
+        cashierRepository.getAllFoodItems().map { items ->
+            items.filter { it.searchKeywords.contains(query.lowercase()) }
+        }
 }

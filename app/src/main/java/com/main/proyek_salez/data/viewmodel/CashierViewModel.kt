@@ -49,8 +49,15 @@ class CashierViewModel @Inject constructor(
             emit("Rp 0")
         }
 
-    val customerName = mutableStateOf("")
+    // Use customer name from repository instead of local state
+    val customerName: StateFlow<String> = repository.customerName
     val checkoutRequested = mutableStateOf(false)
+
+    // Add method to update customer name through repository
+    fun updateCustomerName(name: String) {
+        repository.updateCustomerName(name)
+        Log.d("CashierViewModel", "Customer name updated to: $name")
+    }
 
     fun getFoodItemsByCategory(category: String): Flow<List<FoodItemEntity>> {
         return repository.getFoodItemsByCategory(category)
@@ -126,8 +133,7 @@ class CashierViewModel @Inject constructor(
             try {
                 _isLoading.value = true
                 _errorMessage.value = null
-                repository.clearCart()
-                customerName.value = ""
+                repository.clearCart() // This will also clear customer name
                 checkoutRequested.value = false
                 Log.d("CashierViewModel", "Cart cleared")
             } catch (e: Exception) {
@@ -159,16 +165,19 @@ class CashierViewModel @Inject constructor(
                 _errorMessage.value = null
 
                 val currentCartItems = cartItems.first()
-                if (currentCartItems.isNotEmpty() && customerName.value.isNotBlank()) {
-                    repository.createOrder(customerName.value, currentCartItems, paymentMethod)
-                    Log.d("CashierViewModel", "Order created for ${customerName.value} with ${currentCartItems.size} items")
+                val currentCustomerName = customerName.value
 
-                    customerName.value = ""
+                if (currentCartItems.isNotEmpty() && currentCustomerName.isNotBlank()) {
+                    repository.createOrder(currentCustomerName, currentCartItems, paymentMethod)
+                    Log.d("CashierViewModel", "Order created for $currentCustomerName with ${currentCartItems.size} items")
+
+                    // Clear customer name and checkout request after successful order
+                    repository.clearCustomerName()
                     checkoutRequested.value = false
                 } else {
                     val errorMsg = when {
                         currentCartItems.isEmpty() -> "Keranjang kosong"
-                        customerName.value.isBlank() -> "Nama pelanggan harus diisi"
+                        currentCustomerName.isBlank() -> "Nama pelanggan harus diisi"
                         else -> "Tidak dapat membuat pesanan"
                     }
                     Log.e("CashierViewModel", "Cannot create order: $errorMsg")

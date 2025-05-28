@@ -23,6 +23,18 @@ class CashierRepository @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {
     private val cartId = "current_cart"
+    private val _customerName = MutableStateFlow("")
+    val customerName: StateFlow<String> = _customerName.asStateFlow()
+
+    fun updateCustomerName(name: String) {
+        _customerName.value = name
+        Log.d("CashierRepository", "Customer name updated to: '$name'")
+    }
+
+    fun clearCustomerName() {
+        _customerName.value = ""
+        Log.d("CashierRepository", "Customer name cleared")
+    }
 
     fun getRecommendedItems(): Flow<List<FoodItemEntity>> = flow {
         try {

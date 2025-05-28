@@ -45,6 +45,7 @@ fun CheckoutScreen(
     var expanded by remember { mutableStateOf(false) }
     val paymentMethods = listOf("Tunai", "Kartu", "QRIS")
     var errorMessage by remember { mutableStateOf("") }
+    val customerName by viewModel.customerName.collectAsState()
     val showConfirmationDialog = remember { mutableStateOf(false) }
     // Debug customer name on screen load
     LaunchedEffect(Unit) {
@@ -54,7 +55,7 @@ fun CheckoutScreen(
     }
 
     // Monitor changes to customer name
-    LaunchedEffect(viewModel.customerName.value) {
+    LaunchedEffect(customerName) {
         Log.d("CheckoutScreen", "Customer name changed to: '${viewModel.customerName.value}'")
     }
 
@@ -139,22 +140,12 @@ fun CheckoutScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        // Customer name display with debug info
                         Text(
-                            text = "Pelanggan: ${viewModel.customerName.value}",
+                            text = "Pelanggan: $customerName",
                             style = MaterialTheme.typography.bodyMedium.copy(color = AbuAbuGelap)
                         )
 
-                        // Debug info
-                        Text(
-                            text = "Debug - Customer: '${viewModel.customerName.value}' (Length: ${viewModel.customerName.value.length})",
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = Color.Red,
-                                fontSize = 10.sp
-                            )
-                        )
-
-                        if (viewModel.customerName.value.isBlank()) {
+                        if (customerName.isBlank()) {
                             Text(
                                 text = "⚠️ NAMA PELANGGAN KOSONG!",
                                 style = MaterialTheme.typography.bodySmall.copy(

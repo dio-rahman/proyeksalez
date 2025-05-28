@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
-import com.main.proyek_salez.data.viewmodel.CartViewModel
+import com.main.proyek_salez.data.viewmodel.CashierViewModel // Changed from CartViewModel
 import com.main.proyek_salez.ui.SidebarMenu
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.launch
@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun CartScreen(
     navController: NavController,
-    viewModel: CartViewModel = hiltViewModel()
+    viewModel: CashierViewModel = hiltViewModel() // Changed from CartViewModel
 ) {
     val cartItems by viewModel.cartItems.collectAsState(initial = emptyList())
     val totalPrice by viewModel.totalPrice.collectAsState(initial = "Rp 0")
@@ -42,23 +42,24 @@ fun CartScreen(
     val scope = rememberCoroutineScope()
     val gradientBackground = Brush.verticalGradient(colors = listOf(Putih, Jingga, UnguTua))
     var errorMessage by remember { mutableStateOf("") }
-    var customerName by remember { mutableStateOf(viewModel.customerName.value) }
+    val customerNameState by viewModel.customerName.collectAsState()
+    var customerName by remember { mutableStateOf(customerNameState) }
 
     LaunchedEffect(customerName) {
-        viewModel.customerName.value = customerName
+        viewModel.updateCustomerName(customerName)
         Log.d("CartScreen", "Customer name updated to: $customerName")
     }
 
-    LaunchedEffect(viewModel.customerName.value) {
-        if (customerName != viewModel.customerName.value) {
-            customerName = viewModel.customerName.value
-            Log.d("CartScreen", "Customer name synced from ViewModel: ${viewModel.customerName.value}")
+    LaunchedEffect(customerNameState) {
+        if (customerName != customerNameState) {
+            customerName = customerNameState
+            Log.d("CartScreen", "Customer name synced from ViewModel: $customerNameState")
         }
     }
 
     LaunchedEffect(viewModel.checkoutRequested.value) {
         if (viewModel.checkoutRequested.value) {
-            Log.d("CartScreen", "Navigating to checkout with customer: ${viewModel.customerName.value}")
+            Log.d("CartScreen", "Navigating to checkout with customer: $customerNameState")
             navController.navigate("checkout_screen")
             viewModel.checkoutRequested.value = false
         }
@@ -188,7 +189,7 @@ fun CartScreen(
                     onClick = {
                         Log.d("CartScreen", "Checkout button clicked")
                         Log.d("CartScreen", "Customer name: '$customerName'")
-                        Log.d("CartScreen", "ViewModel customer name: '${viewModel.customerName.value}'")
+                        Log.d("CartScreen", "ViewModel customer name: '$customerNameState'")
                         Log.d("CartScreen", "Cart items: ${cartItems.size}")
                         when {
                             customerName.isBlank() -> {
@@ -200,9 +201,9 @@ fun CartScreen(
                                 Log.e("CartScreen", "Cart is empty")
                             }
                             else -> {
-                                viewModel.customerName.value = customerName
+                                viewModel.updateCustomerName(customerName)
                                 viewModel.checkoutRequested.value = true
-                                Log.d("CartScreen", "Setting checkout requested to true with customer: ${viewModel.customerName.value}")
+                                Log.d("CartScreen", "Setting checkout requested to true with customer: $customerName")
                             }
                         }
                     },

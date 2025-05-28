@@ -105,7 +105,7 @@ fun AppNavigation() {
             }
         }
         composable("cart_screen") {
-            CartScreen(navController = navController, viewModel = cartViewModel)
+            CartScreen(navController = navController, viewModel = cashierViewModel)
         }
         composable("checkout_screen") {
             CheckoutScreen(navController = navController, viewModel = cashierViewModel)
