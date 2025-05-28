@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
-import com.main.proyek_salez.data.viewmodel.CashierViewModel
+import com.main.proyek_salez.data.viewmodel.CartViewModel
 import com.main.proyek_salez.ui.SidebarMenu
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.launch
@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun CartScreen(
     navController: NavController,
-    viewModel: CashierViewModel = hiltViewModel()
+    viewModel: CartViewModel = hiltViewModel()
 ) {
     val cartItems by viewModel.cartItems.collectAsState(initial = emptyList())
     val totalPrice by viewModel.totalPrice.collectAsState(initial = "Rp 0")
@@ -63,7 +63,6 @@ fun CartScreen(
             viewModel.checkoutRequested.value = false
         }
     }
-
 
     if (showConfirmationDialog.value) {
         AlertDialog(
@@ -124,7 +123,6 @@ fun CartScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
-
                 Text(
                     text = "Items in cart: ${cartItems.size}",
                     style = MaterialTheme.typography.bodySmall.copy(
@@ -133,7 +131,6 @@ fun CartScreen(
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
-
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Masukkan nama pelanggan disini",
@@ -145,7 +142,6 @@ fun CartScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-
                 OutlinedTextField(
                     value = customerName,
                     onValueChange = { newValue ->
@@ -188,14 +184,12 @@ fun CartScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
-
                 Button(
                     onClick = {
                         Log.d("CartScreen", "Checkout button clicked")
                         Log.d("CartScreen", "Customer name: '$customerName'")
                         Log.d("CartScreen", "ViewModel customer name: '${viewModel.customerName.value}'")
                         Log.d("CartScreen", "Cart items: ${cartItems.size}")
-
                         when {
                             customerName.isBlank() -> {
                                 errorMessage = "Nama pelanggan harus diisi"
@@ -252,20 +246,28 @@ fun CartScreen(
                             .weight(1f),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(cartItems) { cartItemWithFood ->
-                            CartItemCard(
-                                cartItemWithFood = cartItemWithFood,
-                                onIncrement = {
-                                    scope.launch {
-                                        viewModel.addToCart(cartItemWithFood.foodItem)
-                                    }
-                                },
-                                onDecrement = {
-                                    scope.launch {
-                                        viewModel.decrementItem(cartItemWithFood.foodItem)
-                                    }
+                        items(cartItems.chunked(2)) { rowItems ->
+                            Row(Modifier.fillMaxWidth()) {
+                                rowItems.forEach { cartItemWithFood ->
+                                    CartItemCard(
+                                        modifier = Modifier.weight(1f).padding(4.dp),
+                                        cartItemWithFood = cartItemWithFood,
+                                        onIncrement = {
+                                            scope.launch {
+                                                viewModel.addToCart(cartItemWithFood.foodItem)
+                                            }
+                                        },
+                                        onDecrement = {
+                                            scope.launch {
+                                                viewModel.decrementItem(cartItemWithFood.foodItem)
+                                            }
+                                        }
+                                    )
                                 }
-                            )
+                                if (rowItems.size == 1) {
+                                    Spacer(Modifier.weight(1f))
+                                }
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))

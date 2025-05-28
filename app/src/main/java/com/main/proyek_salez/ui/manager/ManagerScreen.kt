@@ -213,34 +213,33 @@ fun ManagerScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState())
-                        .animateContentSize(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                        .fillMaxSize()
+                        .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(modifier = Modifier.height(140.dp))
-                    Text(
-                        text = "SELAMAT DATANG,",
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            color = Oranye,
-                            fontWeight = FontWeight.Bold
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "HALO,",
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                color = Oranye,
+                                fontWeight = FontWeight.Bold
+                            )
                         )
-                    )
-                    Text(
-                        text = "DIO!",
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            color = UnguTua,
-                            fontWeight = FontWeight.Bold
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "DIO!",
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                color = UnguTua,
+                                fontWeight = FontWeight.Bold
+                            )
                         )
-                    )
-                    Text(
-                        text = "ADA YANG BISA DIBANTU?",
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            color = Oranye,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
+                    }
+
                     Spacer(modifier = Modifier.height(16.dp))
                     Card(
                         modifier = Modifier.fillMaxWidth(),

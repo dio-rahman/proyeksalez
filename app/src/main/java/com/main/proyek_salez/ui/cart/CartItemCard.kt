@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -25,6 +24,7 @@ import com.main.proyek_salez.ui.theme.*
 
 @Composable
 fun CartItemCard(
+    modifier: Modifier = Modifier,
     cartItemWithFood: CartItemWithFood,
     onIncrement: () -> Unit,
     onDecrement: () -> Unit
@@ -33,17 +33,13 @@ fun CartItemCard(
     val quantity = cartItemWithFood.cartItem.quantity
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(4.dp)
-            .height(200.dp),
+        modifier = modifier.height(120.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = Putih),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
+            modifier = Modifier.padding(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (foodItem.imagePath != null) {
@@ -53,51 +49,51 @@ fun CartItemCard(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(60.dp)
+                        .height(40.dp)
                         .clip(RoundedCornerShape(8.dp))
                 )
             }
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = foodItem.name,
                 style = MaterialTheme.typography.bodyLarge.copy(
                     color = UnguTua,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    fontSize = 12.sp
+                    fontSize = 10.sp
                 ),
                 maxLines = 1,
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = "Rp ${foodItem.price.toLong()}",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = AbuAbuGelap,
-                    fontSize = 10.sp,
+                    fontSize = 8.sp,
                     fontWeight = FontWeight.Bold
                 ),
-                modifier = Modifier.padding(vertical = 2.dp)
+                modifier = Modifier.padding(vertical = 1.dp)
             )
             Spacer(modifier = Modifier.weight(1f))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 4.dp),
+                    .padding(top = 2.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
                     onClick = onDecrement,
                     modifier = Modifier
-                        .size(24.dp)
+                        .size(20.dp)
                         .background(Oranye, shape = CircleShape)
                 ) {
                     Icon(
                         imageVector = if (quantity <= 1) Icons.Default.Delete else Icons.Default.Remove,
                         contentDescription = if (quantity <= 1) "Remove item" else "Decrease quantity",
                         tint = UnguTua,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(12.dp)
                     )
                 }
                 Text(
@@ -105,20 +101,20 @@ fun CartItemCard(
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = UnguTua,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp
+                        fontSize = 10.sp
                     )
                 )
                 IconButton(
                     onClick = onIncrement,
                     modifier = Modifier
-                        .size(24.dp)
+                        .size(20.dp)
                         .background(Oranye, shape = CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Increase quantity",
                         tint = UnguTua,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(12.dp)
                     )
                 }
             }

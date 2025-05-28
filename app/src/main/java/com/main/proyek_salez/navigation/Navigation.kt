@@ -23,10 +23,7 @@ import com.main.proyek_salez.ui.cart.CheckoutScreen
 import com.main.proyek_salez.ui.checkout.CompletionScreen
 import com.main.proyek_salez.ui.manager.DashboardManager
 import com.main.proyek_salez.ui.manager.ManagerScreen
-import com.main.proyek_salez.ui.menu.DrinkMenuScreen
-import com.main.proyek_salez.ui.menu.FoodMenuScreen
 import com.main.proyek_salez.ui.menu.OrderHistoryScreen
-import com.main.proyek_salez.ui.menu.OtherMenuScreen
 import com.main.proyek_salez.ui.sidebar.ProfileScreen
 
 @Composable
@@ -34,6 +31,7 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = hiltViewModel()
     val cashierViewModel: CashierViewModel = hiltViewModel()
+    val cartViewModel: CartViewModel = hiltViewModel()
     val mainNavigation = MainNavigation(navController)
     val currentUserState = authViewModel.currentUser.observeAsState()
     val isLoggedIn = authViewModel.isLoggedIn.observeAsState(initial = false)
@@ -91,7 +89,11 @@ fun AppNavigation() {
         composable(Screen.CashierDashboard.route) {
             if (isLoggedIn.value && currentUserState.value?.role == UserRole.CASHIER) {
                 Log.d("AppNavigation", "Showing CashierDashboard for user: ${currentUserState.value?.email}")
-                HomeScreen(navController = navController)
+                HomeScreen(
+                    navController = navController,
+                    cartViewModel = cartViewModel,
+                    cashierViewModel = cashierViewModel
+                )
             } else {
                 Log.w("AppNavigation", "Redirecting to Login: isLoggedIn=${isLoggedIn.value}, role=${currentUserState.value?.role}")
                 LaunchedEffect(Unit) {
@@ -102,17 +104,8 @@ fun AppNavigation() {
                 }
             }
         }
-        composable("food_menu") {
-            FoodMenuScreen(navController = navController, viewModel = hiltViewModel())
-        }
-        composable("drink_menu") {
-            DrinkMenuScreen(navController = navController, viewModel = hiltViewModel())
-        }
-        composable("other_menu") {
-            OtherMenuScreen(navController = navController, viewModel = hiltViewModel())
-        }
         composable("cart_screen") {
-            CartScreen(navController = navController, viewModel = cashierViewModel)
+            CartScreen(navController = navController, viewModel = cartViewModel)
         }
         composable("checkout_screen") {
             CheckoutScreen(navController = navController, viewModel = cashierViewModel)

@@ -254,7 +254,7 @@ fun CheckoutScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .menuAnchor(),
+                                .menuAnchor(), // Reverted to deprecated call
                             colors = OutlinedTextFieldDefaults.colors(
                                 unfocusedContainerColor = Putih,
                                 focusedContainerColor = Putih,

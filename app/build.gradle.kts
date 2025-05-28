@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.main.proyek_salez"
-    compileSdk = 35
+    compileSdkVersion(rootProject.extra["compileSdkVersion"] as Int)
 
     defaultConfig {
         applicationId = "com.main.proyek_salez"
@@ -119,4 +119,5 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation("com.google.firebase:firebase-messaging:24.1.1")
     implementation("com.google.firebase:firebase-analytics")
+
 }

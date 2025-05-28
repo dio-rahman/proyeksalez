@@ -86,9 +86,9 @@ class MainActivity : ComponentActivity() {
     private fun subscribeToTopic() {
         FirebaseMessaging.getInstance().subscribeToTopic(TOPIC_NAME)
             .addOnCompleteListener { task ->
-                var msg = "Subscribed to $TOPIC_NAME"
+                var msg = "Berhasil Masuk Ke Halaman"
                 if (!task.isSuccessful) {
-                    msg = "Subscription to $TOPIC_NAME failed: ${task.exception?.message}"
+                    msg = "Gagal Masuk Ke Halaman Karena: ${task.exception?.message}"
                 }
                 Log.d(TAG, msg)
                 Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()

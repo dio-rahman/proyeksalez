@@ -61,15 +61,6 @@ fun SidebarMenu(
         }
 
         Spacer(modifier = Modifier.height(40.dp))
-        Text(
-            text = "Halo, Dio!",
-            style = MaterialTheme.typography.headlineLarge.copy(
-                color = Putih,
-                fontWeight = FontWeight.Bold
-            )
-        )
-
-        Spacer(modifier = Modifier.height(40.dp))
         MenuItem(
             text = "Profil",
             style = MaterialTheme.typography.bodyLarge.copy(

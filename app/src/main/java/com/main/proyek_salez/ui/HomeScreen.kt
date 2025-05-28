@@ -1,9 +1,15 @@
 package com.main.proyek_salez.ui
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -17,6 +23,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
@@ -27,6 +34,7 @@ import com.main.proyek_salez.ui.menu.MenuItemCard
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import com.main.proyek_salez.data.model.CartItemWithFood
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,24 +48,21 @@ fun HomeScreen(
     var menuInput by remember { mutableStateOf("") }
     var searchResult by remember { mutableStateOf<FoodItemEntity?>(null) }
     var errorMessage by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
     val gradientBackground = Brush.verticalGradient(
-        colors = listOf(
-            Putih,
-            Jingga,
-            UnguTua
-        )
+        colors = listOf(Putih, Jingga, UnguTua)
     )
+    val categories = listOf("Makanan", "Minuman", "Lainnya")
+
+    // Get cart items to determine quantities
+    val cartItems by cartViewModel.cartItems.collectAsState(initial = emptyList())
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             SidebarMenu(
                 navController = navController,
-                onCloseDrawer = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                }
+                onCloseDrawer = { scope.launch { drawerState.close() } }
             )
         }
     ) {
@@ -67,16 +72,11 @@ fun HomeScreen(
                 .background(brush = gradientBackground)
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = {
-                        scope.launch {
-                            drawerState.open()
-                        }
-                    },
+                    onClick = { scope.launch { drawerState.open() } },
                     modifier = Modifier.padding(start = 10.dp)
                 ) {
                     Icon(
@@ -85,7 +85,6 @@ fun HomeScreen(
                         tint = UnguTua
                     )
                 }
-
                 Image(
                     painter = painterResource(id = R.drawable.salez_logo),
                     contentDescription = "Salez Logo",
@@ -102,27 +101,27 @@ fun HomeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(140.dp))
-                Text(
-                    text = "SELAMAT DATANG,",
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        color = Oranye,
-                        fontWeight = FontWeight.Bold
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "HALO,",
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            color = Oranye,
+                            fontWeight = FontWeight.Bold
+                        )
                     )
-                )
-                Text(
-                    text = "DIO!",
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        color = UnguTua,
-                        fontWeight = FontWeight.Bold
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "DIO!",
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            color = UnguTua,
+                            fontWeight = FontWeight.Bold
+                        )
                     )
-                )
-                Text(
-                    text = "ADA YANG BISA DIBANTU?",
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        color = Oranye,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
+                }
 
                 Spacer(modifier = Modifier.height(35.dp))
                 Row(
@@ -187,9 +186,7 @@ fun HomeScreen(
                         .padding(horizontal = 16.dp)
                         .height(48.dp),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Oranye
-                    ),
+                    colors = ButtonDefaults.buttonColors(containerColor = Oranye),
                     shape = RoundedCornerShape(50)
                 ) {
                     Text(
@@ -202,16 +199,17 @@ fun HomeScreen(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 searchResult?.let { foodItem ->
+                    val quantity = cartItems.find { it.foodItem.id == foodItem.id }?.cartItem?.quantity ?: 0
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
                             .padding(horizontal = 4.dp, vertical = 4.dp)
                     ) {
                         MenuItemCard(
                             foodItem = foodItem,
-                            onAddToCart = { item ->
-                                cartViewModel.addToCart(item)
-                            }
+                            quantity = quantity,
+                            onAddToCart = { cartViewModel.addToCart(it) },
+                            onRemoveFromCart = { cartViewModel.decrementItem(it) },
+                            onDeleteFromCart = { cartViewModel.decrementItem(it) }
                         )
                     }
                 }
@@ -226,32 +224,33 @@ fun HomeScreen(
                     )
                 }
                 Spacer(modifier = Modifier.height(24.dp))
-                CategoryButton(
-                    text = "Makanan",
-                    onClick = { navController.navigate("food_menu") },
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        color = UnguTua,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
+
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(categories) { category ->
+                        CategoryButton(
+                            text = category,
+                            onClick = { selectedCategory = category },
+                            isSelected = selectedCategory == category
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
-                CategoryButton(
-                    text = "Minuman",
-                    onClick = { navController.navigate("drink_menu") },
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        color = UnguTua,
-                        fontWeight = FontWeight.Bold
+
+                selectedCategory?.let { category ->
+                    MenuItemsDisplay(
+                        category = category,
+                        cashierViewModel = cashierViewModel,
+                        cartItems = cartItems,
+                        onAddToCart = { cartViewModel.addToCart(it) },
+                        onRemoveFromCart = { cartViewModel.decrementItem(it) },
+                        onDeleteFromCart = { cartViewModel.decrementItem(it) }
                     )
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                CategoryButton(
-                    text = "Lainnya",
-                    onClick = { navController.navigate("other_menu") },
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        color = UnguTua,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
+                }
             }
         }
     }
@@ -261,26 +260,116 @@ fun HomeScreen(
 fun CategoryButton(
     text: String,
     onClick: () -> Unit,
-    style: TextStyle = MaterialTheme.typography.headlineLarge.copy(
+    isSelected: Boolean,
+    style: TextStyle = MaterialTheme.typography.bodyLarge.copy(
         color = UnguTua,
-        fontWeight = FontWeight.Bold
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp
     )
 ) {
+    val infiniteTransition = rememberInfiniteTransition()
+    val offsetX by infiniteTransition.animateFloat(
+        initialValue = 20f,
+        targetValue = -20f,
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = 5000
+                20f at 0
+                20f at 1000
+                -20f at 4000
+                -20f at 5000
+            },
+            repeatMode = RepeatMode.Restart
+        )
+    )
+
     Button(
         onClick = onClick,
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .width(150.dp)
             .height(48.dp),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Oranye
+            containerColor = if (isSelected) Jingga else Oranye
         ),
         shape = RoundedCornerShape(50)
     ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = text,
+                style = style,
+                maxLines = 1,
+                modifier = Modifier.offset(x = offsetX.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun MenuItemsDisplay(
+    category: String,
+    cashierViewModel: CashierViewModel,
+    cartItems: List<CartItemWithFood>,
+    onAddToCart: (FoodItemEntity) -> Unit,
+    onRemoveFromCart: (FoodItemEntity) -> Unit,
+    onDeleteFromCart: (FoodItemEntity) -> Unit
+) {
+    val foodItems by cashierViewModel.getFoodItemsByCategory(category).collectAsState(initial = emptyList())
+
+    if (foodItems.isEmpty()) {
         Text(
-            text = text,
-            style = style
+            text = "Belum ada menu $category.",
+            style = MaterialTheme.typography.bodyLarge.copy(
+                color = UnguTua,
+                textAlign = TextAlign.Center
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         )
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(foodItems.chunked(2)) { rowItems ->
+                MenuRow(
+                    rowItems = rowItems,
+                    cartItems = cartItems,
+                    onAddToCart = onAddToCart,
+                    onRemoveFromCart = onRemoveFromCart,
+                    onDeleteFromCart = onDeleteFromCart
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun MenuRow(
+    rowItems: List<FoodItemEntity>,
+    cartItems: List<CartItemWithFood>,
+    onAddToCart: (FoodItemEntity) -> Unit,
+    onRemoveFromCart: (FoodItemEntity) -> Unit,
+    onDeleteFromCart: (FoodItemEntity) -> Unit
+) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        rowItems.forEach { foodItem ->
+            val quantity = cartItems.find { it.foodItem.id == foodItem.id }?.cartItem?.quantity ?: 0
+            MenuItemCard(
+                modifier = Modifier.weight(1f).padding(4.dp),
+                foodItem = foodItem,
+                quantity = quantity,
+                onAddToCart = onAddToCart,
+                onRemoveFromCart = onRemoveFromCart,
+                onDeleteFromCart = onDeleteFromCart
+            )
+        }
+        if (rowItems.size == 1) {
+            Spacer(modifier = Modifier.weight(1f))
+        }
     }
 }
