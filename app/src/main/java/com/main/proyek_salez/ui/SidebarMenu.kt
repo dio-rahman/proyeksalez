@@ -74,7 +74,7 @@ fun SidebarMenu(
             }
         )
         MenuItem(
-            text = "List Menu",
+            text = "Home",
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = Putih,
                 fontWeight = FontWeight.Bold,
