@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,15 +47,14 @@ fun HomeScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var menuInput by remember { mutableStateOf("") }
-    var searchResult by remember { mutableStateOf<FoodItemEntity?>(null) }
+    var searchResult by remember { mutableStateOf<List<FoodItemEntity>>(emptyList()) }
     var errorMessage by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf<String?>(null) }
+    var selectedCategory by remember { mutableStateOf<String?>("Rekomendasi") }
     val gradientBackground = Brush.verticalGradient(
         colors = listOf(Putih, Jingga, UnguTua)
     )
-    val categories = listOf("Makanan", "Minuman", "Lainnya")
+    val categories = listOf("Rekomendasi", "Makanan", "Minuman", "Lainnya")
 
-    // Get cart items to determine quantities
     val cartItems by cartViewModel.cartItems.collectAsState(initial = emptyList())
 
     ModalNavigationDrawer(
@@ -169,13 +169,12 @@ fun HomeScreen(
                 Button(
                     onClick = {
                         scope.launch {
-                            searchResult = null
                             errorMessage = ""
                             cartViewModel.searchFoodItems(menuInput).collectLatest { items ->
-                                val foundItem = items.firstOrNull()
-                                if (foundItem != null) {
-                                    searchResult = foundItem
+                                if (items.isNotEmpty()) {
+                                    searchResult = items
                                 } else {
+                                    searchResult = emptyList()
                                     errorMessage = "Menu '${menuInput}' tidak tersedia."
                                 }
                             }
@@ -198,30 +197,57 @@ fun HomeScreen(
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                searchResult?.let { foodItem ->
-                    val quantity = cartItems.find { it.foodItem.id == foodItem.id }?.cartItem?.quantity ?: 0
-                    Box(
+                if (searchResult.isNotEmpty() || errorMessage.isNotEmpty()) {
+                    Column(
                         modifier = Modifier
-                            .padding(horizontal = 4.dp, vertical = 4.dp)
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
                     ) {
-                        MenuItemCard(
-                            foodItem = foodItem,
-                            quantity = quantity,
-                            onAddToCart = { cartViewModel.addToCart(it) },
-                            onRemoveFromCart = { cartViewModel.decrementItem(it) },
-                            onDeleteFromCart = { cartViewModel.decrementItem(it) }
-                        )
+                        if (searchResult.isNotEmpty()) {
+                            LazyRow(
+                                modifier = Modifier.height(120.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(searchResult) { foodItem ->
+                                    Box(modifier = Modifier.width(160.dp)) {
+                                        MenuItemCard(
+                                            modifier = Modifier.width(160.dp),
+                                            foodItem = foodItem,
+                                            quantity = cartItems.find { it.foodItem.id == foodItem.id }?.cartItem?.quantity ?: 0,
+                                            onAddToCart = { cartViewModel.addToCart(it) },
+                                            onRemoveFromCart = { cartViewModel.decrementItem(it) },
+                                            onDeleteFromCart = { cartViewModel.decrementItem(it) }
+                                        )
+                                        IconButton(
+                                            onClick = { searchResult = searchResult.filter { it.id != foodItem.id } },
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .padding(4.dp)
+                                                .size(24.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Clear,
+                                                contentDescription = "Close",
+                                                tint = UnguTua,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (errorMessage.isNotEmpty()) {
+                            Text(
+                                text = errorMessage,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    color = UnguTua,
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                            )
+                        }
                     }
-                }
-                if (errorMessage.isNotEmpty()) {
-                    Text(
-                        text = errorMessage,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = UnguTua,
-                            fontWeight = FontWeight.Medium
-                        ),
-                        textAlign = TextAlign.Center
-                    )
                 }
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -317,11 +343,14 @@ fun MenuItemsDisplay(
     onRemoveFromCart: (FoodItemEntity) -> Unit,
     onDeleteFromCart: (FoodItemEntity) -> Unit
 ) {
-    val foodItems by cashierViewModel.getFoodItemsByCategory(category).collectAsState(initial = emptyList())
+    val foodItems = when (category) {
+        "Rekomendasi" -> cashierViewModel.getRecommendedItems().collectAsState(initial = emptyList())
+        else -> cashierViewModel.getFoodItemsByCategory(category).collectAsState(initial = emptyList())
+    }
 
-    if (foodItems.isEmpty()) {
+    if (foodItems.value.isEmpty()) {
         Text(
-            text = "Belum ada menu $category.",
+            text = if (category == "Rekomendasi") "Belum ada rekomendasi." else "Belum ada menu $category.",
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = UnguTua,
                 textAlign = TextAlign.Center
@@ -335,7 +364,7 @@ fun MenuItemsDisplay(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(foodItems.chunked(2)) { rowItems ->
+            items(foodItems.value.chunked(2)) { rowItems ->
                 MenuRow(
                     rowItems = rowItems,
                     cartItems = cartItems,

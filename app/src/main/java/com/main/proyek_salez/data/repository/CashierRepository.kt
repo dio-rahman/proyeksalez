@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Query
 import com.main.proyek_salez.data.model.CartItemEntity
 import com.main.proyek_salez.data.model.CategoryEntity
 import com.main.proyek_salez.data.model.DailySummaryEntity
@@ -17,12 +18,34 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
 @Singleton
 class CashierRepository @Inject constructor(
     private val firestore: FirebaseFirestore
 ) {
     private val cartId = "current_cart"
+
+    fun getRecommendedItems(): Flow<List<FoodItemEntity>> = flow {
+        try {
+            val snapshot = firestore.collection("food_items")
+                .orderBy("salesCount", Query.Direction.DESCENDING)
+                .limit(10)
+                .get()
+                .await()
+
+            val items = snapshot.documents.mapNotNull { doc ->
+                try {
+                    doc.toObject(FoodItemEntity::class.java)
+                } catch (e: Exception) {
+                    Log.e("CashierRepository", "Failed to parse recommended item: ${e.message}")
+                    null
+                }
+            }
+            emit(items)
+        } catch (e: Exception) {
+            Log.e("CashierRepository", "Error fetching recommended items: ${e.message}")
+            emit(emptyList())
+        }
+    }.flowOn(Dispatchers.IO)
 
     fun getAllCartItems(): Flow<List<CartItemWithFood>> = flow {
         try {
@@ -71,7 +94,6 @@ class CashierRepository @Inject constructor(
             val foodItemIds = cartItems.map { it.foodItemId }.distinct()
             Log.d("CashierRepository", "Getting food items for IDs: $foodItemIds")
             val foodItemsMap = mutableMapOf<Long, FoodItemEntity>()
-            // Get food items in batches of 10 (Firestore limit)
             foodItemIds.chunked(10).forEach { batch ->
                 val foodItemsSnapshot = firestore.collection("food_items")
                     .whereIn("id", batch)
@@ -345,7 +367,6 @@ class CashierRepository @Inject constructor(
         try {
             Log.d("CashierRepository", "=== START getFoodItemsByCategory: $category ===")
 
-            // Step 1: Get category ID
             val categoriesSnapshot = firestore.collection("categories")
                 .whereEqualTo("name", category)
                 .get()
@@ -361,7 +382,6 @@ class CashierRepository @Inject constructor(
             val categoryId = categoryDoc.id
             Log.d("CashierRepository", "Found categoryId: $categoryId for category: $category")
 
-            // Step 2: Get food items
             val foodItemsSnapshot = firestore.collection("food_items")
                 .whereEqualTo("categoryId", categoryId)
                 .get()
@@ -494,12 +514,10 @@ class CashierRepository @Inject constructor(
         var listener: ListenerRegistration? = null
 
         try {
-            // Parse the date string to get start and end of day
             val localDate = java.time.LocalDate.parse(date)
             val startOfDay = localDate.atStartOfDay()
             val endOfDay = localDate.atTime(23, 59, 59)
 
-            // Convert to Timestamp
             val startTimestamp = Timestamp(
                 java.util.Date.from(
                     startOfDay.atZone(java.time.ZoneId.systemDefault()).toInstant()
@@ -519,7 +537,6 @@ class CashierRepository @Inject constructor(
                 .addSnapshotListener { snapshot, error ->
                     if (error != null) {
                         Log.e("CashierRepository", "Error fetching daily orders: ${error.message}")
-                        // Don't close the flow on error, just send empty list
                         trySend(emptyList<OrderEntity>())
                         return@addSnapshotListener
                     }
@@ -528,7 +545,7 @@ class CashierRepository @Inject constructor(
                         snapshot?.documents?.mapNotNull { doc ->
                             try {
                                 val order = doc.toObject(OrderEntity::class.java)
-                                order?.copy(orderId = doc.id.hashCode()) // Use document ID hash as orderId
+                                order?.copy(orderId = doc.id.hashCode())
                             } catch (e: Exception) {
                                 Log.e("CashierRepository", "Failed to deserialize order: ${e.message}")
                                 null
@@ -552,7 +569,6 @@ class CashierRepository @Inject constructor(
             trySend(emptyList<OrderEntity>())
         }
 
-        // awaitClose MUST be outside try-catch and at the end of callbackFlow block
         awaitClose {
             listener?.remove()
             Log.d("CashierRepository", "Removed listener for daily orders")
@@ -563,12 +579,10 @@ class CashierRepository @Inject constructor(
         try {
             Log.d("CashierRepository", "=== CLOSING DAILY ORDERS FOR DATE: $date ===")
 
-            // Parse the date string to get start and end of day
             val localDate = java.time.LocalDate.parse(date)
             val startOfDay = localDate.atStartOfDay()
             val endOfDay = localDate.atTime(23, 59, 59)
 
-            // Convert to Timestamp
             val startTimestamp = Timestamp(
                 java.util.Date.from(
                     startOfDay.atZone(java.time.ZoneId.systemDefault()).toInstant()
@@ -582,15 +596,12 @@ class CashierRepository @Inject constructor(
 
             Log.d("CashierRepository", "Querying orders from $startTimestamp to $endTimestamp")
 
-            // Simple approach: Get all orders from today first, then filter by status
-            // This only requires a single field index on orderDate
             val ordersSnapshot = firestore.collection("orders")
                 .whereGreaterThanOrEqualTo("orderDate", startTimestamp)
                 .whereLessThanOrEqualTo("orderDate", endTimestamp)
                 .get()
                 .await()
 
-            // Filter by status in code (since we already have today's orders)
             val todayOpenOrders = ordersSnapshot.documents.filter { doc ->
                 try {
                     val order = doc.toObject(OrderEntity::class.java)
@@ -614,12 +625,10 @@ class CashierRepository @Inject constructor(
             Log.d("CashierRepository", "Found ${orders.size} open orders to close for date $date")
 
             if (orders.isNotEmpty()) {
-                // Validate orders
                 if (orders.any { it.totalPrice <= 0 }) {
                     throw IllegalStateException("Ada pesanan dengan total harga tidak valid")
                 }
 
-                // Update order status to closed
                 val batch = firestore.batch()
                 todayOpenOrders.forEach { doc ->
                     batch.update(doc.reference, "status", "closed")
@@ -628,7 +637,6 @@ class CashierRepository @Inject constructor(
 
                 Log.d("CashierRepository", "Updated ${orders.size} orders to closed status")
 
-                // Calculate summary
                 val totalRevenue = orders.sumOf { it.totalPrice }.toDouble()
                 val totalMenuItems = orders.sumOf { order ->
                     order.items.sumOf { item ->

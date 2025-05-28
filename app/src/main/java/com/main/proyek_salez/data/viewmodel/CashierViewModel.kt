@@ -19,14 +19,12 @@ class CashierViewModel @Inject constructor(
     private val repository: CashierRepository
 ) : ViewModel() {
 
-    // State for loading and error handling
     private val _isLoading = mutableStateOf(false)
     val isLoading = _isLoading
 
     private val _errorMessage = mutableStateOf<String?>(null)
     val errorMessage = _errorMessage
 
-    // Cart related flows with error handling
     val cartItems: Flow<List<CartItemWithFood>> = repository.getAllCartItems()
         .catch { e ->
             Log.e("CashierViewModel", "Error in cartItems flow: ${e.message}")
@@ -165,7 +163,6 @@ class CashierViewModel @Inject constructor(
                     repository.createOrder(customerName.value, currentCartItems, paymentMethod)
                     Log.d("CashierViewModel", "Order created for ${customerName.value} with ${currentCartItems.size} items")
 
-                    // Reset state after successful order
                     customerName.value = ""
                     checkoutRequested.value = false
                 } else {
@@ -188,5 +185,14 @@ class CashierViewModel @Inject constructor(
 
     fun clearError() {
         _errorMessage.value = null
+    }
+
+    fun getRecommendedItems(): Flow<List<FoodItemEntity>> {
+        return repository.getRecommendedItems()
+            .catch { e: Throwable ->
+                Log.e("CashierViewModel", "Error getting recommended items: ${e.message}")
+                _errorMessage.value = "Gagal memuat rekomendasi: ${e.message}"
+                emit(emptyList())
+            }
     }
 }
