@@ -113,7 +113,7 @@ fun DashboardManager(
                 error?.let {
                     Text(
                         text = it,
-                        color = Color.Red,
+                        color = Color.Merah,
                         modifier = Modifier.padding(top = 16.dp)
                     )
                 }
