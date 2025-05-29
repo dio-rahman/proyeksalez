@@ -119,5 +119,4 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation("com.google.firebase:firebase-messaging:24.1.1")
     implementation("com.google.firebase:firebase-analytics")
-
 }

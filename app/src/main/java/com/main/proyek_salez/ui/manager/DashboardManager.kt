@@ -22,6 +22,7 @@ import com.main.proyek_salez.ui.sidebar.SidebarManager
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.*
+import com.main.proyek_salez.ui.theme.Merah
 
 @Composable
 fun DashboardManager(
@@ -68,7 +69,7 @@ fun DashboardManager(
                         title = "Total Revenue",
                         value = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
                             .format(summaryData.totalRevenue.toLong()),
-                        percentageChange = "+32.40%", // Ganti dengan percentageRevenue dari ViewModel jika diperlukan
+                        percentageChange = "+32.40%",
                         isPositive = true,
                         icon = painterResource(id = android.R.drawable.ic_menu_gallery)
                     )
@@ -113,7 +114,7 @@ fun DashboardManager(
                 error?.let {
                     Text(
                         text = it,
-                        color = Color.Merah,
+                        color = Merah,
                         modifier = Modifier.padding(top = 16.dp)
                     )
                 }
@@ -161,7 +162,7 @@ fun DashboardCard(
                 )
                 Text(
                     text = percentageChange,
-                    color = if (isPositive) Color.Green else Color.Red,
+                    color = if (isPositive) Color.Green else Merah,
                     fontSize = 12.sp
                 )
             }

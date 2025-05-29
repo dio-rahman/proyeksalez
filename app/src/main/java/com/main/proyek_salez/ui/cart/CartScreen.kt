@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
-import com.main.proyek_salez.data.viewmodel.CashierViewModel // Changed from CartViewModel
+import com.main.proyek_salez.data.viewmodel.CashierViewModel
 import com.main.proyek_salez.ui.SidebarMenu
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.launch
@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun CartScreen(
     navController: NavController,
-    viewModel: CashierViewModel = hiltViewModel() // Changed from CartViewModel
+    viewModel: CashierViewModel = hiltViewModel()
 ) {
     val cartItems by viewModel.cartItems.collectAsState(initial = emptyList())
     val totalPrice by viewModel.totalPrice.collectAsState(initial = "Rp 0")
@@ -328,7 +328,7 @@ fun CartScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(48.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                        colors = ButtonDefaults.buttonColors(containerColor = Merah),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(

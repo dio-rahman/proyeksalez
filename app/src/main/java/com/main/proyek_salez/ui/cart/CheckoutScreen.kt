@@ -47,14 +47,13 @@ fun CheckoutScreen(
     var errorMessage by remember { mutableStateOf("") }
     val customerName by viewModel.customerName.collectAsState()
     val showConfirmationDialog = remember { mutableStateOf(false) }
-    // Debug customer name on screen load
+
     LaunchedEffect(Unit) {
         Log.d("CheckoutScreen", "CheckoutScreen loaded")
         Log.d("CheckoutScreen", "Customer name from ViewModel: '${viewModel.customerName.value}'")
         Log.d("CheckoutScreen", "Cart items: ${cartItems.size}")
     }
 
-    // Monitor changes to customer name
     LaunchedEffect(customerName) {
         Log.d("CheckoutScreen", "Customer name changed to: '${viewModel.customerName.value}'")
     }
@@ -149,7 +148,7 @@ fun CheckoutScreen(
                             Text(
                                 text = "⚠️ NAMA PELANGGAN KOSONG!",
                                 style = MaterialTheme.typography.bodySmall.copy(
-                                    color = Color.Red,
+                                    color = Merah,
                                     fontWeight = FontWeight.Bold
                                 )
                             )
@@ -166,8 +165,8 @@ fun CheckoutScreen(
                             items(cartItems) { cartItemWithFood ->
                                 CartItemCard(
                                     cartItemWithFood = cartItemWithFood,
-                                    onIncrement = {}, // Nonaktif di Checkout
-                                    onDecrement = {}  // Nonaktif di Checkout
+                                    onIncrement = {},
+                                    onDecrement = {}
                                 )
                             }
                         }
@@ -245,7 +244,7 @@ fun CheckoutScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .menuAnchor(), // Reverted to deprecated call
+                                .menuAnchor(),
                             colors = OutlinedTextFieldDefaults.colors(
                                 unfocusedContainerColor = Putih,
                                 focusedContainerColor = Putih,
@@ -357,7 +356,7 @@ fun CheckoutScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 40.dp)
                         .height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                    colors = ButtonDefaults.buttonColors(containerColor = Merah),
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(

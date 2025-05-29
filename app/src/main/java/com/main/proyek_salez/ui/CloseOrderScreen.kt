@@ -191,7 +191,7 @@ fun CloseOrderScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = it,
-                        color = if (it.contains("Gagal")) Color.Red else Color.Green,
+                        color = if (it.contains("Gagal")) Merah else Color.Green,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }

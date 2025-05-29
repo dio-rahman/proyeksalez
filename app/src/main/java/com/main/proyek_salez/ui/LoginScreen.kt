@@ -55,17 +55,17 @@ fun LoginScreen(
                 }
                 is Result.Error -> {
                     errorMessage = when {
-                        result.message?.contains("PERMISSION_DENIED") == true ->
+                        result.message.contains("PERMISSION_DENIED") ->
                             "Gagal login: Tidak ada izin untuk mengakses data pengguna."
-                        result.message?.contains("Dokumen pengguna tidak ditemukan") == true ->
+                        result.message.contains("Dokumen pengguna tidak ditemukan") ->
                             "Akun belum terdaftar di sistem. Silakan registrasi."
-                        result.message?.contains("The email address is badly formatted") == true ->
+                        result.message.contains("The email address is badly formatted") ->
                             "Email tidak valid. Silakan masukkan email yang benar."
-                        result.message?.contains("The supplied auth credential is incorrect") == true ->
+                        result.message.contains("The supplied auth credential is incorrect") ->
                             "Email atau kata sandi salah. Silakan coba lagi."
-                        result.message?.contains("Peran tidak valid") == true ->
+                        result.message.contains("Peran tidak valid") ->
                             "Peran akun tidak valid: ${result.message}"
-                        else -> result.message ?: "Gagal login: Terjadi kesalahan."
+                        else -> result.message
                     }
                     Log.e("LoginScreen", "Error set: $errorMessage")
                 }
