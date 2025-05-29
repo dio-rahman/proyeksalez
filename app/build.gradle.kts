@@ -100,7 +100,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("org.apache.poi:poi:5.3.0")
-    implementation("org.apache.poi:poi-ooxml:5.3.0")
+    implementation("org.apache.poi:poi-ooxml:5.4.0")
     implementation("org.apache.pdfbox:pdfbox:3.0.2")
     implementation("com.google.code.gson:gson:2.10.1")
 
