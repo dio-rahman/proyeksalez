@@ -1,5 +1,8 @@
+// 5. REPLACE CartItemCard.kt with this improved version
+
 package com.main.proyek_salez.ui.cart
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -9,7 +12,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,6 +34,13 @@ fun CartItemCard(
 ) {
     val foodItem = cartItemWithFood.foodItem
     val quantity = cartItemWithFood.cartItem.quantity
+
+    // Add state key to force recomposition
+    val stateKey by remember(cartItemWithFood.cartItem.cartItemId, quantity) {
+        mutableStateOf("${cartItemWithFood.cartItem.cartItemId}-$quantity")
+    }
+
+    Log.d("CartItemCard", "Rendering ${foodItem.name} with quantity: $quantity (key: $stateKey)")
 
     Card(
         modifier = modifier.height(120.dp),
@@ -84,7 +94,10 @@ fun CartItemCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = onDecrement,
+                    onClick = {
+                        Log.d("CartItemCard", "Decrement clicked for ${foodItem.name}, current quantity: $quantity")
+                        onDecrement()
+                    },
                     modifier = Modifier
                         .size(20.dp)
                         .background(Oranye, shape = CircleShape)
@@ -96,16 +109,24 @@ fun CartItemCard(
                         modifier = Modifier.size(12.dp)
                     )
                 }
-                Text(
-                    text = quantity.toString(),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = UnguTua,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 10.sp
+
+                // Use key to ensure Text recomposes when quantity changes
+                key(stateKey) {
+                    Text(
+                        text = quantity.toString(),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = UnguTua,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 10.sp
+                        )
                     )
-                )
+                }
+
                 IconButton(
-                    onClick = onIncrement,
+                    onClick = {
+                        Log.d("CartItemCard", "Increment clicked for ${foodItem.name}, current quantity: $quantity")
+                        onIncrement()
+                    },
                     modifier = Modifier
                         .size(20.dp)
                         .background(Oranye, shape = CircleShape)

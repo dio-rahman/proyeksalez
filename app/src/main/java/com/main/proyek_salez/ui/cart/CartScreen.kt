@@ -247,20 +247,48 @@ fun CartScreen(
                             .weight(1f),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(cartItems.chunked(2)) { rowItems ->
+                        items(
+                            items = cartItems.chunked(2),
+                            key = { rowItems ->
+                                // Create a unique key for each row based on cart item IDs and quantities
+                                rowItems.joinToString("-") { "${it.cartItem.cartItemId}:${it.cartItem.quantity}" }
+                            }
+                        ) { rowItems ->
                             Row(Modifier.fillMaxWidth()) {
                                 rowItems.forEach { cartItemWithFood ->
                                     CartItemCard(
                                         modifier = Modifier.weight(1f).padding(4.dp),
                                         cartItemWithFood = cartItemWithFood,
                                         onIncrement = {
+                                            Log.d("CartScreen", "=== INCREMENT CLICKED ===")
+                                            Log.d("CartScreen", "Item: ${cartItemWithFood.foodItem.name}")
+                                            Log.d("CartScreen", "Current quantity: ${cartItemWithFood.cartItem.quantity}")
+                                            Log.d("CartScreen", "Food ID: ${cartItemWithFood.foodItem.id}")
+
                                             scope.launch {
-                                                viewModel.addToCart(cartItemWithFood.foodItem)
+                                                try {
+                                                    viewModel.addToCart(cartItemWithFood.foodItem)
+                                                    Log.d("CartScreen", "Successfully called addToCart for ${cartItemWithFood.foodItem.name}")
+                                                } catch (e: Exception) {
+                                                    Log.e("CartScreen", "Error incrementing item: ${e.message}")
+                                                    errorMessage = "Gagal menambah ${cartItemWithFood.foodItem.name}: ${e.message}"
+                                                }
                                             }
                                         },
                                         onDecrement = {
+                                            Log.d("CartScreen", "=== DECREMENT CLICKED ===")
+                                            Log.d("CartScreen", "Item: ${cartItemWithFood.foodItem.name}")
+                                            Log.d("CartScreen", "Current quantity: ${cartItemWithFood.cartItem.quantity}")
+                                            Log.d("CartScreen", "Food ID: ${cartItemWithFood.foodItem.id}")
+
                                             scope.launch {
-                                                viewModel.decrementItem(cartItemWithFood.foodItem)
+                                                try {
+                                                    viewModel.decrementItem(cartItemWithFood.foodItem)
+                                                    Log.d("CartScreen", "Successfully called decrementItem for ${cartItemWithFood.foodItem.name}")
+                                                } catch (e: Exception) {
+                                                    Log.e("CartScreen", "Error decrementing item: ${e.message}")
+                                                    errorMessage = "Gagal mengurangi ${cartItemWithFood.foodItem.name}: ${e.message}"
+                                                }
                                             }
                                         }
                                     )

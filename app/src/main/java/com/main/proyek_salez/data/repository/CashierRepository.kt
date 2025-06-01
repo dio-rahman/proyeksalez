@@ -14,6 +14,7 @@ import com.main.proyek_salez.data.model.CartItemWithFood
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -59,100 +60,136 @@ class CashierRepository @Inject constructor(
         }
     }.flowOn(Dispatchers.IO)
 
-    fun getAllCartItems(): Flow<List<CartItemWithFood>> = flow {
-        try {
-            Log.d("CashierRepository", "=== GET ALL CART ITEMS ===")
-            val cartSnapshot = firestore.collection("carts")
-                .document(cartId)
-                .get()
-                .await()
-            if (!cartSnapshot.exists()) {
-                Log.d("CashierRepository", "Cart document doesn't exist")
-                emit(emptyList<CartItemWithFood>())
-                return@flow
-            }
-            val cartItems = try {
-                val itemsData = cartSnapshot.get("items") as? List<Map<String, Any>>
-                Log.d("CashierRepository", "Raw cart data: $itemsData")
-                itemsData?.mapNotNull { item ->
-                    try {
-                        val cartItemId = (item["cartItemId"] as? Number)?.toInt() ?: 0
-                        val foodItemId = when (val foodId = item["foodItemId"]) {
-                            is Number -> foodId.toLong()
-                            is String -> foodId.toLongOrNull() ?: 0L
-                            else -> 0L
+    fun getAllCartItems(): Flow<List<CartItemWithFood>> = callbackFlow {
+        Log.d("CashierRepository", "=== SETTING UP REAL-TIME CART LISTENER ===")
+
+        val listener = firestore.collection("carts")
+            .document(cartId)
+            .addSnapshotListener { cartSnapshot, error ->
+                if (error != null) {
+                    Log.e("CashierRepository", "Error listening to cart: ${error.message}")
+                    trySend(emptyList<CartItemWithFood>())
+                    return@addSnapshotListener
+                }
+
+                // Handle when cart document doesn't exist
+                if (cartSnapshot?.exists() != true) {
+                    Log.d("CashierRepository", "Cart document doesn't exist - emitting empty list")
+                    trySend(emptyList<CartItemWithFood>())
+                    return@addSnapshotListener
+                }
+
+                try {
+                    val itemsData = cartSnapshot.get("items") as? List<Map<String, Any>>
+                    Log.d("CashierRepository", "Real-time cart update - Raw data: $itemsData")
+
+                    if (itemsData.isNullOrEmpty()) {
+                        Log.d("CashierRepository", "Cart is empty - emitting empty list")
+                        trySend(emptyList<CartItemWithFood>())
+                        return@addSnapshotListener
+                    }
+
+                    val cartItems = itemsData.mapNotNull { item ->
+                        try {
+                            val cartItemId = (item["cartItemId"] as? Number)?.toInt() ?: 0
+                            val foodItemId = when (val foodId = item["foodItemId"]) {
+                                is Number -> foodId.toLong()
+                                is String -> foodId.toLongOrNull() ?: 0L
+                                else -> 0L
+                            }
+                            val quantity = (item["quantity"] as? Number)?.toInt() ?: 0
+                            Log.d("CashierRepository", "Real-time parsed: foodId=$foodItemId, quantity=$quantity")
+                            CartItemEntity(
+                                cartItemId = cartItemId,
+                                foodItemId = foodItemId,
+                                quantity = quantity
+                            )
+                        } catch (e: Exception) {
+                            Log.e("CashierRepository", "Failed to parse cart item: ${e.message}")
+                            null
                         }
-                        val quantity = (item["quantity"] as? Number)?.toInt() ?: 0
-                        Log.d("CashierRepository", "Cart item: cartItemId=$cartItemId, foodItemId=$foodItemId, quantity=$quantity")
-                        CartItemEntity(
-                            cartItemId = cartItemId,
-                            foodItemId = foodItemId,
-                            quantity = quantity
-                        )
-                    } catch (e: Exception) {
-                        Log.e("CashierRepository", "Failed to parse cart item: ${e.message}")
-                        null
                     }
-                } ?: emptyList()
-            } catch (e: Exception) {
-                Log.e("CashierRepository", "Failed to parse cart items: ${e.message}")
-                emptyList()
-            }
-            Log.d("CashierRepository", "Parsed ${cartItems.size} cart items")
-            if (cartItems.isEmpty()) {
-                emit(emptyList<CartItemWithFood>())
-                return@flow
-            }
-            val foodItemIds = cartItems.map { it.foodItemId }.distinct()
-            Log.d("CashierRepository", "Getting food items for IDs: $foodItemIds")
-            val foodItemsMap = mutableMapOf<Long, FoodItemEntity>()
-            foodItemIds.chunked(10).forEach { batch ->
-                val foodItemsSnapshot = firestore.collection("food_items")
-                    .whereIn("id", batch)
-                    .get()
-                    .await()
-                foodItemsSnapshot.documents.forEach { doc ->
-                    try {
-                        val id = doc.id.toLongOrNull() ?: 0L
-                        val name = doc.getString("name") ?: ""
-                        val description = doc.getString("description") ?: ""
-                        val price = doc.getDouble("price") ?: 0.0
-                        val imagePath = doc.getString("imagePath") ?: ""
-                        val categoryId = doc.getString("categoryId") ?: ""
-                        val searchKeywords = doc.get("searchKeywords") as? List<String> ?: emptyList()
-                        val foodItem = FoodItemEntity(
-                            id = id,
-                            name = name,
-                            description = description,
-                            price = price,
-                            imagePath = imagePath,
-                            categoryId = categoryId,
-                            searchKeywords = searchKeywords
-                        )
-                        foodItemsMap[id] = foodItem
-                        Log.d("CashierRepository", "Food item loaded: ${foodItem.name} (ID: $id)")
-                    } catch (e: Exception) {
-                        Log.e("CashierRepository", "Failed to parse food item: ${e.message}")
+
+                    Log.d("CashierRepository", "Real-time parsed ${cartItems.size} cart items")
+
+                    // Fetch food items asynchronously
+                    val foodItemIds = cartItems.map { it.foodItemId }.distinct()
+                    Log.d("CashierRepository", "Fetching food items for IDs: $foodItemIds")
+
+                    // Launch coroutine to fetch food items
+                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                        try {
+                            val foodItemsMap = mutableMapOf<Long, FoodItemEntity>()
+
+                            // Fetch food items in batches
+                            foodItemIds.chunked(10).forEach { batch ->
+                                val foodSnapshot = firestore.collection("food_items")
+                                    .whereIn("id", batch)
+                                    .get()
+                                    .await()
+
+                                foodSnapshot.documents.forEach { doc ->
+                                    try {
+                                        val id = doc.id.toLongOrNull() ?: 0L
+                                        val name = doc.getString("name") ?: ""
+                                        val description = doc.getString("description") ?: ""
+                                        val price = doc.getDouble("price") ?: 0.0
+                                        val imagePath = doc.getString("imagePath") ?: ""
+                                        val categoryId = doc.getString("categoryId") ?: ""
+                                        val searchKeywords = doc.get("searchKeywords") as? List<String> ?: emptyList()
+
+                                        val foodItem = FoodItemEntity(
+                                            id = id,
+                                            name = name,
+                                            description = description,
+                                            price = price,
+                                            imagePath = imagePath,
+                                            categoryId = categoryId,
+                                            searchKeywords = searchKeywords
+                                        )
+                                        foodItemsMap[id] = foodItem
+                                        Log.d("CashierRepository", "Real-time food item loaded: ${foodItem.name} (ID: $id)")
+                                    } catch (e: Exception) {
+                                        Log.e("CashierRepository", "Failed to parse food item: ${e.message}")
+                                    }
+                                }
+                            }
+
+                            val cartWithFood = cartItems.mapNotNull { cartItem ->
+                                val foodItem = foodItemsMap[cartItem.foodItemId]
+                                if (foodItem != null) {
+                                    Log.d("CashierRepository", "Real-time cart item: ${foodItem.name} x ${cartItem.quantity}")
+                                    CartItemWithFood(cartItem, foodItem)
+                                } else {
+                                    Log.w("CashierRepository", "Food item not found for ID: ${cartItem.foodItemId}")
+                                    null
+                                }
+                            }
+
+                            Log.d("CashierRepository", "Real-time emitting ${cartWithFood.size} cart items with food")
+                            cartWithFood.forEach { item ->
+                                Log.d("CashierRepository", "  - ${item.foodItem.name}: ${item.cartItem.quantity}")
+                            }
+
+                            trySend(cartWithFood)
+                        } catch (e: Exception) {
+                            Log.e("CashierRepository", "Error fetching food items in real-time: ${e.message}")
+                            trySend(emptyList<CartItemWithFood>())
+                        }
                     }
+
+                } catch (e: Exception) {
+                    Log.e("CashierRepository", "Error processing real-time cart snapshot: ${e.message}")
+                    trySend(emptyList<CartItemWithFood>())
                 }
             }
-            val cartWithFood = cartItems.mapNotNull { cartItem ->
-                val foodItem = foodItemsMap[cartItem.foodItemId]
-                if (foodItem != null) {
-                    Log.d("CashierRepository", "Cart item with food: ${foodItem.name} x ${cartItem.quantity}")
-                    CartItemWithFood(cartItem, foodItem)
-                } else {
-                    Log.w("CashierRepository", "Food item not found for ID: ${cartItem.foodItemId}")
-                    null
-                }
-            }
-            Log.d("CashierRepository", "Final result: ${cartWithFood.size} cart items with food")
-            emit(cartWithFood)
-        } catch (e: Exception) {
-            Log.e("CashierRepository", "Error getting cart items: ${e.message}")
-            emit(emptyList<CartItemWithFood>())
+
+        awaitClose {
+            listener.remove()
+            Log.d("CashierRepository", "Real-time cart listener removed")
         }
     }.flowOn(Dispatchers.IO)
+
 
     private suspend fun fetchFoodItemsMap(foodItemIds: List<Long>): Map<Long, FoodItemEntity> {
         if (foodItemIds.isEmpty()) return emptyMap()
@@ -186,15 +223,98 @@ class CashierRepository @Inject constructor(
 
     suspend fun addToCart(foodItem: FoodItemEntity) {
         try {
-            Log.d("CashierRepository", "=== ADD TO CART: ${foodItem.name} ===")
-            val cartSnapshot = firestore.collection("carts")
-                .document(cartId)
-                .get()
-                .await()
-            val currentItems = if (cartSnapshot.exists()) {
-                val itemsData = cartSnapshot.get("items") as? List<Map<String, Any>> ?: emptyList()
-                Log.d("CashierRepository", "Current cart has ${itemsData.size} items")
-                itemsData.mapNotNull { item ->
+            Log.d("CashierRepository", "=== ADD TO CART: ${foodItem.name} (ID: ${foodItem.id}) ===")
+
+            val cartRef = firestore.collection("carts").document(cartId)
+
+            // Use transaction for atomic operation
+            firestore.runTransaction { transaction ->
+                val cartSnapshot = transaction.get(cartRef)
+
+                val currentItems = if (cartSnapshot.exists()) {
+                    val itemsData = cartSnapshot.get("items") as? List<Map<String, Any>> ?: emptyList()
+                    Log.d("CashierRepository", "Current cart has ${itemsData.size} items")
+                    itemsData.mapNotNull { item ->
+                        try {
+                            CartItemEntity(
+                                cartItemId = (item["cartItemId"] as? Number)?.toInt() ?: 0,
+                                foodItemId = when (val foodId = item["foodItemId"]) {
+                                    is Number -> foodId.toLong()
+                                    is String -> foodId.toLongOrNull() ?: 0L
+                                    else -> 0L
+                                },
+                                quantity = (item["quantity"] as? Number)?.toInt() ?: 0
+                            )
+                        } catch (e: Exception) {
+                            Log.e("CashierRepository", "Failed to deserialize cart item: ${e.message}")
+                            null
+                        }
+                    }
+                } else {
+                    Log.d("CashierRepository", "Cart document doesn't exist, creating new cart")
+                    emptyList()
+                }
+
+                val existingItem = currentItems.find { it.foodItemId == foodItem.id }
+                val updatedItems = if (existingItem != null) {
+                    Log.d("CashierRepository", "Item already in cart, updating quantity from ${existingItem.quantity} to ${existingItem.quantity + 1}")
+                    currentItems.map { item ->
+                        if (item.foodItemId == foodItem.id) {
+                            item.copy(quantity = item.quantity + 1)
+                        } else {
+                            item
+                        }
+                    }
+                } else {
+                    val newCartItemId = (currentItems.maxOfOrNull { it.cartItemId } ?: 0) + 1
+                    val newItem = CartItemEntity(
+                        cartItemId = newCartItemId,
+                        foodItemId = foodItem.id,
+                        quantity = 1
+                    )
+                    Log.d("CashierRepository", "Adding new item to cart: ${foodItem.name} with cartItemId: $newCartItemId")
+                    currentItems + newItem
+                }
+
+                val itemsAsMap = updatedItems.map { item ->
+                    mapOf(
+                        "cartItemId" to item.cartItemId,
+                        "foodItemId" to item.foodItemId,
+                        "quantity" to item.quantity
+                    )
+                }
+
+                Log.d("CashierRepository", "Transaction: Saving cart with ${itemsAsMap.size} items")
+                itemsAsMap.forEachIndexed { index, item ->
+                    Log.d("CashierRepository", "Transaction Item $index: foodItemId=${item["foodItemId"]}, quantity=${item["quantity"]}")
+                }
+
+                transaction.set(cartRef, mapOf("items" to itemsAsMap))
+            }.await()
+
+            Log.d("CashierRepository", "Successfully added ${foodItem.name} to cart via transaction")
+        } catch (e: Exception) {
+            Log.e("CashierRepository", "Failed to add to cart: ${e.message}")
+            throw e
+        }
+    }
+
+    suspend fun decrementItem(foodItem: FoodItemEntity) {
+        try {
+            Log.d("CashierRepository", "=== DECREMENT ITEM: ${foodItem.name} (ID: ${foodItem.id}) ===")
+
+            val cartRef = firestore.collection("carts").document(cartId)
+
+            // Use transaction for atomic operation
+            firestore.runTransaction { transaction ->
+                val cartSnapshot = transaction.get(cartRef)
+
+                if (!cartSnapshot.exists()) {
+                    Log.w("CashierRepository", "Cart doesn't exist, cannot decrement")
+                    return@runTransaction
+                }
+
+                val currentItems = (cartSnapshot.get("items") as? List<Map<String, Any>>)?.mapNotNull { item ->
                     try {
                         CartItemEntity(
                             cartItemId = (item["cartItemId"] as? Number)?.toInt() ?: 0,
@@ -209,99 +329,43 @@ class CashierRepository @Inject constructor(
                         Log.e("CashierRepository", "Failed to deserialize cart item: ${e.message}")
                         null
                     }
+                } ?: emptyList()
+
+                val existingItem = currentItems.find { it.foodItemId == foodItem.id }
+                if (existingItem == null) {
+                    Log.w("CashierRepository", "Item not found in cart: ${foodItem.name}")
+                    return@runTransaction
                 }
-            } else {
-                Log.d("CashierRepository", "Cart document doesn't exist, creating new cart")
-                emptyList()
-            }
-            val existingItem = currentItems.find { it.foodItemId == foodItem.id }
-            val updatedItems = if (existingItem != null) {
-                Log.d("CashierRepository", "Item already in cart, updating quantity from ${existingItem.quantity} to ${existingItem.quantity + 1}")
-                currentItems.map { item ->
+
+                Log.d("CashierRepository", "Current quantity for ${foodItem.name}: ${existingItem.quantity}")
+
+                val updatedItems = currentItems.mapNotNull { item ->
                     if (item.foodItemId == foodItem.id) {
-                        item.copy(quantity = item.quantity + 1)
+                        if (item.quantity > 1) {
+                            Log.d("CashierRepository", "Decreasing quantity from ${item.quantity} to ${item.quantity - 1}")
+                            item.copy(quantity = item.quantity - 1)
+                        } else {
+                            Log.d("CashierRepository", "Removing item from cart (quantity was 1)")
+                            null // Remove item from cart
+                        }
                     } else {
                         item
                     }
                 }
-            } else {
-                val newCartItemId = (currentItems.maxOfOrNull { it.cartItemId } ?: 0) + 1
-                val newItem = CartItemEntity(
-                    cartItemId = newCartItemId,
-                    foodItemId = foodItem.id,
-                    quantity = 1
-                )
-                Log.d("CashierRepository", "Adding new item to cart: ${foodItem.name} with cartItemId: $newCartItemId")
-                currentItems + newItem
-            }
-            val itemsAsMap = updatedItems.map { item ->
-                mapOf(
-                    "cartItemId" to item.cartItemId,
-                    "foodItemId" to item.foodItemId,
-                    "quantity" to item.quantity
-                )
-            }
-            Log.d("CashierRepository", "Saving cart with ${itemsAsMap.size} items")
-            itemsAsMap.forEachIndexed { index, item ->
-                Log.d("CashierRepository", "Item $index: foodItemId=${item["foodItemId"]}, quantity=${item["quantity"]}")
-            }
-            firestore.collection("carts")
-                .document(cartId)
-                .set(mapOf("items" to itemsAsMap))
-                .await()
-            Log.d("CashierRepository", "Successfully added ${foodItem.name} to cart")
-        } catch (e: Exception) {
-            Log.e("CashierRepository", "Failed to add to cart: ${e.message}")
-            throw e
-        }
-    }
 
-    suspend fun decrementItem(foodItem: FoodItemEntity) {
-        try {
-            val cartSnapshot = firestore.collection("carts")
-                .document(cartId)
-                .get()
-                .await()
-            if (!cartSnapshot.exists()) return
-            val currentItems = (cartSnapshot.get("items") as? List<Map<String, Any>>)?.mapNotNull { item ->
-                try {
-                    CartItemEntity(
-                        cartItemId = (item["cartItemId"] as? Number)?.toInt() ?: 0,
-                        foodItemId = when (val foodId = item["foodItemId"]) {
-                            is Number -> foodId.toLong()
-                            is String -> foodId.toLongOrNull() ?: 0L
-                            else -> 0L
-                        },
-                        quantity = (item["quantity"] as? Number)?.toInt() ?: 0
+                val itemsAsMap = updatedItems.map { item ->
+                    mapOf(
+                        "cartItemId" to item.cartItemId,
+                        "foodItemId" to item.foodItemId,
+                        "quantity" to item.quantity
                     )
-                } catch (e: Exception) {
-                    Log.e("CashierRepository", "Failed to deserialize cart item: ${e.message}")
-                    null
                 }
-            } ?: emptyList()
 
-            val updatedItems = currentItems.mapNotNull { item ->
-                if (item.foodItemId == foodItem.id) {
-                    if (item.quantity > 1) {
-                        item.copy(quantity = item.quantity - 1)
-                    } else {
-                        null
-                    }
-                } else {
-                    item
-                }
-            }
-            val itemsAsMap = updatedItems.map { item ->
-                mapOf(
-                    "cartItemId" to item.cartItemId,
-                    "foodItemId" to item.foodItemId,
-                    "quantity" to item.quantity
-                )
-            }
-            firestore.collection("carts")
-                .document(cartId)
-                .set(mapOf("items" to itemsAsMap))
-                .await()
+                Log.d("CashierRepository", "Transaction: Saving cart with ${itemsAsMap.size} items after decrement")
+                transaction.set(cartRef, mapOf("items" to itemsAsMap))
+            }.await()
+
+            Log.d("CashierRepository", "Successfully decremented ${foodItem.name} via transaction")
         } catch (e: Exception) {
             Log.e("CashierRepository", "Failed to decrement item: ${e.message}")
             throw e
