@@ -72,7 +72,6 @@ class CashierRepository @Inject constructor(
                     return@addSnapshotListener
                 }
 
-                // Handle when cart document doesn't exist
                 if (cartSnapshot?.exists() != true) {
                     Log.d("CashierRepository", "Cart document doesn't exist - emitting empty list")
                     trySend(emptyList<CartItemWithFood>())
@@ -112,11 +111,9 @@ class CashierRepository @Inject constructor(
 
                     Log.d("CashierRepository", "Real-time parsed ${cartItems.size} cart items")
 
-                    // Fetch food items asynchronously
                     val foodItemIds = cartItems.map { it.foodItemId }.distinct()
                     Log.d("CashierRepository", "Fetching food items for IDs: $foodItemIds")
 
-                    // Launch coroutine to fetch food items
                     kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
                         try {
                             val foodItemsMap = mutableMapOf<Long, FoodItemEntity>()
@@ -190,44 +187,12 @@ class CashierRepository @Inject constructor(
         }
     }.flowOn(Dispatchers.IO)
 
-
-    private suspend fun fetchFoodItemsMap(foodItemIds: List<Long>): Map<Long, FoodItemEntity> {
-        if (foodItemIds.isEmpty()) return emptyMap()
-        return try {
-            val batches = foodItemIds.chunked(10)
-            val allFoodItems = mutableMapOf<Long, FoodItemEntity>()
-            for (batch in batches) {
-                val foodItemDocs = firestore.collection("food_items")
-                    .whereIn("id", batch)
-                    .get()
-                    .await()
-                    .documents
-                    .mapNotNull { doc ->
-                        try {
-                            doc.toObject(FoodItemEntity::class.java)
-                        } catch (e: Exception) {
-                            Log.e("CashierRepository", "Failed to deserialize food item: ${e.message}")
-                            null
-                        }
-                    }
-                    .associateBy { it.id }
-
-                allFoodItems.putAll(foodItemDocs)
-            }
-            allFoodItems
-        } catch (e: Exception) {
-            Log.e("CashierRepository", "Failed to fetch food items: ${e.message}")
-            emptyMap()
-        }
-    }
-
     suspend fun addToCart(foodItem: FoodItemEntity) {
         try {
             Log.d("CashierRepository", "=== ADD TO CART: ${foodItem.name} (ID: ${foodItem.id}) ===")
 
             val cartRef = firestore.collection("carts").document(cartId)
 
-            // Use transaction for atomic operation
             firestore.runTransaction { transaction ->
                 val cartSnapshot = transaction.get(cartRef)
 
@@ -305,7 +270,6 @@ class CashierRepository @Inject constructor(
 
             val cartRef = firestore.collection("carts").document(cartId)
 
-            // Use transaction for atomic operation
             firestore.runTransaction { transaction ->
                 val cartSnapshot = transaction.get(cartRef)
 
@@ -346,7 +310,7 @@ class CashierRepository @Inject constructor(
                             item.copy(quantity = item.quantity - 1)
                         } else {
                             Log.d("CashierRepository", "Removing item from cart (quantity was 1)")
-                            null // Remove item from cart
+                            null
                         }
                     } else {
                         item

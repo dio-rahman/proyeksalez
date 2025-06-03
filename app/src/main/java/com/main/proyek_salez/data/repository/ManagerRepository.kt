@@ -36,13 +36,15 @@ class ManagerRepository @Inject constructor(
                 }
                 val categories = snapshot?.documents?.mapNotNull { doc ->
                     try {
-                        // Manually create CategoryEntity with document ID
                         CategoryEntity(
                             id = doc.id,
                             name = doc.getString("name") ?: ""
                         )
                     } catch (e: Exception) {
-                        Log.e("ManagerRepository", "Failed to deserialize category ${doc.id}: ${e.message}")
+                        Log.e(
+                            "ManagerRepository",
+                            "Failed to deserialize category ${doc.id}: ${e.message}"
+                        )
                         null
                     }
                 } ?: emptyList()
@@ -73,7 +75,8 @@ class ManagerRepository @Inject constructor(
                         val price = doc.getDouble("price") ?: 0.0
                         val imagePath = doc.getString("imagePath")
                         val categoryId = doc.getString("categoryId") ?: ""
-                        val searchKeywords = doc.get("searchKeywords") as? List<String> ?: emptyList()
+                        val searchKeywords =
+                            doc.get("searchKeywords") as? List<String> ?: emptyList()
 
                         FoodItemEntity(
                             id = id,
@@ -85,7 +88,10 @@ class ManagerRepository @Inject constructor(
                             searchKeywords = searchKeywords
                         )
                     } catch (e: Exception) {
-                        Log.e("ManagerRepository", "Failed to deserialize document ${doc.id}: ${e.message}")
+                        Log.e(
+                            "ManagerRepository",
+                            "Failed to deserialize document ${doc.id}: ${e.message}"
+                        )
                         null
                     }
                 } ?: emptyList()
@@ -201,7 +207,8 @@ class ManagerRepository @Inject constructor(
                     val id = doc.id.toIntOrNull() ?: 0
                     val customerName = doc.getString("customerName") ?: ""
                     val totalPrice = doc.getLong("totalPrice") ?: 0L
-                    val orderDate = doc.getTimestamp("orderDate") ?: com.google.firebase.Timestamp.now()
+                    val orderDate =
+                        doc.getTimestamp("orderDate") ?: com.google.firebase.Timestamp.now()
                     val items = (doc.get("items") as? List<Map<String, Any>>)?.mapNotNull { item ->
                         try {
                             mapOf(
@@ -214,7 +221,10 @@ class ManagerRepository @Inject constructor(
                                 "quantity" to ((item["quantity"] as? Number)?.toInt() ?: 0)
                             )
                         } catch (e: Exception) {
-                            Log.e("ManagerRepository", "Failed to deserialize cart item in order ${doc.id}: ${e.message}")
+                            Log.e(
+                                "ManagerRepository",
+                                "Failed to deserialize cart item in order ${doc.id}: ${e.message}"
+                            )
                             null
                         }
                     } ?: emptyList()
@@ -231,7 +241,10 @@ class ManagerRepository @Inject constructor(
                         status = status
                     )
                 } catch (e: Exception) {
-                    Log.e("ManagerRepository", "Failed to deserialize order ${doc.id}: ${e.message}")
+                    Log.e(
+                        "ManagerRepository",
+                        "Failed to deserialize order ${doc.id}: ${e.message}"
+                    )
                     null
                 }
             }
@@ -256,178 +269,6 @@ class ManagerRepository @Inject constructor(
         } catch (e: Exception) {
             Log.e("ManagerRepository", "Failed to load popular food items: ${e.message}", e)
             return emptyList()
-        }
-    }
-
-    // Setup initial data for Firestore
-    suspend fun setupInitialData(): Result<Unit> {
-        return try {
-            Log.d("ManagerRepository", "Starting initial data setup...")
-
-            // Check if categories already exist
-            val existingCategories = firestore.collection("categories").get().await()
-            if (existingCategories.documents.isNotEmpty()) {
-                Log.d("ManagerRepository", "Categories already exist, skipping setup")
-                return Result.Success(Unit)
-            }
-
-            // 1. Setup Categories
-            val categories = listOf(
-                CategoryEntity(name = "Makanan"),
-                CategoryEntity(name = "Minuman"),
-                CategoryEntity(name = "Lainnya")
-            )
-
-            categories.forEach { category ->
-                val categoryRef = firestore.collection("categories").document()
-                val categoryWithId = category.copy(id = categoryRef.id)
-                categoryRef.set(categoryWithId).await()
-                Log.d("ManagerRepository", "Added category: ${category.name} with ID: ${categoryRef.id}")
-            }
-
-            // 2. Get category IDs for food items
-            val categoriesSnapshot = firestore.collection("categories").get().await()
-            val categoryMap = categoriesSnapshot.documents.associate {
-                it.getString("name") to it.id
-            }
-
-            // 3. Setup Sample Food Items
-            val foodItems = listOf(
-                // Makanan
-                FoodItemEntity(
-                    id = 1,
-                    name = "Nasi Goreng",
-                    description = "Nasi goreng spesial dengan telur",
-                    price = 15000.0,
-                    imagePath = "",
-                    categoryId = categoryMap["Makanan"] ?: "",
-                    searchKeywords = listOf("nasi", "goreng")
-                ),
-                FoodItemEntity(
-                    id = 2,
-                    name = "Mie Ayam",
-                    description = "Mie ayam dengan bakso",
-                    price = 12000.0,
-                    imagePath = "",
-                    categoryId = categoryMap["Makanan"] ?: "",
-                    searchKeywords = listOf("mie", "ayam")
-                ),
-                FoodItemEntity(
-                    id = 3,
-                    name = "Ayam Goreng",
-                    description = "Ayam goreng crispy",
-                    price = 18000.0,
-                    imagePath = "",
-                    categoryId = categoryMap["Makanan"] ?: "",
-                    searchKeywords = listOf("ayam", "goreng")
-                ),
-
-                // Minuman
-                FoodItemEntity(
-                    id = 4,
-                    name = "Es Teh",
-                    description = "Es teh manis segar",
-                    price = 5000.0,
-                    imagePath = "",
-                    categoryId = categoryMap["Minuman"] ?: "",
-                    searchKeywords = listOf("es", "teh")
-                ),
-                FoodItemEntity(
-                    id = 5,
-                    name = "Jus Jeruk",
-                    description = "Jus jeruk segar",
-                    price = 8000.0,
-                    imagePath = "",
-                    categoryId = categoryMap["Minuman"] ?: "",
-                    searchKeywords = listOf("jus", "jeruk")
-                ),
-                FoodItemEntity(
-                    id = 6,
-                    name = "Kopi",
-                    description = "Kopi hitam tubruk",
-                    price = 6000.0,
-                    imagePath = "",
-                    categoryId = categoryMap["Minuman"] ?: "",
-                    searchKeywords = listOf("kopi")
-                ),
-
-                // Lainnya
-                FoodItemEntity(
-                    id = 7,
-                    name = "Kerupuk",
-                    description = "Kerupuk udang renyah",
-                    price = 3000.0,
-                    imagePath = "",
-                    categoryId = categoryMap["Lainnya"] ?: "",
-                    searchKeywords = listOf("kerupuk")
-                ),
-                FoodItemEntity(
-                    id = 8,
-                    name = "Sambal",
-                    description = "Sambal terasi pedas",
-                    price = 2000.0,
-                    imagePath = "",
-                    categoryId = categoryMap["Lainnya"] ?: "",
-                    searchKeywords = listOf("sambal")
-                )
-            )
-
-            foodItems.forEach { item ->
-                firestore.collection("food_items")
-                    .document(item.id.toString())
-                    .set(item)
-                    .await()
-                Log.d("ManagerRepository", "Added food item: ${item.name} to category: ${item.categoryId}")
-            }
-
-            Log.d("ManagerRepository", "Initial data setup completed successfully")
-            Result.Success(Unit)
-        } catch (e: Exception) {
-            Log.e("ManagerRepository", "Failed to setup initial data: ${e.message}")
-            Result.Error("Failed to setup initial data: ${e.message}")
-        }
-    }
-
-    // Debug Firestore data
-    suspend fun debugFirestoreData() {
-        try {
-            Log.d("ManagerRepository", "=== DEBUGGING FIRESTORE DATA ===")
-
-            // Debug Categories
-            val categoriesSnapshot = firestore.collection("categories").get().await()
-            Log.d("ManagerRepository", "=== CATEGORIES (${categoriesSnapshot.documents.size}) ===")
-            categoriesSnapshot.documents.forEach { doc ->
-                Log.d("ManagerRepository", "Category ID: ${doc.id}, Name: ${doc.getString("name")}")
-            }
-
-            // Debug Food Items
-            val foodItemsSnapshot = firestore.collection("food_items").get().await()
-            Log.d("ManagerRepository", "=== FOOD ITEMS (${foodItemsSnapshot.documents.size}) ===")
-            foodItemsSnapshot.documents.forEach { doc ->
-                Log.d("ManagerRepository", "Food ID: ${doc.id}")
-                Log.d("ManagerRepository", "  Name: ${doc.getString("name")}")
-                Log.d("ManagerRepository", "  CategoryId: ${doc.getString("categoryId")}")
-                Log.d("ManagerRepository", "  Price: ${doc.getDouble("price")}")
-            }
-
-            // Debug Category Mapping
-            Log.d("ManagerRepository", "=== CATEGORY MAPPING ===")
-            categoriesSnapshot.documents.forEach { categoryDoc ->
-                val categoryName = categoryDoc.getString("name")
-                val categoryId = categoryDoc.id
-
-                val itemsInCategory = foodItemsSnapshot.documents.filter {
-                    it.getString("categoryId") == categoryId
-                }
-
-                Log.d("ManagerRepository", "Category '$categoryName' (ID: $categoryId) has ${itemsInCategory.size} items:")
-                itemsInCategory.forEach { item ->
-                    Log.d("ManagerRepository", "  - ${item.getString("name")}")
-                }
-            }
-
-        } catch (e: Exception) {
-            Log.e("ManagerRepository", "Error debugging Firestore: ${e.message}")
         }
     }
 }

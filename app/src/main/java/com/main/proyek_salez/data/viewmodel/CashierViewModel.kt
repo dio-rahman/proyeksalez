@@ -49,11 +49,10 @@ class CashierViewModel @Inject constructor(
             emit("Rp 0")
         }
 
-    // Use customer name from repository instead of local state
+
     val customerName: StateFlow<String> = repository.customerName
     val checkoutRequested = mutableStateOf(false)
 
-    // Add method to update customer name through repository
     fun updateCustomerName(name: String) {
         repository.updateCustomerName(name)
         Log.d("CashierViewModel", "Customer name updated to: $name")
@@ -82,15 +81,6 @@ class CashierViewModel @Inject constructor(
                 _isLoading.value = false
             }
         }
-    }
-
-    fun getAllFoodItems(): Flow<List<FoodItemEntity>> {
-        return repository.getAllFoodItems()
-            .catch { e ->
-                Log.e("CashierViewModel", "Error getting all food items: ${e.message}")
-                _errorMessage.value = "Gagal memuat semua menu: ${e.message}"
-                emit(emptyList())
-            }
     }
 
     fun getAllOrders(): Flow<List<OrderEntity>> {
@@ -133,7 +123,7 @@ class CashierViewModel @Inject constructor(
             try {
                 _isLoading.value = true
                 _errorMessage.value = null
-                repository.clearCart() // This will also clear customer name
+                repository.clearCart()
                 checkoutRequested.value = false
                 Log.d("CashierViewModel", "Cart cleared")
             } catch (e: Exception) {
@@ -143,19 +133,6 @@ class CashierViewModel @Inject constructor(
                 _isLoading.value = false
             }
         }
-    }
-
-    fun getAllCartItems(): Flow<List<CartItemWithFood>> {
-        return cartItems
-    }
-
-    fun getAllCategories(): Flow<List<CategoryEntity>> {
-        return repository.getAllCategories()
-            .catch { e ->
-                Log.e("CashierViewModel", "Error getting categories: ${e.message}")
-                _errorMessage.value = "Gagal memuat kategori: ${e.message}"
-                emit(emptyList())
-            }
     }
 
     fun createOrder(paymentMethod: String) {
@@ -190,10 +167,6 @@ class CashierViewModel @Inject constructor(
                 _isLoading.value = false
             }
         }
-    }
-
-    fun clearError() {
-        _errorMessage.value = null
     }
 
     fun getRecommendedItems(): Flow<List<FoodItemEntity>> {

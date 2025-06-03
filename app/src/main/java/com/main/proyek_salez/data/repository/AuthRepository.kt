@@ -173,25 +173,6 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun getCurrentUserRole(): String? {
-        if (auth.currentUser == null) {
-            Log.e("AuthRepository", "Tidak ada pengguna yang login")
-            return null
-        }
-        val userId = auth.currentUser!!.uid
-        Log.d("AuthRepository", "Mengambil peran pengguna, UID: $userId")
-
-        return try {
-            val userDoc = firestore.collection("users").document(userId).get().await()
-            userDoc.getString("role").also {
-                Log.d("AuthRepository", "Peran ditemukan: $it")
-            }
-        } catch (e: Exception) {
-            Log.e("AuthRepository", "Gagal mengambil peran: ${e.message}", e)
-            null
-        }
-    }
-
     fun isUserLoggedIn(): Boolean {
         val isLoggedIn = auth.currentUser != null
         Log.d("AuthRepository", "isUserLoggedIn: $isLoggedIn")

@@ -25,7 +25,8 @@ class ManagerViewModel @Inject constructor(
     val foodItems: StateFlow<List<FoodItemEntity>> = _foodItems.asStateFlow()
 
     private val _popularFoodItems = MutableStateFlow<List<Pair<FoodItemEntity, Int>>>(emptyList())
-    val popularFoodItems: StateFlow<List<Pair<FoodItemEntity, Int>>> = _popularFoodItems.asStateFlow()
+    val popularFoodItems: StateFlow<List<Pair<FoodItemEntity, Int>>> =
+        _popularFoodItems.asStateFlow()
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
@@ -38,11 +39,6 @@ class ManagerViewModel @Inject constructor(
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
-    val percentageRevenue = if (summary.value?.previousRevenue != null && summary.value?.previousRevenue!! > 0) {
-        val change = ((summary.value?.totalRevenue!! - summary.value?.previousRevenue!!) / summary.value?.previousRevenue!!) * 100
-        "${"%.2f".format(change)}%"
-    } else "0.00%"
 
     init {
         loadCategories()
@@ -84,6 +80,7 @@ class ManagerViewModel @Inject constructor(
                 is Result.Success -> {
                     _errorMessage.value = null
                 }
+
                 is Result.Error -> {
                     _errorMessage.value = result.message
                 }
@@ -97,6 +94,7 @@ class ManagerViewModel @Inject constructor(
                 is Result.Success -> {
                     _errorMessage.value = null
                 }
+
                 is Result.Error -> {
                     _errorMessage.value = result.message
                 }
@@ -126,6 +124,7 @@ class ManagerViewModel @Inject constructor(
                 is Result.Success -> {
                     _errorMessage.value = null
                 }
+
                 is Result.Error -> {
                     _errorMessage.value = result.message
                 }
@@ -155,6 +154,7 @@ class ManagerViewModel @Inject constructor(
                 is Result.Success -> {
                     _errorMessage.value = null
                 }
+
                 is Result.Error -> {
                     _errorMessage.value = result.message
                 }
@@ -168,6 +168,7 @@ class ManagerViewModel @Inject constructor(
                 is Result.Success -> {
                     _errorMessage.value = null
                 }
+
                 is Result.Error -> {
                     _errorMessage.value = result.message
                 }
@@ -194,33 +195,6 @@ class ManagerViewModel @Inject constructor(
             }
         }
     }
-
-    // Setup initial data function
-    fun setupInitialData() {
-        viewModelScope.launch {
-            _isLoading.value = true
-            _errorMessage.value = null
-
-            when (val result = repository.setupInitialData()) {
-                is Result.Success -> {
-                    _errorMessage.value = "Data awal berhasil dibuat!"
-                    // Reload data after setup
-                    loadCategories()
-                    loadFoodItems()
-                }
-                is Result.Error -> {
-                    _errorMessage.value = result.message
-                }
-            }
-
-            _isLoading.value = false
-        }
-    }
-
-    // Debug function
-    fun debugFirestoreData() {
-        viewModelScope.launch {
-            repository.debugFirestoreData()
-        }
-    }
 }
+
+

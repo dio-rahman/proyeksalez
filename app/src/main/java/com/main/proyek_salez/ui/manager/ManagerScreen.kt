@@ -70,11 +70,11 @@ fun ManagerScreen(
     var foodName by rememberSaveable { mutableStateOf("") }
     var foodDesc by rememberSaveable { mutableStateOf("") }
     var foodPrice by rememberSaveable { mutableStateOf("") }
-    var selectedCategoryId by rememberSaveable { mutableStateOf<String?>(null) } // Changed to String?
+    var selectedCategoryId by rememberSaveable { mutableStateOf<String?>(null) }
     var isCategoryDropdownExpanded by remember { mutableStateOf(false) }
     var selectedImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     var editingFoodItem by rememberSaveable { mutableStateOf<FoodItemEntity?>(null) }
-    var showDeleteCategoryDialog by remember { mutableStateOf<String?>(null) } // Changed to String?
+    var showDeleteCategoryDialog by remember { mutableStateOf<String?>(null) }
     var showDeleteFoodItemDialog by remember { mutableStateOf<Long?>(null) }
 
     val categories by viewModel.categories.collectAsState()

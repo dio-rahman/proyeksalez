@@ -55,7 +55,6 @@ class AuthViewModel @Inject constructor(
                 _currentUser.value = authRepository.getCurrentUser()
                 _isLoggedIn.value = true
             }
-            // Optional: Tambahkan LiveData untuk hasil registrasi jika diperlukan
         }
     }
 
