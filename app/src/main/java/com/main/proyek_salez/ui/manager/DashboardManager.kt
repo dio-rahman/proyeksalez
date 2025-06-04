@@ -1,14 +1,19 @@
 package com.main.proyek_salez.ui.manager
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
@@ -18,11 +23,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.data.model.FoodItemEntity
-import com.main.proyek_salez.data.model.UserRole
-import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import com.main.proyek_salez.data.viewmodel.ManagerViewModel
 import com.main.proyek_salez.ui.sidebar.SidebarManager
-import com.main.proyek_salez.ui.theme.Merah
+import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.*
@@ -40,6 +43,10 @@ fun DashboardManager(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    val gradientBackground = Brush.verticalGradient(
+        colors = listOf(Putih, Jingga, UnguTua)
+    )
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -53,21 +60,43 @@ fun DashboardManager(
             )
         }
     ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(brush = gradientBackground)
         ) {
             Column(
                 modifier = Modifier
+                    .fillMaxSize()
                     .padding(16.dp)
-                    .fillMaxWidth(),
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "SALEZ",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                drawerState.open()
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Menu",
+                            tint = UnguTua
+                        )
+                    }
+                    Text(
+                        text = "SALEZ",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            color = UnguTua,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
                 Spacer(modifier = Modifier.height(32.dp))
                 summary?.let { summaryData ->
                     DashboardCard(
@@ -98,18 +127,20 @@ fun DashboardManager(
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Menu Populer",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        color = UnguTua,
+                        fontWeight = FontWeight.Bold
+                    )
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 if (popularFoodItems.isEmpty()) {
                     Text(
                         text = "Belum ada data menu populer",
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        color = UnguTua.copy(alpha = 0.6f)
                     )
                 } else {
                     LazyColumn(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.heightIn(max = 300.dp)
                     ) {
                         items(popularFoodItems) { (foodItem, quantity) ->
                             PopularMenuCard(foodItem = foodItem, quantity = quantity)
@@ -140,8 +171,9 @@ fun DashboardCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Putih),
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -151,19 +183,22 @@ fun DashboardCard(
                 painter = icon,
                 contentDescription = title,
                 modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.primary
+                tint = UnguTua
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = UnguTua.copy(alpha = 0.6f)
+                    )
                 )
                 Text(
                     text = value,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = UnguTua
+                    )
                 )
                 Text(
                     text = percentageChange,
@@ -182,7 +217,8 @@ fun PopularMenuCard(foodItem: FoodItemEntity, quantity: Int) {
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        colors = CardDefaults.cardColors(containerColor = Putih),
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -191,7 +227,7 @@ fun PopularMenuCard(foodItem: FoodItemEntity, quantity: Int) {
             Surface(
                 modifier = Modifier.size(48.dp),
                 shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                color = UnguTua.copy(alpha = 0.2f)
             ) {
                 // Placeholder untuk gambar
             }
@@ -199,18 +235,22 @@ fun PopularMenuCard(foodItem: FoodItemEntity, quantity: Int) {
             Column {
                 Text(
                     text = foodItem.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.Medium,
+                        color = UnguTua
+                    )
                 )
                 Text(
                     text = NumberFormat.getCurrencyInstance(Locale("id", "ID")).format(foodItem.price),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = UnguTua.copy(alpha = 0.6f)
+                    )
                 )
                 Text(
                     text = "Dipesan: $quantity kali",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = UnguTua.copy(alpha = 0.6f)
+                    )
                 )
             }
         }
