@@ -92,7 +92,7 @@ fun SidebarManager(
                 fontSize = 20.sp
             ),
             onClick = {
-                navController.navigate("order_history")
+                navController.navigate("order_history_manager")
                 onCloseDrawer()
             }
         )

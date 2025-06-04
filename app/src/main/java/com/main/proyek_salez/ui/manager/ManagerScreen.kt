@@ -48,20 +48,7 @@ import java.io.FileOutputStream
 fun ManagerScreen(
     navController: NavController,
     viewModel: ManagerViewModel = hiltViewModel(),
-    authViewModel: AuthViewModel = hiltViewModel()
 ) {
-    val isLoggedIn by authViewModel.isLoggedIn.observeAsState(initial = false)
-    val currentUser by authViewModel.currentUser.observeAsState()
-
-    if (!isLoggedIn || currentUser?.role != UserRole.MANAGER) {
-        LaunchedEffect(Unit) {
-            navController.navigate("login") {
-                popUpTo(navController.graph.startDestinationId)
-                launchSingleTop = true
-            }
-        }
-        return
-    }
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()

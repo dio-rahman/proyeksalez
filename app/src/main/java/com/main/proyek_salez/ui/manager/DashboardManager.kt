@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,18 +18,22 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.data.model.FoodItemEntity
+import com.main.proyek_salez.data.model.UserRole
+import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import com.main.proyek_salez.data.viewmodel.ManagerViewModel
 import com.main.proyek_salez.ui.sidebar.SidebarManager
+import com.main.proyek_salez.ui.theme.Merah
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.*
-import com.main.proyek_salez.ui.theme.Merah
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardManager(
     navController: NavController,
-    viewModel: ManagerViewModel = hiltViewModel()
+    viewModel: ManagerViewModel = hiltViewModel(),
 ) {
+
     val summary by viewModel.summary.collectAsState()
     val error by viewModel.error.collectAsState()
     val popularFoodItems by viewModel.popularFoodItems.collectAsState()

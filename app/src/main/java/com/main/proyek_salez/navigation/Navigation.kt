@@ -23,6 +23,7 @@ import com.main.proyek_salez.ui.cart.CheckoutScreen
 import com.main.proyek_salez.ui.checkout.CompletionScreen
 import com.main.proyek_salez.ui.manager.DashboardManager
 import com.main.proyek_salez.ui.manager.ManagerScreen
+import com.main.proyek_salez.ui.manager.OrderHistoryManager
 import com.main.proyek_salez.ui.menu.OrderHistoryScreen
 import com.main.proyek_salez.ui.sidebar.ProfileScreen
 
@@ -73,19 +74,9 @@ fun AppNavigation() {
             )
         }
         composable(Screen.ManagerScreen.route) {
-            if (isLoggedIn.value && currentUserState.value?.role == UserRole.MANAGER) {
-                Log.d("AppNavigation", "Showing ManagerScreen for user: ${currentUserState.value?.email}")
-                ManagerScreen(navController = navController)
-            } else {
-                Log.w("AppNavigation", "Redirecting to Login: isLoggedIn=${isLoggedIn.value}, role=${currentUserState.value?.role}")
-                LaunchedEffect(Unit) {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                }
-            }
+            ManagerScreen(navController = navController)
         }
+
         composable(Screen.CashierDashboard.route) {
             if (isLoggedIn.value && currentUserState.value?.role == UserRole.CASHIER) {
                 Log.d("AppNavigation", "Showing CashierDashboard for user: ${currentUserState.value?.email}")
@@ -118,6 +109,9 @@ fun AppNavigation() {
         }
         composable("order_history") {
             OrderHistoryScreen(navController = navController)
+        }
+        composable("order_history_manager") {
+            OrderHistoryManager(navController = navController)
         }
         composable("close_order") {
             CloseOrderScreen(navController = navController)
