@@ -187,7 +187,8 @@ fun ManagerScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
@@ -213,7 +214,7 @@ fun ManagerScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -251,7 +252,7 @@ fun ManagerScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                "Tambah",
+                                "Tambah Kategori",
                                 style = MaterialTheme.typography.headlineLarge.copy(
                                     color = UnguTua,
                                     fontWeight = FontWeight.Bold
@@ -298,7 +299,7 @@ fun ManagerScreen(
                             }
                         }
                     }
-
+                    Spacer(modifier = Modifier.height(16.dp))
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = Putih),
@@ -549,7 +550,7 @@ fun ManagerScreen(
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
                     }
-
+                    Spacer(modifier = Modifier.height(16.dp))
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = Putih),
@@ -565,7 +566,7 @@ fun ManagerScreen(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             LazyColumn(
-                                modifier = Modifier.heightIn(max = 100.dp)
+                                modifier = Modifier.heightIn(max = 200.dp)
                             ) {
                                 items(categories) { category ->
                                     Row(
@@ -594,7 +595,7 @@ fun ManagerScreen(
                             }
                         }
                     }
-
+                    Spacer(modifier = Modifier.height(16.dp))
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = Putih),
