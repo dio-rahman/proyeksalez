@@ -1,5 +1,6 @@
 package com.main.proyek_salez.ui
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.main.proyek_salez.R
 import com.main.proyek_salez.data.model.User
+import com.main.proyek_salez.data.repository.Result
 import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import androidx.activity.compose.BackHandler
 import com.main.proyek_salez.ui.theme.*
@@ -33,6 +35,7 @@ fun LoginScreen(
     onLoginSuccess: (User) -> Unit
 ) {
     BackHandler(enabled = true) {
+        // Tidak ada aksi, mencegah kembali
     }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -41,25 +44,37 @@ fun LoginScreen(
     val loginResult by viewModel.loginResult.observeAsState()
 
     LaunchedEffect(loginResult) {
+        Log.d("LoginScreen", "Login result changed: $loginResult")
         loginResult?.getContentIfNotHandled()?.let { result ->
             isLoading = false
-            result.fold(
-                onSuccess = { user ->
-                    onLoginSuccess(user)
-                },
-                onFailure = { e ->
-                    errorMessage = e.message ?: "Login gagal"
+            when (result) {
+                is Result.Success -> {
+                    Log.d("LoginScreen", "Login success for user: ${result.data.email}, role: ${result.data.role}")
+                    errorMessage = null
+                    onLoginSuccess(result.data)
                 }
-            )
+                is Result.Error -> {
+                    errorMessage = when {
+                        result.message.contains("PERMISSION_DENIED") ->
+                            "Gagal login: Tidak ada izin untuk mengakses data pengguna."
+                        result.message.contains("Dokumen pengguna tidak ditemukan") ->
+                            "Akun belum terdaftar di sistem. Silakan registrasi."
+                        result.message.contains("The email address is badly formatted") ->
+                            "Email tidak valid. Silakan masukkan email yang benar."
+                        result.message.contains("The supplied auth credential is incorrect") ->
+                            "Email atau kata sandi salah. Silakan coba lagi."
+                        result.message.contains("Peran tidak valid") ->
+                            "Peran akun tidak valid: ${result.message}"
+                        else -> result.message
+                    }
+                    Log.e("LoginScreen", "Error set: $errorMessage")
+                }
+            }
         }
     }
 
     val gradientBackground = Brush.verticalGradient(
-        colors = listOf(
-            Putih,
-            Jingga,
-            UnguTua
-        )
+        colors = listOf(Putih, Jingga, UnguTua)
     )
 
     Box(
@@ -68,7 +83,7 @@ fun LoginScreen(
             .background(brush = gradientBackground)
     ) {
         IconButton(
-            onClick = {  },
+            onClick = { /* Tidak ada aksi */ },
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(16.dp)
@@ -147,7 +162,10 @@ fun LoginScreen(
                     text = it,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                        .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(4.dp))
+                        .padding(8.dp)
                 )
             }
             Spacer(modifier = Modifier.height(24.dp))
@@ -155,6 +173,7 @@ fun LoginScreen(
                 onClick = {
                     errorMessage = null
                     isLoading = true
+                    Log.d("LoginScreen", "Login button clicked with email: $email")
                     viewModel.login(email, password)
                 },
                 enabled = !isLoading && email.isNotBlank() && password.isNotBlank(),

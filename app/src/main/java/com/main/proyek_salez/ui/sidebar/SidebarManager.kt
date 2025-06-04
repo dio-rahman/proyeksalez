@@ -1,4 +1,4 @@
-package com.main.proyek_salez.ui
+package com.main.proyek_salez.ui.sidebar
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,7 +26,7 @@ import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import com.main.proyek_salez.navigation.Screen
 
 @Composable
-fun SidebarMenu(
+fun SidebarManager(
     navController: NavController,
     onCloseDrawer: () -> Unit
 ) {
@@ -62,27 +62,27 @@ fun SidebarMenu(
 
         Spacer(modifier = Modifier.height(40.dp))
         MenuItem(
-            text = "Profil",
+            text = "Dashboard",
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = Putih,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             ),
             onClick = {
-                navController.navigate("profile")
-                onCloseDrawer()
-            }
+                navController.navigate("manager_dashboard")
+                onCloseDrawer()}
         )
         MenuItem(
-            text = "Home",
+            text = "Tambah Menu",
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = Putih,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             ),
             onClick = {
-                navController.navigate("cashier_dashboard")
-                onCloseDrawer()}
+                navController.navigate("manager_screen")
+                onCloseDrawer()
+            }
         )
         MenuItem(
             text = "Cek Histori",
@@ -92,20 +92,9 @@ fun SidebarMenu(
                 fontSize = 20.sp
             ),
             onClick = {
-                navController.navigate("order_history")
+                navController.navigate("order_history_manager")
                 onCloseDrawer()
             }
-        )
-        MenuItem(
-            text = "Close Order",
-            style = MaterialTheme.typography.bodyLarge.copy(
-                color = Putih,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            ),
-            onClick = {
-                navController.navigate("close_order")
-                onCloseDrawer()}
         )
         MenuItem(
             text = "Log Out",
@@ -170,3 +159,4 @@ fun MenuItem(
         )
     }
 }
+

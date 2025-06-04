@@ -19,3 +19,20 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+#Preserve all annotations
+
+-keepattributes Annotation
+
+-keep class com.main.proyek_salez.data.model.FoodItemEntity { <init>(...); *; }
+-keep class com.main.proyek_salez.data.model.CategoryEntity { <init>(...); *; }
+-keep class com.main.proyek_salez.data.model.OrderEntity { <init>(...); *; }
+-keep class com.main.proyek_salez.data.model.CartItemEntity { <init>(...); *; }
+-keep class com.main.proyek_salez.data.model.DailySummaryEntity { <init>(...); *; }
+
+#Keep Firestore classes
+
+-keep class com.google.firebase.firestore.** { *; }
+
+#Keep Room classes and entities
+
+-keep class androidx.room.** { *; } -keep @androidx.room.Entity class * { *; }

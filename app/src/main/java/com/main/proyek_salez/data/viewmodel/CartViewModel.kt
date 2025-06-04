@@ -58,7 +58,7 @@ class CartViewModel @Inject constructor(
         }
     }
 
-    fun getTotalPrice(): String {
+    suspend fun getTotalPrice(): String {
         val totalPrice = _cartItems.value.sumOf { cartItemWithFood ->
             cartItemWithFood.foodItem.price * cartItemWithFood.cartItem.quantity
         }

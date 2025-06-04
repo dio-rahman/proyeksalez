@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
+import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.viewmodel.CartViewModel
 import com.main.proyek_salez.data.viewmodel.CashierViewModel
 import com.main.proyek_salez.ui.SidebarMenu

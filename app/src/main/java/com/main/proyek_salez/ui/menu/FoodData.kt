@@ -1,4 +1,4 @@
-package com.main.proyek_salez.ui.menu/*
+/*
 package com.main.proyek_salez.ui.menu
 
 import com.main.proyek_salez.R
