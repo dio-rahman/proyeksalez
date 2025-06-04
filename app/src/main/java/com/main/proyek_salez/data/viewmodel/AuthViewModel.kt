@@ -5,8 +5,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.main.proyek_salez.data.model.User
+import com.main.proyek_salez.data.model.UserRole
 import com.main.proyek_salez.data.repository.AuthRepository
-import com.main.proyek_salez.data.repository.Result
 import com.main.proyek_salez.utils.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -17,58 +17,47 @@ class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    private val _currentUser = MutableLiveData<User?>()
-    val currentUser: LiveData<User?> = _currentUser
-
     private val _loginResult = MutableLiveData<Event<Result<User>>>()
     val loginResult: LiveData<Event<Result<User>>> = _loginResult
 
-    private val _isLoggedIn = MutableLiveData<Boolean>()
-    val isLoggedIn: LiveData<Boolean> = _isLoggedIn
+    private val _registerResult = MutableLiveData<Event<Result<User>>>()
+    val registerResult: LiveData<Event<Result<User>>> = _registerResult
 
-    init {
-        checkAuthStatus()
-    }
+    private val _currentUser = MutableLiveData<User?>()
+    val currentUser: LiveData<User?> = _currentUser
 
-    private fun checkAuthStatus() {
-        viewModelScope.launch {
-            _isLoggedIn.value = authRepository.isUserLoggedIn()
-            _currentUser.value = authRepository.getCurrentUser()
-        }
-    }
-
+    // Check role saat login
     fun login(email: String, password: String) {
         viewModelScope.launch {
-            val result = authRepository.login(email, password)
+            val result = authRepository.loginWithRoleCheck(email, password)
             _loginResult.value = Event(result)
-            if (result is Result.Success) {
-                _currentUser.value = result.data
-                _isLoggedIn.value = true
-            }
         }
     }
 
-    fun register(email: String, password: String, role: String, name: String = "", phone: String = "") {
+    // Register user baru
+    fun registerUser(email: String, password: String, name: String, phone: String, role: UserRole) {
         viewModelScope.launch {
-            val result = authRepository.register(email, password, role, name, phone)
-            if (result is Result.Success) {
-                _currentUser.value = authRepository.getCurrentUser()
-                _isLoggedIn.value = true
-            }
+            val result = authRepository.registerUser(email, password, name, phone, role)
+            _registerResult.value = Event(result)
         }
     }
 
-    fun logout() {
-        authRepository.logout()
-        _currentUser.value = null
-        _isLoggedIn.value = false
-
-    }
-
+    // Dapatkan user saat ini
     fun getCurrentUser() {
         viewModelScope.launch {
             _currentUser.value = authRepository.getCurrentUser()
-            _isLoggedIn.value = authRepository.isUserLoggedIn()
         }
     }
+
+    // Logout
+    fun logout() {
+        authRepository.logout()
+        _currentUser.value = null
+    }
+
+    fun clearLoginState() {
+        _loginResult.value = Event(Result.failure(Exception("State cleared")))
+    }
+
+    companion object
 }

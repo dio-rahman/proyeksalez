@@ -30,9 +30,9 @@ import com.main.proyek_salez.ui.theme.*
 
 @Composable
 fun LoginScreen(
+    modifier: Modifier = Modifier,
     viewModel: AuthViewModel = hiltViewModel(),
-    onLoginSuccess: (User) -> Unit,
-    modifier: Modifier = Modifier
+    onLoginSuccess: (User) -> Unit
 ) {
     BackHandler(enabled = true) {
         // Tidak ada aksi, mencegah kembali
