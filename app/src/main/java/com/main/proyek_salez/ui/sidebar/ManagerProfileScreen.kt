@@ -31,29 +31,53 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.main.proyek_salez.R
+import com.main.proyek_salez.data.database.AppDatabase
+import com.main.proyek_salez.data.model.ManagerProfileEntity
 import com.main.proyek_salez.ui.theme.*
-import androidx.core.net.toUri
-import androidx.core.content.edit
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavController) {
+fun ManagerProfileScreen(navController: NavController) {
+    val context = LocalContext.current
+    val database = AppDatabase.getDatabase(context)
+    val managerProfileDao = database.managerProfileDao()
+
     var isEditMode by remember { mutableStateOf(false) }
-    var username by remember { mutableStateOf("DioRahmanPutra") }
-    var email by remember { mutableStateOf("dio.rahman.ti123@polban.ac.id") }
-    var nickname by remember { mutableStateOf("Dio") }
-    var tempUsername by remember { mutableStateOf(username) }
-    var tempEmail by remember { mutableStateOf(email) }
-    var tempNickname by remember { mutableStateOf(nickname) }
+    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var nickname by remember { mutableStateOf("") }
+    var tempUsername by remember { mutableStateOf("") }
+    var tempEmail by remember { mutableStateOf("") }
+    var tempNickname by remember { mutableStateOf("") }
     var profilePhotoUri by remember { mutableStateOf<Uri?>(null) }
     var tempProfilePhotoUri by remember { mutableStateOf<Uri?>(null) }
     val hasSpacesInUsername by remember { derivedStateOf { isEditMode && tempUsername.contains(" ") } }
-    val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
+    val scope = rememberCoroutineScope()
 
+    // Memuat data profil dari database saat layar pertama kali dibuka
     LaunchedEffect(Unit) {
-        val savedUriString = sharedPreferences.getString("profile_photo_uri", null)
-        profilePhotoUri = savedUriString?.toUri()
+        scope.launch {
+            val profile = managerProfileDao.getProfile()
+            if (profile != null) {
+                username = profile.username
+                email = profile.email
+                nickname = profile.nickname
+                profilePhotoUri = profile.profilePhotoUri?.let { Uri.parse(it) }
+                tempUsername = profile.username
+                tempEmail = profile.email
+                tempNickname = profile.nickname
+                tempProfilePhotoUri = profile.profilePhotoUri?.let { Uri.parse(it) }
+            } else {
+                // Data default jika belum ada di database
+                username = "ManagerDefault"
+                email = "manager@example.com"
+                nickname = "Manager"
+                tempUsername = username
+                tempEmail = email
+                tempNickname = nickname
+            }
+        }
     }
 
     var hasPermission by remember { mutableStateOf(false) }
@@ -102,8 +126,8 @@ fun ProfileScreen(navController: NavController) {
         ) {
             IconButton(
                 onClick = {
-                    navController.navigate("cashier_dashboard") {
-                        popUpTo("profile") { inclusive = true }
+                    navController.navigate("manager_dashboard") {
+                        popUpTo("manager_profile") { inclusive = true }
                     }
                 },
                 modifier = Modifier.padding(start = 10.dp)
@@ -114,7 +138,6 @@ fun ProfileScreen(navController: NavController) {
                     tint = UnguTua
                 )
             }
-
             Image(
                 painter = painterResource(id = R.drawable.salez_logo),
                 contentDescription = "Salez Logo",
@@ -263,8 +286,15 @@ fun ProfileScreen(navController: NavController) {
                                 email = tempEmail
                                 nickname = tempNickname
                                 profilePhotoUri = tempProfilePhotoUri
-                                sharedPreferences.edit {
-                                    putString("profile_photo_uri", profilePhotoUri?.toString())
+                                scope.launch {
+                                    managerProfileDao.insertProfile(
+                                        ManagerProfileEntity(
+                                            username = username,
+                                            email = email,
+                                            nickname = nickname,
+                                            profilePhotoUri = profilePhotoUri?.toString()
+                                        )
+                                    )
                                 }
                                 isEditMode = false
                             }

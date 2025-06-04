@@ -21,9 +21,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
-import com.main.proyek_salez.ui.theme.*
 import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import com.main.proyek_salez.navigation.Screen
+import com.main.proyek_salez.ui.theme.*
 
 @Composable
 fun SidebarManager(
@@ -33,10 +33,7 @@ fun SidebarManager(
     val authViewModel: AuthViewModel = hiltViewModel()
     val showDialog = remember { mutableStateOf(false) }
     val gradientBackground = Brush.verticalGradient(
-        colors = listOf(
-            Jingga,
-            Oranye
-        )
+        colors = listOf(Jingga, Oranye)
     )
 
     Column(
@@ -70,7 +67,8 @@ fun SidebarManager(
             ),
             onClick = {
                 navController.navigate("manager_dashboard")
-                onCloseDrawer()}
+                onCloseDrawer()
+            }
         )
         MenuItem(
             text = "Tambah Menu",
@@ -97,6 +95,18 @@ fun SidebarManager(
             }
         )
         MenuItem(
+            text = "Profile",
+            style = MaterialTheme.typography.bodyLarge.copy(
+                color = Putih,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            ),
+            onClick = {
+                navController.navigate("manager_profile")
+                onCloseDrawer()
+            }
+        )
+        MenuItem(
             text = "Log Out",
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = Putih,
@@ -109,11 +119,9 @@ fun SidebarManager(
             androidx.compose.material3.AlertDialog(
                 onDismissRequest = { showDialog.value = false },
                 confirmButton = {
-                    println("Logout button pressed")
                     Button(onClick = {
                         authViewModel.logout()
                         showDialog.value = false
-                        println("Navigating to login screen")
                         navController.navigate(Screen.Login.route) {
                             popUpTo(0) { inclusive = true }
                             launchSingleTop = true
@@ -133,7 +141,6 @@ fun SidebarManager(
         }
     }
 }
-
 
 @Composable
 fun MenuItem(
@@ -159,4 +166,3 @@ fun MenuItem(
         )
     }
 }
-
