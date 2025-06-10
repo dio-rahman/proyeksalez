@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.main.proyek_salez.data.model.DailySummaryEntity
 import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.viewmodel.ManagerViewModel
 import com.main.proyek_salez.ui.sidebar.SidebarManager
@@ -36,9 +37,8 @@ fun DashboardManager(
     navController: NavController,
     viewModel: ManagerViewModel = hiltViewModel(),
 ) {
-
-    val summary by viewModel.summary.collectAsState()
-    val error by viewModel.error.collectAsState()
+    val summaries: Pair<DailySummaryEntity?, DailySummaryEntity?> by viewModel.summaries.collectAsState(initial = null to null)
+    val error by viewModel.error.collectAsState(initial = null)
     val popularFoodItems by viewModel.popularFoodItems.collectAsState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -98,27 +98,42 @@ fun DashboardManager(
                     )
                 }
                 Spacer(modifier = Modifier.height(32.dp))
-                summary?.let { summaryData ->
+                summaries.first?.let { latestSummary ->
                     DashboardCard(
                         title = "Total Revenue",
                         value = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
-                            .format(summaryData.totalRevenue.toLong()),
-                        percentageChange = "+32.40%",
-                        isPositive = true,
+                            .format(latestSummary.totalRevenue.toLong()),
+                        percentageChange = calculatePercentageChange(
+                            latestSummary.totalRevenue,
+                            summaries.second?.totalRevenue
+                        ),
+                        isPositive = summaries.second?.let { prev ->
+                            latestSummary.totalRevenue >= prev.totalRevenue
+                        } ?: true,
                         icon = painterResource(id = android.R.drawable.ic_menu_gallery)
                     )
                     DashboardCard(
                         title = "Total Dish Ordered",
-                        value = summaryData.totalMenuItems.toString(),
-                        percentageChange = "-12.40%",
-                        isPositive = false,
+                        value = latestSummary.totalMenuItems.toString(),
+                        percentageChange = calculatePercentageChange(
+                            latestSummary.totalMenuItems.toDouble(),
+                            summaries.second?.totalMenuItems?.toDouble()
+                        ),
+                        isPositive = summaries.second?.let { prev ->
+                            latestSummary.totalMenuItems >= prev.totalMenuItems
+                        } ?: true,
                         icon = painterResource(id = android.R.drawable.ic_menu_gallery)
                     )
                     DashboardCard(
                         title = "Total Customer",
-                        value = summaryData.totalCustomers.toString(),
-                        percentageChange = "+2.40%",
-                        isPositive = true,
+                        value = latestSummary.totalCustomers.toString(),
+                        percentageChange = calculatePercentageChange(
+                            latestSummary.totalCustomers.toDouble(),
+                            summaries.second?.totalCustomers?.toDouble()
+                        ),
+                        isPositive = summaries.second?.let { prev ->
+                            latestSummary.totalCustomers >= prev.totalCustomers
+                        } ?: true,
                         icon = painterResource(id = android.R.drawable.ic_menu_gallery)
                     )
                 } ?: run {
@@ -254,5 +269,13 @@ fun PopularMenuCard(foodItem: FoodItemEntity, quantity: Int) {
                 )
             }
         }
+    }
+}
+
+fun calculatePercentageChange(current: Double, previous: Double?): String {
+    if (previous == null || previous == 0.0) return "+0.00%"
+    val change = ((current - previous) / previous) * 100
+    return String.format("%.2f%%", change).let {
+        if (change >= 0) "+$it" else it
     }
 }

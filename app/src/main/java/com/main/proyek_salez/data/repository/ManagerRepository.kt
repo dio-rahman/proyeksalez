@@ -184,14 +184,21 @@ class ManagerRepository @Inject constructor(
         }
     }
 
-    suspend fun getLatestSummary(): DailySummaryEntity? {
-        return firestore.collection("daily_summaries")
-            .orderBy("closedAt", Query.Direction.DESCENDING)
-            .limit(1)
-            .get()
-            .await()
-            .toObjects(DailySummaryEntity::class.java)
-            .firstOrNull()
+    suspend fun getLatestSummary(): Pair<DailySummaryEntity?, DailySummaryEntity?> {
+        return try {
+            val snapshots = firestore.collection("daily_summaries")
+                .orderBy("closedAt", Query.Direction.DESCENDING)
+                .limit(2)
+                .get()
+                .await()
+            val summaries = snapshots.toObjects(DailySummaryEntity::class.java)
+            val latest = summaries.getOrNull(0)
+            val previous = summaries.getOrNull(1)
+            latest to previous
+        } catch (e: Exception) {
+            Log.e("ManagerRepository", "Failed to load summaries: ${e.message}", e)
+            null to null
+        }
     }
 
     suspend fun getPopularFoodItems(limit: Int = 5): List<Pair<FoodItemEntity, Int>> {

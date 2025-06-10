@@ -16,12 +16,16 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class CashierRepository @Inject constructor(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val managerRepository: ManagerRepository
 ) {
     private val cartId = "current_cart"
     private val _customerName = MutableStateFlow("")
@@ -39,21 +43,10 @@ class CashierRepository @Inject constructor(
 
     fun getRecommendedItems(): Flow<List<FoodItemEntity>> = flow {
         try {
-            val snapshot = firestore.collection("food_items")
-                .orderBy("salesCount", Query.Direction.DESCENDING)
-                .limit(10)
-                .get()
-                .await()
-
-            val items = snapshot.documents.mapNotNull { doc ->
-                try {
-                    doc.toObject(FoodItemEntity::class.java)
-                } catch (e: Exception) {
-                    Log.e("CashierRepository", "Failed to parse recommended item: ${e.message}")
-                    null
-                }
-            }
-            emit(items)
+            val popularItems = managerRepository.getPopularFoodItems()
+            val foodItems = popularItems.map { it.first }
+            Log.d("CashierRepository", "Fetched ${foodItems.size} recommended items")
+            emit(foodItems)
         } catch (e: Exception) {
             Log.e("CashierRepository", "Error fetching recommended items: ${e.message}")
             emit(emptyList())
@@ -619,22 +612,29 @@ class CashierRepository @Inject constructor(
         try {
             Log.d("CashierRepository", "=== CLOSING DAILY ORDERS FOR DATE: $date ===")
 
-            val localDate = java.time.LocalDate.parse(date)
+            val localDate = LocalDate.parse(date)
             val startOfDay = localDate.atStartOfDay()
-            val endOfDay = localDate.atTime(23, 59, 59)
+            val endOfDay = localDate.atTime(23, 59)
 
             val startTimestamp = Timestamp(
                 java.util.Date.from(
-                    startOfDay.atZone(java.time.ZoneId.systemDefault()).toInstant()
+                    startOfDay.atZone(ZoneId.systemDefault()).toInstant()
                 )
             )
             val endTimestamp = Timestamp(
                 java.util.Date.from(
-                    endOfDay.atZone(java.time.ZoneId.systemDefault()).toInstant()
+                    endOfDay.atZone(ZoneId.systemDefault()).toInstant()
                 )
             )
 
             Log.d("CashierRepository", "Querying orders from $startTimestamp to $endTimestamp")
+
+            val previousDate = localDate.minusDays(1).toString()
+            val previousSummary = firestore.collection("daily_summaries")
+                .document(previousDate)
+                .get()
+                .await()
+                .toObject(DailySummaryEntity::class.java)
 
             val ordersSnapshot = firestore.collection("orders")
                 .whereGreaterThanOrEqualTo("orderDate", startTimestamp)
@@ -692,7 +692,10 @@ class CashierRepository @Inject constructor(
                     totalRevenue = totalRevenue,
                     totalMenuItems = totalMenuItems,
                     totalCustomers = totalCustomers,
-                    closedAt = java.time.LocalDateTime.now()
+                    closedAt = LocalDateTime.now(),
+                    previousRevenue = previousSummary?.totalRevenue,
+                    previousMenuItems = previousSummary?.totalMenuItems,
+                    previousCustomers = previousSummary?.totalCustomers
                 )
 
                 firestore.collection("daily_summaries")
