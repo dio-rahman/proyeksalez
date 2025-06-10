@@ -1,5 +1,3 @@
-// 5. REPLACE CartItemCard.kt with this improved version
-
 package com.main.proyek_salez.ui.cart
 
 import android.util.Log
@@ -35,7 +33,6 @@ fun CartItemCard(
     val foodItem = cartItemWithFood.foodItem
     val quantity = cartItemWithFood.cartItem.quantity
 
-    // Add state key to force recomposition
     val stateKey by remember(cartItemWithFood.cartItem.cartItemId, quantity) {
         mutableStateOf("${cartItemWithFood.cartItem.cartItemId}-$quantity")
     }
@@ -110,7 +107,6 @@ fun CartItemCard(
                     )
                 }
 
-                // Use key to ensure Text recomposes when quantity changes
                 key(stateKey) {
                     Text(
                         text = quantity.toString(),

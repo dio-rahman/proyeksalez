@@ -20,7 +20,7 @@ import com.main.proyek_salez.ui.LoginScreen
 import com.main.proyek_salez.ui.OnboardingApp
 import com.main.proyek_salez.ui.cart.CartScreen
 import com.main.proyek_salez.ui.cart.CheckoutScreen
-import com.main.proyek_salez.ui.checkout.CompletionScreen
+import com.main.proyek_salez.ui.cart.CompletionScreen
 import com.main.proyek_salez.ui.manager.DashboardManager
 import com.main.proyek_salez.ui.manager.ManagerScreen
 import com.main.proyek_salez.ui.manager.OrderHistoryManager
@@ -43,7 +43,7 @@ fun AppNavigation() {
             mainNavigation.navigateBasedOnRole(currentUserState.value!!)
         } else if (!isLoggedIn.value && navController.currentDestination?.route != Screen.Login.route) {
             Log.d("AppNavigation", "Not logged in, navigating to LoginScreen")
-            navController.navigate(Screen.Login.route) {
+            navController.navigate("onboarding") {
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
                 launchSingleTop = true
             }

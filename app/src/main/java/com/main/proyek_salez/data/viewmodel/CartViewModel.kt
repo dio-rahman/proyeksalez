@@ -1,6 +1,5 @@
 package com.main.proyek_salez.data.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.main.proyek_salez.data.model.FoodItemEntity
@@ -8,11 +7,7 @@ import com.main.proyek_salez.data.model.CartItemWithFood
 import com.main.proyek_salez.data.repository.CashierRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

@@ -25,7 +25,6 @@ import com.main.proyek_salez.R
 import com.main.proyek_salez.data.model.User
 import com.main.proyek_salez.data.repository.Result
 import com.main.proyek_salez.data.viewmodel.AuthViewModel
-import androidx.activity.compose.BackHandler
 import com.main.proyek_salez.ui.theme.*
 
 @Composable
@@ -34,9 +33,6 @@ fun LoginScreen(
     onLoginSuccess: (User) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    BackHandler(enabled = true) {
-        // Tidak ada aksi, mencegah kembali
-    }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }

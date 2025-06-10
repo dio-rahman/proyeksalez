@@ -11,7 +11,6 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -25,8 +24,6 @@ import androidx.navigation.NavController
 import com.main.proyek_salez.R
 import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.model.OrderEntity
-import com.main.proyek_salez.data.model.UserRole
-import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import com.main.proyek_salez.data.viewmodel.CashierViewModel
 import com.main.proyek_salez.ui.sidebar.SidebarManager
 import com.main.proyek_salez.ui.theme.*

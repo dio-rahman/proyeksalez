@@ -19,26 +19,6 @@ data class DailySummaryEntity(
     @PropertyName("previousMenuItems") val previousMenuItems: Int? = null,
     @PropertyName("previousCustomers") val previousCustomers: Int? = null
 ) {
-    // No-arg constructor for Firestore deserialization
-    constructor() : this(
-        id = 0,
-        date = "",
-        totalRevenue = 0.0,
-        totalMenuItems = 0,
-        totalCustomers = 0,
-        closedAt = Timestamp.now(),
-        previousRevenue = null,
-        previousMenuItems = null,
-        previousCustomers = null
-    )
-
-    // Helper methods to convert between LocalDateTime and Timestamp
-    fun getClosedAtAsLocalDateTime(): LocalDateTime {
-        return closedAt.toDate().toInstant()
-            .atZone(ZoneId.systemDefault())
-            .toLocalDateTime()
-    }
-
     companion object {
         fun fromLocalDateTime(dateTime: LocalDateTime): Timestamp {
             return Timestamp(

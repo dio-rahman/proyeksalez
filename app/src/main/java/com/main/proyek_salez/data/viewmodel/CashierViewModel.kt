@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.main.proyek_salez.data.model.CategoryEntity
 import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.model.OrderEntity
 import com.main.proyek_salez.data.model.CartItemWithFood
