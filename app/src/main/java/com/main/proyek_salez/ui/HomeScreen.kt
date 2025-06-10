@@ -51,7 +51,10 @@ fun HomeScreen(
     val gradientBackground = Brush.verticalGradient(
         colors = listOf(Putih, Jingga, UnguTua)
     )
-    val categories = listOf("Rekomendasi", "Makanan", "Minuman", "Lainnya")
+    val categories by cashierViewModel.getAllCategories().collectAsState(initial = emptyList())
+    val categoryNames = remember(categories) {
+        listOf("Rekomendasi") + categories.map { it.name }
+    }
 
     val cartItems by cartViewModel.cartItems.collectAsState(initial = emptyList())
 
@@ -99,28 +102,6 @@ fun HomeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(140.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "HALO,",
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            color = Oranye,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "DIO!",
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            color = UnguTua,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-                }
-
                 Spacer(modifier = Modifier.height(35.dp))
                 Row(
                     modifier = Modifier
@@ -254,7 +235,7 @@ fun HomeScreen(
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(categories) { category ->
+                    items(categoryNames) { category ->
                         CategoryButton(
                             text = category,
                             onClick = { selectedCategory = category },

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.model.OrderEntity
 import com.main.proyek_salez.data.model.CartItemWithFood
+import com.main.proyek_salez.data.model.CategoryEntity
 import com.main.proyek_salez.data.repository.CashierRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -14,7 +15,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CashierViewModel @Inject constructor(
+class  CashierViewModel @Inject constructor(
     private val repository: CashierRepository
 ) : ViewModel() {
 
@@ -176,4 +177,6 @@ class CashierViewModel @Inject constructor(
                 emit(emptyList())
             }
     }
+
+    fun getAllCategories(): Flow<List<CategoryEntity>> = repository.getAllCategories()
 }

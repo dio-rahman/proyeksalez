@@ -155,7 +155,7 @@ fun CartScreen(
                         .clip(RoundedCornerShape(50)),
                     placeholder = {
                         Text(
-                            text = "Masukkan nama pelanggan disini",
+                            text = "",
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
                             fontSize = 14.sp

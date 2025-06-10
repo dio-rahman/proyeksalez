@@ -206,28 +206,6 @@ fun ManagerScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(modifier = Modifier.height(5.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "HALO,",
-                            style = MaterialTheme.typography.headlineLarge.copy(
-                                color = Oranye,
-                                fontWeight = FontWeight.Bold
-                            )
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "DIO!",
-                            style = MaterialTheme.typography.headlineLarge.copy(
-                                color = UnguTua,
-                                fontWeight = FontWeight.Bold
-                            )
-                        )
-                    }
-
                     Spacer(modifier = Modifier.height(16.dp))
                     Card(
                         modifier = Modifier.fillMaxWidth(),
