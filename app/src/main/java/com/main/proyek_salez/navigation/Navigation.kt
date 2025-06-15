@@ -25,6 +25,7 @@ import com.main.proyek_salez.ui.manager.DashboardManager
 import com.main.proyek_salez.ui.manager.ManagerScreen
 import com.main.proyek_salez.ui.manager.OrderHistoryManager
 import com.main.proyek_salez.ui.menu.OrderHistoryScreen
+import com.main.proyek_salez.ui.sidebar.ManagerProfileScreen
 import com.main.proyek_salez.ui.sidebar.ProfileScreen
 
 @Composable
@@ -118,6 +119,9 @@ fun AppNavigation() {
         }
         composable("manager_dashboard") {
             DashboardManager(navController = navController)
+        }
+        composable("manager_profile") {
+            ManagerProfileScreen(navController = navController)
         }
     }
 }
