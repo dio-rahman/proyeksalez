@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,7 +20,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,13 +27,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.main.proyek_salez.data.model.CategoryEntity
 import com.main.proyek_salez.data.model.FoodItemEntity
-import com.main.proyek_salez.data.model.UserRole
-import com.main.proyek_salez.data.viewmodel.AuthViewModel
 import com.main.proyek_salez.data.viewmodel.ManagerViewModel
 import com.main.proyek_salez.ui.sidebar.SidebarManager
 import com.main.proyek_salez.ui.theme.*
@@ -49,7 +44,6 @@ fun ManagerScreen(
     navController: NavController,
     viewModel: ManagerViewModel = hiltViewModel(),
 ) {
-
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var categoryName by rememberSaveable { mutableStateOf("") }
@@ -62,6 +56,8 @@ fun ManagerScreen(
     var editingFoodItem by rememberSaveable { mutableStateOf<FoodItemEntity?>(null) }
     var showDeleteCategoryDialog by remember { mutableStateOf<String?>(null) }
     var showDeleteFoodItemDialog by remember { mutableStateOf<Long?>(null) }
+    var showEditCategoryDialog by remember { mutableStateOf<CategoryEntity?>(null) }
+    var editingCategoryName by rememberSaveable { mutableStateOf("") }
 
     val categories by viewModel.categories.collectAsState()
     val foodItems by viewModel.foodItems.collectAsState()
@@ -81,18 +77,8 @@ fun ManagerScreen(
     showDeleteCategoryDialog?.let { categoryId ->
         AlertDialog(
             onDismissRequest = { showDeleteCategoryDialog = null },
-            title = {
-                Text(
-                    "Konfirmasi Hapus",
-                    style = MaterialTheme.typography.headlineLarge.copy(color = UnguTua)
-                )
-            },
-            text = {
-                Text(
-                    "Apakah anda yakin untuk menghapus kategori ini?",
-                    style = MaterialTheme.typography.bodyMedium.copy(color = UnguTua)
-                )
-            },
+            title = { Text("Konfirmasi Hapus", style = MaterialTheme.typography.headlineLarge.copy(color = UnguTua)) },
+            text = { Text("Apakah anda yakin untuk menghapus kategori ini?", style = MaterialTheme.typography.bodyMedium.copy(color = UnguTua)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -100,17 +86,58 @@ fun ManagerScreen(
                         showDeleteCategoryDialog = null
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = UnguTua)
-                ) {
-                    Text("Ya")
-                }
+                ) { Text("Ya") }
             },
             dismissButton = {
                 TextButton(
                     onClick = { showDeleteCategoryDialog = null },
                     colors = ButtonDefaults.textButtonColors(contentColor = UnguTua)
-                ) {
-                    Text("Batal")
-                }
+                ) { Text("Batal") }
+            }
+        )
+    }
+
+    showEditCategoryDialog?.let { category ->
+        AlertDialog(
+            onDismissRequest = { showEditCategoryDialog = null },
+            title = { Text("Edit Kategori", style = MaterialTheme.typography.headlineLarge.copy(color = UnguTua)) },
+            text = {
+                OutlinedTextField(
+                    value = editingCategoryName,
+                    onValueChange = { editingCategoryName = it },
+                    label = { Text("Nama Kategori") },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedContainerColor = Putih,
+                        focusedContainerColor = Putih,
+                        focusedBorderColor = UnguTua,
+                        unfocusedBorderColor = AbuAbu
+                    ),
+                    shape = RoundedCornerShape(50)
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (editingCategoryName.isBlank()) {
+                            viewModel.setErrorMessage("Nama kategori tidak boleh kosong")
+                        } else {
+                            viewModel.updateCategory(category.id, editingCategoryName)
+                            showEditCategoryDialog = null
+                            editingCategoryName = ""
+                        }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = UnguTua)
+                ) { Text("Simpan") }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showEditCategoryDialog = null
+                        editingCategoryName = ""
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = UnguTua)
+                ) { Text("Batal") }
             }
         )
     }
@@ -118,18 +145,8 @@ fun ManagerScreen(
     showDeleteFoodItemDialog?.let { foodItemId ->
         AlertDialog(
             onDismissRequest = { showDeleteFoodItemDialog = null },
-            title = {
-                Text(
-                    "Konfirmasi Hapus",
-                    style = MaterialTheme.typography.headlineLarge.copy(color = UnguTua)
-                )
-            },
-            text = {
-                Text(
-                    "Apakah anda yakin untuk menghapus menu ini?",
-                    style = MaterialTheme.typography.bodyMedium.copy(color = UnguTua)
-                )
-            },
+            title = { Text("Konfirmasi Hapus", style = MaterialTheme.typography.headlineLarge.copy(color = UnguTua)) },
+            text = { Text("Apakah anda yakin untuk menghapus menu ini?", style = MaterialTheme.typography.bodyMedium.copy(color = UnguTua)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -137,17 +154,13 @@ fun ManagerScreen(
                         showDeleteFoodItemDialog = null
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = UnguTua)
-                ) {
-                    Text("Ya")
-                }
+                ) { Text("Ya") }
             },
             dismissButton = {
                 TextButton(
                     onClick = { showDeleteFoodItemDialog = null },
                     colors = ButtonDefaults.textButtonColors(contentColor = UnguTua)
-                ) {
-                    Text("Batal")
-                }
+                ) { Text("Batal") }
             }
         )
     }
@@ -157,11 +170,7 @@ fun ManagerScreen(
         drawerContent = {
             SidebarManager(
                 navController = navController,
-                onCloseDrawer = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                }
+                onCloseDrawer = { scope.launch { drawerState.close() } }
             )
         }
     ) {
@@ -178,16 +187,11 @@ fun ManagerScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
-                        onClick = {
-                            scope.launch {
-                                drawerState.open()
-                            }
-                        },
+                        onClick = { scope.launch { drawerState.open() } },
                         modifier = Modifier.padding(start = 2.dp)
                     ) {
                         Icon(
@@ -204,7 +208,6 @@ fun ManagerScreen(
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Spacer(modifier = Modifier.height(5.dp))
                     Spacer(modifier = Modifier.height(16.dp))
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -308,9 +311,7 @@ fun ManagerScreen(
                             )
                             OutlinedTextField(
                                 value = foodPrice,
-                                onValueChange = {
-                                    foodPrice = it.filter { it.isDigit() || it == '.' }
-                                },
+                                onValueChange = { foodPrice = it.filter { it.isDigit() || it == '.' } },
                                 label = { Text("Harga Menu") },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = OutlinedTextFieldDefaults.colors(
@@ -341,8 +342,7 @@ fun ManagerScreen(
                             }
                             Box {
                                 OutlinedTextField(
-                                    value = categories.find { it.id == selectedCategoryId }?.name
-                                        ?: "Pilih Kategori",
+                                    value = categories.find { it.id == selectedCategoryId }?.name ?: "Pilih Kategori",
                                     onValueChange = {},
                                     readOnly = true,
                                     modifier = Modifier
@@ -356,9 +356,7 @@ fun ManagerScreen(
                                     ),
                                     shape = RoundedCornerShape(50),
                                     trailingIcon = {
-                                        IconButton(onClick = {
-                                            isCategoryDropdownExpanded = true
-                                        }) {
+                                        IconButton(onClick = { isCategoryDropdownExpanded = true }) {
                                             Icon(
                                                 imageVector = if (isCategoryDropdownExpanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                                                 contentDescription = null,
@@ -377,19 +375,14 @@ fun ManagerScreen(
                                             text = {
                                                 Text(
                                                     category.name,
-                                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                                        color = UnguTua
-                                                    )
+                                                    style = MaterialTheme.typography.bodyLarge.copy(color = UnguTua)
                                                 )
                                             },
                                             onClick = {
                                                 selectedCategoryId = category.id
                                                 isCategoryDropdownExpanded = false
                                             },
-                                            contentPadding = PaddingValues(
-                                                horizontal = 16.dp,
-                                                vertical = 8.dp
-                                            )
+                                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                                         )
                                     }
                                 }
@@ -410,34 +403,19 @@ fun ManagerScreen(
                                             viewModel.clearErrorMessage()
                                         },
                                         colors = ButtonDefaults.textButtonColors(contentColor = UnguTua)
-                                    ) {
-                                        Text(
-                                            "Batal",
-                                            style = MaterialTheme.typography.bodyLarge.copy(color = UnguTua)
-                                        )
-                                    }
+                                    ) { Text("Batal", style = MaterialTheme.typography.bodyLarge.copy(color = UnguTua)) }
                                 }
                                 Button(
                                     onClick = {
                                         viewModel.clearErrorMessage()
                                         when {
-                                            foodName.isBlank() -> viewModel.setErrorMessage(
-                                                "Nama menu tidak boleh kosong"
-                                            )
-
-                                            foodPrice.isBlank() -> viewModel.setErrorMessage(
-                                                "Harga menu tidak boleh kosong"
-                                            )
-
-                                            selectedCategoryId == null -> viewModel.setErrorMessage(
-                                                "Pilih kategori terlebih dahulu"
-                                            )
-
+                                            foodName.isBlank() -> viewModel.setErrorMessage("Nama menu tidak boleh kosong")
+                                            foodPrice.isBlank() -> viewModel.setErrorMessage("Harga menu tidak boleh kosong")
+                                            selectedCategoryId == null -> viewModel.setErrorMessage("Pilih kategori terlebih dahulu")
                                             else -> {
-                                                val imagePath: String? =
-                                                    selectedImageUri?.let { uri ->
-                                                        saveImageToInternalStorage(context, uri)
-                                                    } ?: editingFoodItem?.imagePath
+                                                val imagePath: String? = selectedImageUri?.let { uri ->
+                                                    saveImageToInternalStorage(context, uri)
+                                                } ?: editingFoodItem?.imagePath
                                                 if (editingFoodItem == null) {
                                                     viewModel.addFoodItem(
                                                         name = foodName,
@@ -524,14 +502,24 @@ fun ManagerScreen(
                                             style = MaterialTheme.typography.bodyLarge.copy(color = UnguTua),
                                             modifier = Modifier.weight(1f)
                                         )
-                                        IconButton(onClick = {
-                                            showDeleteCategoryDialog = category.id
-                                        }) {
-                                            Icon(
-                                                imageVector = Icons.Default.Delete,
-                                                contentDescription = "Hapus Kategori",
-                                                tint = Merah
-                                            )
+                                        Row {
+                                            IconButton(onClick = {
+                                                showEditCategoryDialog = category
+                                                editingCategoryName = category.name
+                                            }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Edit,
+                                                    contentDescription = "Edit Kategori",
+                                                    tint = UnguTua
+                                                )
+                                            }
+                                            IconButton(onClick = { showDeleteCategoryDialog = category.id }) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Delete,
+                                                    contentDescription = "Hapus Kategori",
+                                                    tint = Merah
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -559,8 +547,7 @@ fun ManagerScreen(
                                 items(foodItems) { foodItem ->
                                     FoodItemCard(
                                         foodItem = foodItem,
-                                        categoryName = categories.find { it.id == foodItem.categoryId }?.name
-                                            ?: "Unknown",
+                                        categoryName = categories.find { it.id == foodItem.categoryId }?.name ?: "Unknown",
                                         onEdit = {
                                             editingFoodItem = foodItem
                                             foodName = foodItem.name

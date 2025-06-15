@@ -126,6 +126,26 @@ class ManagerRepository @Inject constructor(
         }
     }
 
+    suspend fun updateCategory(categoryId: String, newName: String): Result<Unit> {
+        return try {
+            val normalizedName = newName.lowercase().trim()
+            val querySnapshot = firestore.collection("categories")
+                .whereEqualTo("name", normalizedName)
+                .get()
+                .await()
+            if (!querySnapshot.isEmpty && querySnapshot.documents.none { it.id == categoryId }) {
+                return Result.Error("Kategori '$normalizedName' sudah ada")
+            }
+            firestore.collection("categories")
+                .document(categoryId)
+                .update("name", normalizedName)
+                .await()
+            Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Error("Gagal memperbarui kategori: ${e.message}")
+        }
+    }
+
     suspend fun deleteCategory(categoryId: String): Result<Unit> {
         return try {
             val foodItems = firestore.collection("food_items")

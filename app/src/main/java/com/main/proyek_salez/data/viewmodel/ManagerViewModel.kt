@@ -66,6 +66,15 @@ class ManagerViewModel @Inject constructor(
         }
     }
 
+    fun updateCategory(categoryId: String, newName: String) {
+        viewModelScope.launch {
+            when (val result = repository.updateCategory(categoryId, newName)) {
+                is Result.Success -> clearErrorMessage()
+                is Result.Error -> setErrorMessage(result.message)
+            }
+        }
+    }
+
     fun deleteCategory(categoryId: String) {
         viewModelScope.launch {
             when (val result = repository.deleteCategory(categoryId)) {
