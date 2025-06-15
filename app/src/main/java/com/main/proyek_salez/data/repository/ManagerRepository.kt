@@ -8,6 +8,7 @@ import com.main.proyek_salez.data.model.DailySummaryEntity
 import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.model.OrderEntity
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
@@ -100,20 +101,26 @@ class ManagerRepository @Inject constructor(
 
     suspend fun addCategory(category: CategoryEntity): Result<Unit> {
         return try {
-            val exists = firestore.collection("categories")
-                .whereEqualTo("name", category.name.lowercase())
+            val normalizedName = category.name.lowercase().trim()
+            val querySnapshot = firestore.collection("categories")
+                .whereEqualTo("name", normalizedName)
                 .get()
                 .await()
-                .documents
-                .isNotEmpty()
-            if (exists) {
-                Result.Error("Kategori '${category.name}' sudah ada")
-            } else {
-                val newDocRef = firestore.collection("categories").document()
-                val newCategory = category.copy(id = newDocRef.id)
-                newDocRef.set(newCategory).await()
-                Result.Success(Unit)
+            querySnapshot.documents.forEach { doc ->
+                val name = doc.getString("name") ?: "null"
+                Log.d("ManagerRepository", "Found document: ${doc.id}, name: $name")
             }
+            if (!querySnapshot.isEmpty) {
+                Log.d("ManagerRepository", "Category '$normalizedName' already exists")
+                return Result.Error("Kategori '$normalizedName' sudah ada")
+            }
+            firestore.runTransaction { transaction ->
+                val newDocRef = firestore.collection("categories").document()
+                val newCategory = category.copy(id = newDocRef.id, name = normalizedName)
+                transaction.set(newDocRef, newCategory)
+                Log.d("ManagerRepository", "Added new category: ${newDocRef.id}, name: ${newCategory.name}")
+            }.await()
+            Result.Success(Unit)
         } catch (e: Exception) {
             Result.Error("Gagal menambah kategori: ${e.message}")
         }
@@ -141,21 +148,15 @@ class ManagerRepository @Inject constructor(
 
     suspend fun addFoodItem(foodItem: FoodItemEntity): Result<Unit> {
         return try {
-            val exists = firestore.collection("food_items")
-                .document(foodItem.id.toString())
-                .get()
+            val newId = System.currentTimeMillis()
+            val foodItemWithId = foodItem.copy(id = newId)
+            firestore.collection("food_items")
+                .document(newId.toString())
+                .set(foodItemWithId.copy(searchKeywords = foodItem.name.lowercase().split(" ")))
                 .await()
-                .exists()
-            if (exists) {
-                Result.Error("ID menu '${foodItem.id}' sudah digunakan")
-            } else {
-                firestore.collection("food_items")
-                    .document(foodItem.id.toString())
-                    .set(foodItem.copy(searchKeywords = foodItem.name.lowercase().split(" ")))
-                    .await()
-                Result.Success(Unit)
-            }
+            Result.Success(Unit)
         } catch (e: Exception) {
+            Log.e("ManagerRepository", "Error adding food item: ${e.message}")
             Result.Error("Gagal menambah menu: ${e.message}")
         }
     }

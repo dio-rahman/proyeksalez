@@ -149,12 +149,17 @@ fun HomeScreen(
                     onClick = {
                         scope.launch {
                             errorMessage = ""
-                            cartViewModel.searchFoodItems(menuInput).collectLatest { items ->
-                                if (items.isNotEmpty()) {
-                                    searchResult = items
-                                } else {
-                                    searchResult = emptyList()
-                                    errorMessage = "Menu '${menuInput}' tidak tersedia."
+                            if (menuInput.isBlank()) {
+                                errorMessage = "Masukkan nama menu"
+                                searchResult = emptyList()
+                            } else {
+                                cartViewModel.searchFoodItems(menuInput).collectLatest { items ->
+                                    if (items.isNotEmpty()) {
+                                        searchResult = items
+                                    } else {
+                                        searchResult = emptyList()
+                                        errorMessage = "Menu '${menuInput}' tidak tersedia."
+                                    }
                                 }
                             }
                         }

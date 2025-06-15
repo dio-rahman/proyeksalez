@@ -53,7 +53,6 @@ fun ManagerScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var categoryName by rememberSaveable { mutableStateOf("") }
-    var foodId by rememberSaveable { mutableStateOf("") }
     var foodName by rememberSaveable { mutableStateOf("") }
     var foodDesc by rememberSaveable { mutableStateOf("") }
     var foodPrice by rememberSaveable { mutableStateOf("") }
@@ -282,20 +281,6 @@ fun ManagerScreen(
                                 )
                             )
                             OutlinedTextField(
-                                value = foodId,
-                                onValueChange = { foodId = it.filter { it.isDigit() } },
-                                label = { Text("ID Menu") },
-                                modifier = Modifier.fillMaxWidth(),
-                                enabled = editingFoodItem == null,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    unfocusedContainerColor = Putih,
-                                    focusedContainerColor = Putih,
-                                    focusedBorderColor = UnguTua,
-                                    unfocusedBorderColor = AbuAbu
-                                ),
-                                shape = RoundedCornerShape(50)
-                            )
-                            OutlinedTextField(
                                 value = foodName,
                                 onValueChange = { foodName = it },
                                 label = { Text("Nama Menu") },
@@ -416,7 +401,6 @@ fun ManagerScreen(
                                 if (editingFoodItem != null) {
                                     TextButton(
                                         onClick = {
-                                            foodId = ""
                                             foodName = ""
                                             foodDesc = ""
                                             foodPrice = ""
@@ -437,10 +421,6 @@ fun ManagerScreen(
                                     onClick = {
                                         viewModel.clearErrorMessage()
                                         when {
-                                            foodId.isBlank() -> viewModel.setErrorMessage(
-                                                "ID menu tidak boleh kosong"
-                                            )
-
                                             foodName.isBlank() -> viewModel.setErrorMessage(
                                                 "Nama menu tidak boleh kosong"
                                             )
@@ -460,7 +440,6 @@ fun ManagerScreen(
                                                     } ?: editingFoodItem?.imagePath
                                                 if (editingFoodItem == null) {
                                                     viewModel.addFoodItem(
-                                                        id = foodId.toLongOrNull() ?: 0,
                                                         name = foodName,
                                                         description = foodDesc,
                                                         price = foodPrice.toDoubleOrNull() ?: 0.0,
@@ -478,7 +457,6 @@ fun ManagerScreen(
                                                     )
                                                 }
                                                 if (viewModel.errorMessage.value == null) {
-                                                    foodId = ""
                                                     foodName = ""
                                                     foodDesc = ""
                                                     foodPrice = ""
@@ -585,7 +563,6 @@ fun ManagerScreen(
                                             ?: "Unknown",
                                         onEdit = {
                                             editingFoodItem = foodItem
-                                            foodId = foodItem.id.toString()
                                             foodName = foodItem.name
                                             foodDesc = foodItem.description
                                             foodPrice = foodItem.price.toString()

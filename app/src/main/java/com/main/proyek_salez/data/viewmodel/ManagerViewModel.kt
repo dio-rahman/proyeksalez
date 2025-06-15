@@ -75,10 +75,10 @@ class ManagerViewModel @Inject constructor(
         }
     }
 
-    fun addFoodItem(id: Long, name: String, description: String, price: Double, imagePath: String?, categoryId: String) {
+    fun addFoodItem(name: String, description: String, price: Double, imagePath: String?, categoryId: String) {
         viewModelScope.launch {
             val foodItem = FoodItemEntity(
-                id = id,
+                id = 0L,
                 name = name,
                 description = description,
                 price = price,
