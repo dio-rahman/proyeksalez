@@ -86,7 +86,7 @@ fun OnboardingTombol(onClick: () -> Unit) {
                 disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
                 disabledContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.38f)
             ),
-            shape = RoundedCornerShape(50),
+            shape = RoundedCornerShape(8.dp),
             modifier = Modifier
                 .shadow(
                     elevation = 15.dp,

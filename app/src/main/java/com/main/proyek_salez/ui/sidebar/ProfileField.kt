@@ -55,14 +55,14 @@ fun ProfileField(
                     focusedBorderColor = UnguTua,
                     unfocusedBorderColor = AbuAbu
                 ),
-                shape = RoundedCornerShape(50)
+                shape = RoundedCornerShape(8.dp)
             )
         } else {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
-                    .background(Color.White, RoundedCornerShape(50)),
+                    .background(Color.White, RoundedCornerShape(8.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(

@@ -186,7 +186,7 @@ fun ProfileScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(20.dp))
             ProfileField(
-                label = "Nama Panggilan",
+                label = "NAMA PANGGILAN",
                 value = if (isEditMode) tempNickname else nickname,
                 onValueChange = { tempNickname = it },
                 isEditable = isEditMode
@@ -211,12 +211,12 @@ fun ProfileScreen(navController: NavController) {
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .height(48.dp)
-                        .shadow(elevation = 5.dp, shape = RoundedCornerShape(50)),
+                        .shadow(elevation = 5.dp, shape = RoundedCornerShape(8.dp)),
                     colors = ButtonDefaults.buttonColors(containerColor = Oranye),
                     shape = RoundedCornerShape(50)
                 ) {
                     Text(
-                        text = "Ganti Foto",
+                        text = "GANTI FOTO",
                         style = MaterialTheme.typography.headlineLarge.copy(
                             color = UnguTua,
                             fontWeight = FontWeight.Bold
@@ -243,12 +243,12 @@ fun ProfileScreen(navController: NavController) {
                             .weight(1f)
                             .padding(end = 8.dp)
                             .height(40.dp)
-                            .shadow(elevation = 5.dp, shape = RoundedCornerShape(50)),
+                            .shadow(elevation = 5.dp, shape = RoundedCornerShape(8.dp)),
                         colors = ButtonDefaults.buttonColors(containerColor = Merah),
                         shape = RoundedCornerShape(50)
                     ) {
                         Text(
-                            text = "Batalkan",
+                            text = "BATALKAN",
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 color = Putih,
                                 fontWeight = FontWeight.Bold
@@ -273,7 +273,7 @@ fun ProfileScreen(navController: NavController) {
                             .weight(1f)
                             .padding(start = 8.dp)
                             .height(40.dp)
-                            .shadow(elevation = 5.dp, shape = RoundedCornerShape(50)),
+                            .shadow(elevation = 5.dp, shape = RoundedCornerShape(8.dp)),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (hasSpacesInUsername) Color.Gray else Hijau
                         ),
@@ -281,7 +281,7 @@ fun ProfileScreen(navController: NavController) {
                         shape = RoundedCornerShape(50)
                     ) {
                         Text(
-                            text = "Simpan",
+                            text = "SIMPAN",
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 color = Putih,
                                 fontWeight = FontWeight.Bold
@@ -302,12 +302,12 @@ fun ProfileScreen(navController: NavController) {
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .height(48.dp)
-                        .shadow(elevation = 5.dp, shape = RoundedCornerShape(50)),
+                        .shadow(elevation = 5.dp, shape = RoundedCornerShape(8.dp)),
                     colors = ButtonDefaults.buttonColors(containerColor = Oranye),
                     shape = RoundedCornerShape(50)
                 ) {
                     Text(
-                        text = "Edit Biodata",
+                        text = "EDIT PROFIL",
                         style = MaterialTheme.typography.headlineLarge.copy(
                             color = UnguTua,
                             fontWeight = FontWeight.Bold

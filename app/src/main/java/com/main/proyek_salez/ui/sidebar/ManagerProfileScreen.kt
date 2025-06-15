@@ -234,9 +234,9 @@ fun ManagerProfileScreen(navController: NavController) {
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .height(48.dp)
-                        .shadow(elevation = 5.dp, shape = RoundedCornerShape(50)),
+                        .shadow(elevation = 5.dp, shape = RoundedCornerShape(8.dp)),
                     colors = ButtonDefaults.buttonColors(containerColor = Oranye),
-                    shape = RoundedCornerShape(50)
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
                         text = "Ganti Foto",
@@ -266,9 +266,9 @@ fun ManagerProfileScreen(navController: NavController) {
                             .weight(1f)
                             .padding(end = 8.dp)
                             .height(40.dp)
-                            .shadow(elevation = 5.dp, shape = RoundedCornerShape(50)),
+                            .shadow(elevation = 5.dp, shape = RoundedCornerShape(8.dp)),
                         colors = ButtonDefaults.buttonColors(containerColor = Merah),
-                        shape = RoundedCornerShape(50)
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
                             text = "Batalkan",
@@ -303,12 +303,12 @@ fun ManagerProfileScreen(navController: NavController) {
                             .weight(1f)
                             .padding(start = 8.dp)
                             .height(40.dp)
-                            .shadow(elevation = 5.dp, shape = RoundedCornerShape(50)),
+                            .shadow(elevation = 5.dp, shape = RoundedCornerShape(8.dp)),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (hasSpacesInUsername) Color.Gray else Hijau
                         ),
                         enabled = !hasSpacesInUsername,
-                        shape = RoundedCornerShape(50)
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
                             text = "Simpan",
@@ -332,12 +332,12 @@ fun ManagerProfileScreen(navController: NavController) {
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .height(48.dp)
-                        .shadow(elevation = 5.dp, shape = RoundedCornerShape(50)),
+                        .shadow(elevation = 5.dp, shape = RoundedCornerShape(8.dp)),
                     colors = ButtonDefaults.buttonColors(containerColor = Oranye),
-                    shape = RoundedCornerShape(50)
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        text = "Edit Biodata",
+                        text = "EDIT PROFIL",
                         style = MaterialTheme.typography.headlineLarge.copy(
                             color = UnguTua,
                             fontWeight = FontWeight.Bold

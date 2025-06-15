@@ -25,7 +25,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
 import com.main.proyek_salez.data.viewmodel.CashierViewModel
-import com.main.proyek_salez.ui.SidebarMenu
+import com.main.proyek_salez.ui.sidebar.SidebarMenu
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.launch
 
@@ -92,7 +92,8 @@ fun CheckoutScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = { scope.launch { drawerState.open() } }, modifier = Modifier.padding(start = 10.dp)) {
@@ -155,18 +156,65 @@ fun CheckoutScreen(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(max = 200.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(cartItems) { cartItemWithFood ->
-                                CartItemCard(
-                                    cartItemWithFood = cartItemWithFood,
-                                    onIncrement = {},
-                                    onDecrement = {}
+                        if (cartItems.isEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(100.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Keranjang kosong",
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        color = UnguTua,
+                                        textAlign = TextAlign.Center
+                                    )
                                 )
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(max = 200.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(cartItems) { cartItemWithFood ->
+                                    CartItemCard(
+                                        cartItemWithFood = cartItemWithFood,
+                                        onIncrement = {
+                                            Log.d("CheckoutScreen", "=== INCREMENT CLICKED ===")
+                                            Log.d("CheckoutScreen", "Item: ${cartItemWithFood.foodItem.name}")
+                                            Log.d("CheckoutScreen", "Current quantity: ${cartItemWithFood.cartItem.quantity}")
+                                            Log.d("CheckoutScreen", "Food ID: ${cartItemWithFood.foodItem.id}")
+
+                                            scope.launch {
+                                                try {
+                                                    viewModel.addToCart(cartItemWithFood.foodItem)
+                                                    Log.d("CheckoutScreen", "Successfully called addToCart for ${cartItemWithFood.foodItem.name}")
+                                                } catch (e: Exception) {
+                                                    Log.e("CheckoutScreen", "Error incrementing item: ${e.message}")
+                                                    errorMessage = "Gagal menambah ${cartItemWithFood.foodItem.name}: ${e.message}"
+                                                }
+                                            }
+                                        },
+                                        onDecrement = {
+                                            Log.d("CheckoutScreen", "=== DECREMENT CLICKED ===")
+                                            Log.d("CheckoutScreen", "Item: ${cartItemWithFood.foodItem.name}")
+                                            Log.d("CheckoutScreen", "Current quantity: ${cartItemWithFood.cartItem.quantity}")
+                                            Log.d("CheckoutScreen", "Food ID: ${cartItemWithFood.foodItem.id}")
+
+                                            scope.launch {
+                                                try {
+                                                    viewModel.decrementItem(cartItemWithFood.foodItem)
+                                                    Log.d("CheckoutScreen", "Successfully called decrementItem for ${cartItemWithFood.foodItem.name}")
+                                                } catch (e: Exception) {
+                                                    Log.e("CheckoutScreen", "Error decrementing item: ${e.message}")
+                                                    errorMessage = "Gagal mengurangi ${cartItemWithFood.foodItem.name}: ${e.message}"
+                                                }
+                                            }
+                                        }
+                                    )
+                                }
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))
@@ -220,15 +268,15 @@ fun CheckoutScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 40.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(Putih)
+                        .width(250.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Putih),
+                    contentAlignment = Alignment.Center
                 ) {
                     ExposedDropdownMenuBox(
                         expanded = expanded,
                         onExpandedChange = { expanded = !expanded },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.width(250.dp)
                     ) {
                         OutlinedTextField(
                             value = paymentMethod,
@@ -242,8 +290,9 @@ fun CheckoutScreen(
                                 )
                             },
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor(),
+                                .width(265.dp)
+                                .height(50.dp)
+                                .menuAnchor(MenuAnchorType.PrimaryEditable),
                             colors = OutlinedTextFieldDefaults.colors(
                                 unfocusedContainerColor = Putih,
                                 focusedContainerColor = Putih,
@@ -252,14 +301,17 @@ fun CheckoutScreen(
                             ),
                             textStyle = LocalTextStyle.current.copy(
                                 textAlign = TextAlign.Center,
-                                color = UnguTua
+                                color = UnguTua,
+                                fontSize = 16.sp
                             ),
-                            shape = RoundedCornerShape(50)
+                            shape = RoundedCornerShape(8.dp)
                         )
                         ExposedDropdownMenu(
                             expanded = expanded,
                             onDismissRequest = { expanded = false },
-                            modifier = Modifier.background(Putih)
+                            modifier = Modifier
+                                .background(Putih)
+                                .width(250.dp)
                         ) {
                             paymentMethods.forEach { method ->
                                 DropdownMenuItem(
@@ -268,7 +320,7 @@ fun CheckoutScreen(
                                             text = method,
                                             style = MaterialTheme.typography.bodyMedium.copy(
                                                 color = UnguTua,
-                                                fontSize = 14.sp
+                                                fontSize = 16.sp
                                             )
                                         )
                                     },
@@ -321,7 +373,7 @@ fun CheckoutScreen(
                                     try {
                                         viewModel.createOrder(paymentMethod)
                                         Log.d("CheckoutScreen", "Order created successfully")
-                                        navController.navigate("cart_screen") {
+                                        navController.navigate("completion_screen") {
                                             popUpTo("checkout_screen") { inclusive = true }
                                         }
                                     } catch (e: Exception) {
@@ -337,10 +389,10 @@ fun CheckoutScreen(
                         .padding(horizontal = 40.dp)
                         .height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Oranye),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(50)
                 ) {
                     Text(
-                        text = "Selesaikan Pembayaran",
+                        text = "SELESAIKAN",
                         style = MaterialTheme.typography.headlineLarge.copy(
                             color = UnguTua,
                             fontWeight = FontWeight.Bold,
@@ -356,10 +408,10 @@ fun CheckoutScreen(
                         .padding(horizontal = 40.dp)
                         .height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Merah),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(50)
                 ) {
                     Text(
-                        text = "Batalkan Pembayaran",
+                        text = "BATALKAN",
                         style = MaterialTheme.typography.headlineLarge.copy(
                             color = Putih,
                             fontWeight = FontWeight.Bold,

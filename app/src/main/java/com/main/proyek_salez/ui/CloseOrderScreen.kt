@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.main.proyek_salez.ui.sidebar.SidebarMenu
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -149,7 +150,7 @@ fun CloseOrderScreen(
                     shape = RoundedCornerShape(50)
                 ) {
                     Text(
-                        text = "Tutup Pesanan Harian",
+                        text = "SELESAIKAN",
                         style = MaterialTheme.typography.bodyLarge.copy(
                             color = UnguTua,
                             fontWeight = FontWeight.Bold

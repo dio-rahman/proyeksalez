@@ -34,6 +34,7 @@ import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import com.main.proyek_salez.data.model.CartItemWithFood
+import com.main.proyek_salez.ui.sidebar.SidebarMenu
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,6 +58,16 @@ fun HomeScreen(
     }
 
     val cartItems by cartViewModel.cartItems.collectAsState(initial = emptyList())
+
+    val infiniteTransition = rememberInfiniteTransition()
+    val offsetX by infiniteTransition.animateFloat(
+        initialValue = 20f,
+        targetValue = -20f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        )
+    )
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -129,7 +140,7 @@ fun HomeScreen(
                             focusedBorderColor = UnguTua,
                             unfocusedBorderColor = AbuAbu
                         ),
-                        shape = RoundedCornerShape(50)
+                        shape = RoundedCornerShape(8.dp)
                     )
                     IconButton(
                         onClick = { navController.navigate("cart_screen") },
@@ -173,7 +184,7 @@ fun HomeScreen(
                     shape = RoundedCornerShape(50)
                 ) {
                     Text(
-                        text = "Cari Menu",
+                        text = "CARI MENU",
                         style = MaterialTheme.typography.headlineLarge.copy(
                             color = UnguTua,
                             fontWeight = FontWeight.Bold
@@ -189,7 +200,7 @@ fun HomeScreen(
                     ) {
                         if (searchResult.isNotEmpty()) {
                             LazyRow(
-                                modifier = Modifier.height(120.dp),
+                                modifier = Modifier.height(130.dp),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 items(searchResult) { foodItem ->
@@ -244,7 +255,8 @@ fun HomeScreen(
                         CategoryButton(
                             text = category,
                             onClick = { selectedCategory = category },
-                            isSelected = selectedCategory == category
+                            isSelected = selectedCategory == category,
+                            offsetX = offsetX
                         )
                     }
                 }
@@ -271,36 +283,22 @@ fun CategoryButton(
     text: String,
     onClick: () -> Unit,
     isSelected: Boolean,
+    offsetX: Float,
     style: TextStyle = MaterialTheme.typography.bodyLarge.copy(
-        color = UnguTua,
+        color = Putih,
         fontWeight = FontWeight.Bold,
-        fontSize = 20.sp
+        fontSize = 18.sp // Mengurangi ukuran font sedikit agar muat
     )
 ) {
-    val infiniteTransition = rememberInfiniteTransition()
-    val offsetX by infiniteTransition.animateFloat(
-        initialValue = 20f,
-        targetValue = -20f,
-        animationSpec = infiniteRepeatable(
-            animation = keyframes {
-                durationMillis = 5000
-                20f at 0
-                20f at 1000
-                -20f at 4000
-                -20f at 5000
-            },
-            repeatMode = RepeatMode.Restart
-        )
-    )
-
     Button(
         onClick = onClick,
         modifier = Modifier
-            .width(150.dp)
-            .height(48.dp),
+            .wrapContentWidth() // Lebar dinamis berdasarkan teks
+            .height(48.dp)
+            .padding(horizontal = 4.dp), // Padding horizontal untuk ruang antar tombol
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isSelected) Jingga else Oranye
+            containerColor = if (isSelected) Oranye else UnguTua // Warna berbeda untuk tombol yang dipilih
         ),
         shape = RoundedCornerShape(50)
     ) {
@@ -312,7 +310,9 @@ fun CategoryButton(
                 text = text,
                 style = style,
                 maxLines = 1,
-                modifier = Modifier.offset(x = offsetX.dp)
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(horizontal = 8.dp) // Padding internal untuk teks
             )
         }
     }
@@ -334,7 +334,7 @@ fun MenuItemsDisplay(
 
     if (foodItems.value.isEmpty()) {
         Text(
-            text = if (category == "POPULER") "Belum ada rekomendasi." else "Belum ada menu $category.",
+            text = if (category == "POPULER") "Belum ada rekomendasi Populer." else "Belum ada menu $category.",
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = UnguTua,
                 textAlign = TextAlign.Center

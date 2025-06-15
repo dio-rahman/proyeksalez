@@ -72,8 +72,13 @@ class ManagerRepository @Inject constructor(
                         val price = doc.getDouble("price") ?: 0.0
                         val imagePath = doc.getString("imagePath")
                         val categoryId = doc.getString("categoryId") ?: ""
-                        val searchKeywords =
-                            doc.get("searchKeywords") as? List<String> ?: emptyList()
+                        val searchKeywords = doc.get("searchKeywords")?.let { keywords ->
+                            if (keywords is List<*>) {
+                                keywords.filterIsInstance<String>()
+                            } else {
+                                emptyList()
+                            }
+                        } ?: emptyList()
 
                         FoodItemEntity(
                             id = id,
@@ -85,10 +90,7 @@ class ManagerRepository @Inject constructor(
                             searchKeywords = searchKeywords
                         )
                     } catch (e: Exception) {
-                        Log.e(
-                            "ManagerRepository",
-                            "Failed to deserialize document ${doc.id}: ${e.message}"
-                        )
+                        Log.e("ManagerRepository", "Failed to deserialize document ${doc.id}: ${e.message}")
                         null
                     }
                 } ?: emptyList()
@@ -231,44 +233,44 @@ class ManagerRepository @Inject constructor(
                     val id = doc.id.toIntOrNull() ?: 0
                     val customerName = doc.getString("customerName") ?: ""
                     val totalPrice = doc.getLong("totalPrice") ?: 0L
-                    val orderDate =
-                        doc.getTimestamp("orderDate") ?: com.google.firebase.Timestamp.now()
-                    val items = (doc.get("items") as? List<Map<String, Any>>)?.mapNotNull { item ->
-                        try {
-                            mapOf(
-                                "cartItemId" to ((item["cartItemId"] as? Number)?.toInt() ?: 0),
-                                "foodItemId" to when (val foodId = item["foodItemId"]) {
-                                    is Number -> foodId.toLong()
-                                    is String -> foodId.toLongOrNull() ?: 0L
-                                    else -> 0L
-                                },
-                                "quantity" to ((item["quantity"] as? Number)?.toInt() ?: 0)
-                            )
-                        } catch (e: Exception) {
-                            Log.e(
-                                "ManagerRepository",
-                                "Failed to deserialize cart item in order ${doc.id}: ${e.message}"
-                            )
-                            null
+                    val orderDate = doc.getTimestamp("orderDate") ?: com.google.firebase.Timestamp.now()
+                    val items = doc.get("items")?.let { rawItems ->
+                        if (rawItems is List<*>) {
+                            rawItems.mapNotNull { item ->
+                                if (item is Map<*, *>) {
+                                    try {
+                                        mapOf(
+                                            "cartItemId" to ((item["cartItemId"] as? Number)?.toInt() ?: 0),
+                                            "foodItemId" to when (val foodId = item["foodItemId"]) {
+                                                is Number -> foodId.toLong()
+                                                is String -> foodId.toLongOrNull() ?: 0L
+                                                else -> 0L
+                                            },
+                                            "quantity" to ((item["quantity"] as? Number)?.toInt() ?: 0)
+                                        )
+                                    } catch (e: Exception) {
+                                        Log.e("ManagerRepository", "Failed to process cart item: ${e.message}")
+                                        null
+                                    }
+                                } else {
+                                    null
+                                }
+                            }
+                        } else {
+                            emptyList()
                         }
                     } ?: emptyList()
-                    val paymentMethod = doc.getString("paymentMethod") ?: ""
-                    val status = doc.getString("status") ?: "open"
-
                     OrderEntity(
                         orderId = id,
                         customerName = customerName,
                         totalPrice = totalPrice,
                         orderDate = orderDate,
                         items = items,
-                        paymentMethod = paymentMethod,
-                        status = status
+                        paymentMethod = doc.getString("paymentMethod") ?: "",
+                        status = doc.getString("status") ?: "open"
                     )
                 } catch (e: Exception) {
-                    Log.e(
-                        "ManagerRepository",
-                        "Failed to deserialize order ${doc.id}: ${e.message}"
-                    )
+                    Log.e("ManagerRepository", "Failed to deserialize order ${doc.id}: ${e.message}")
                     null
                 }
             }

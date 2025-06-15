@@ -36,11 +36,7 @@ class MainActivity : ComponentActivity() {
             subscribeToTopic()
         } else {
             Toast.makeText(this, "Notifications permission denied", Toast.LENGTH_SHORT).show()
-            // Explain to the user that the feature is unavailable because the
-            // feature requires a permission that the user has denied. At the
-            // same time, respect the user's decision. Don't link to system
-            // settings in an effort to convince the user to change their
-            // decision.
+
         }
     }
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,7 +46,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             FirebaseApp.initializeApp(this)
             Firebase.firestore.firestoreSettings = firestoreSettings {
-                isPersistenceEnabled = true // Dukungan offline
+                isPersistenceEnabled = true // offline
             }
             ProyekSalezTheme {
                 AppNavigation()
@@ -59,26 +55,21 @@ class MainActivity : ComponentActivity() {
 
     }
     private fun askNotificationPermission() {
-        // This is only necessary for API level 33 and higher.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
                 PackageManager.PERMISSION_GRANTED
             ) {
-                // FCM SDK (and your app) can post notifications.
                 Log.d(TAG, "Notification permission already granted.")
                 subscribeToTopic()
             } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
                 // TODO: Display an educational UI explaining to the user the importance of the permission.
-                // For now, just request it.
                 Log.d(TAG, "Showing rationale for notification permission.")
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             } else {
-                // Directly ask for the permission.
                 Log.d(TAG, "Requesting notification permission.")
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         } else {
-            // Non-TIRAMISU devices don't need runtime permission for notifications
             subscribeToTopic()
         }
     }

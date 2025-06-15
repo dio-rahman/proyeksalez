@@ -44,11 +44,8 @@ fun SplashScreen(duration: Long, onTimeout: () -> Unit) {
             contentDescription = "Salez Logo",
             modifier = Modifier
                 .fillMaxWidth(1f)
-                .scale(1.5f)
-                // --- PERUBAHAN UTAMA DI SINI ---
-                // Geser gambar ke kanan secara manual.
-                // Ubah nilai '20.dp' ini sesuai kebutuhan.
-                .offset(x = 20.dp)
+                .scale(2f)
+                .offset(x = 5.dp)
         )
     }
 }

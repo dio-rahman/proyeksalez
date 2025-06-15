@@ -118,7 +118,7 @@ fun LoginScreen(
                     focusedBorderColor = UnguTua,
                     unfocusedBorderColor = AbuAbu
                 ),
-                shape = RoundedCornerShape(50),
+                shape = RoundedCornerShape(8.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -136,7 +136,7 @@ fun LoginScreen(
                     focusedBorderColor = UnguTua,
                     unfocusedBorderColor = AbuAbu
                 ),
-                shape = RoundedCornerShape(50),
+                shape = RoundedCornerShape(8.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -166,7 +166,7 @@ fun LoginScreen(
                     .height(48.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Oranye),
                 shape = RoundedCornerShape(50),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 50.dp)
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(color = Putih, modifier = Modifier.size(24.dp))

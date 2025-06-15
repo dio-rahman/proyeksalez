@@ -3,14 +3,12 @@ package com.main.proyek_salez.ui.cart
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -19,8 +17,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
-import com.main.proyek_salez.ui.SidebarMenu
+import com.main.proyek_salez.ui.sidebar.SidebarMenu
 import com.main.proyek_salez.ui.theme.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,6 +36,18 @@ fun CompletionScreen(
             UnguTua
         )
     )
+
+    var remainingTime by remember { mutableStateOf(5) }
+
+    LaunchedEffect(Unit) {
+        while (remainingTime > 0) {
+            delay(1000)
+            remainingTime--
+        }
+        navController.navigate("cashier_dashboard") {
+            popUpTo("completion_screen") { inclusive = true }
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -126,37 +137,20 @@ fun CompletionScreen(
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
-
-                Spacer(modifier = Modifier.weight(1f))
-                Button(
-                    onClick = {
-                        navController.navigate("cashier_dashboard") {
-                            popUpTo("cashier_dashboard") { inclusive = true }
-                        }
-                    },
+                Spacer(modifier = Modifier.height(200.dp))
+                Text(
+                    text = "Otomatis akan tertutup dalam: $remainingTime detik",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = Putih,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp
+                    ),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp)
-                        .shadow(
-                            elevation = 25.dp,
-                            shape = RoundedCornerShape(50)
-                        ),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Oranye
-                    ),
-                    shape = RoundedCornerShape(50)
-                ) {
-                    Text(
-                        text = "Kembali Ke Beranda",
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            color = UnguTua,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        )
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
+                        .padding(8.dp)
+                )
             }
         }
     }

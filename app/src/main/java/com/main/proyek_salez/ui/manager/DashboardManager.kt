@@ -150,7 +150,7 @@ fun DashboardManager(
                 Spacer(modifier = Modifier.height(8.dp))
                 if (popularFoodItems.isEmpty()) {
                     Text(
-                        text = "Belum ada data menu populer",
+                        text = "Belum ada data menu Populer",
                         color = UnguTua.copy(alpha = 0.6f)
                     )
                 } else {

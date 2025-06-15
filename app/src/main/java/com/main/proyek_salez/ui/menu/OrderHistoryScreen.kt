@@ -25,7 +25,7 @@ import com.main.proyek_salez.R
 import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.model.OrderEntity
 import com.main.proyek_salez.data.viewmodel.CashierViewModel
-import com.main.proyek_salez.ui.SidebarMenu
+import com.main.proyek_salez.ui.sidebar.SidebarMenu
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat

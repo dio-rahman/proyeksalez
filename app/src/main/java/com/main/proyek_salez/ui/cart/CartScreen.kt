@@ -24,7 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.main.proyek_salez.R
 import com.main.proyek_salez.data.viewmodel.CashierViewModel
-import com.main.proyek_salez.ui.SidebarMenu
+import com.main.proyek_salez.ui.sidebar.SidebarMenu
 import com.main.proyek_salez.ui.theme.*
 import kotlinx.coroutines.launch
 
@@ -123,14 +123,6 @@ fun CartScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
-                Text(
-                    text = "Items in cart: ${cartItems.size}",
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = UnguTua,
-                        textAlign = TextAlign.Center
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Masukkan nama pelanggan disini",
@@ -147,12 +139,12 @@ fun CartScreen(
                     onValueChange = { newValue ->
                         customerName = newValue
                         errorMessage = ""
-                        Log.d("CartScreen", "Customer name input changed to: $newValue")
+                        Log.d("CartScreen", "Nama Pelanggan Berubah Menjadi : $newValue")
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 40.dp)
-                        .clip(RoundedCornerShape(50)),
+                        .clip(RoundedCornerShape(8.dp)),
                     placeholder = {
                         Text(
                             text = "",
@@ -168,14 +160,14 @@ fun CartScreen(
                         focusedBorderColor = UnguTua,
                         unfocusedBorderColor = AbuAbu
                     ),
-                    shape = RoundedCornerShape(50),
+                    shape = RoundedCornerShape(8.dp),
                     singleLine = true
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 if (errorMessage.isNotEmpty()) {
                     Text(
                         text = errorMessage,
-                        style = MaterialTheme.typography.bodyMedium.copy(
+                        style = MaterialTheme.typography.bodyLarge.copy(
                             color = UnguTua,
                             fontWeight = FontWeight.Medium
                         ),
@@ -184,28 +176,9 @@ fun CartScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
+                Spacer(modifier = Modifier.height(8.dp))
                 Button(
-                    onClick = {
-                        Log.d("CartScreen", "Checkout button clicked")
-                        Log.d("CartScreen", "Customer name: '$customerName'")
-                        Log.d("CartScreen", "ViewModel customer name: '$customerNameState'")
-                        Log.d("CartScreen", "Cart items: ${cartItems.size}")
-                        when {
-                            customerName.isBlank() -> {
-                                errorMessage = "Nama pelanggan harus diisi"
-                                Log.e("CartScreen", "Customer name is blank")
-                            }
-                            cartItems.isEmpty() -> {
-                                errorMessage = "Keranjang kosong"
-                                Log.e("CartScreen", "Cart is empty")
-                            }
-                            else -> {
-                                viewModel.updateCustomerName(customerName)
-                                viewModel.checkoutRequested.value = true
-                                Log.d("CartScreen", "Setting checkout requested to true with customer: $customerName")
-                            }
-                        }
-                    },
+                    onClick = { navController.navigate("cashier_dashboard") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 40.dp)
@@ -214,7 +187,7 @@ fun CartScreen(
                     shape = RoundedCornerShape(50)
                 ) {
                     Text(
-                        text = "Checkout",
+                        text = "CARI MENU",
                         style = MaterialTheme.typography.headlineLarge.copy(
                             color = UnguTua,
                             fontWeight = FontWeight.Bold,
@@ -222,7 +195,7 @@ fun CartScreen(
                         )
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 if (cartItems.isEmpty()) {
                     Box(
                         modifier = Modifier
@@ -249,7 +222,6 @@ fun CartScreen(
                         items(
                             items = cartItems.chunked(2),
                             key = { rowItems ->
-                                // Create a unique key for each row based on cart item IDs and quantities
                                 rowItems.joinToString("-") { "${it.cartItem.cartItemId}:${it.cartItem.quantity}" }
                             }
                         ) { rowItems ->
@@ -263,7 +235,6 @@ fun CartScreen(
                                             Log.d("CartScreen", "Item: ${cartItemWithFood.foodItem.name}")
                                             Log.d("CartScreen", "Current quantity: ${cartItemWithFood.cartItem.quantity}")
                                             Log.d("CartScreen", "Food ID: ${cartItemWithFood.foodItem.id}")
-
                                             scope.launch {
                                                 try {
                                                     viewModel.addToCart(cartItemWithFood.foodItem)
@@ -279,7 +250,6 @@ fun CartScreen(
                                             Log.d("CartScreen", "Item: ${cartItemWithFood.foodItem.name}")
                                             Log.d("CartScreen", "Current quantity: ${cartItemWithFood.cartItem.quantity}")
                                             Log.d("CartScreen", "Food ID: ${cartItemWithFood.foodItem.id}")
-
                                             scope.launch {
                                                 try {
                                                     viewModel.decrementItem(cartItemWithFood.foodItem)
@@ -349,17 +319,60 @@ fun CartScreen(
                             }
                         }
                     }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                if (!cartItems.isEmpty()) {
+                    Button(
+                        onClick = {
+                            Log.d("CartScreen", "Checkout button clicked")
+                            Log.d("CartScreen", "Customer name: '$customerName'")
+                            Log.d("CartScreen", "ViewModel customer name: '$customerNameState'")
+                            Log.d("CartScreen", "Cart items: ${cartItems.size}")
+                            when {
+                                customerName.isBlank() -> {
+                                    errorMessage = "Nama pelanggan harus diisi"
+                                    Log.e("CartScreen", "Customer name is blank")
+                                }
+                                cartItems.isEmpty() -> {
+                                    errorMessage = "Keranjang kosong"
+                                    Log.e("CartScreen", "Cart is empty")
+                                }
+                                else -> {
+                                    viewModel.updateCustomerName(customerName)
+                                    viewModel.checkoutRequested.value = true
+                                    Log.d("CartScreen", "Setting checkout requested to true with customer: $customerName")
+                                }
+                            }
+                        },
+                        enabled = cartItems.isNotEmpty(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 40.dp)
+                            .height(48.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Oranye),
+                        shape = RoundedCornerShape(50)
+                    ) {
+                        Text(
+                            text = "CHECKOUT",
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                color = UnguTua,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
+                        )
+                    }
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = { showConfirmationDialog.value = true },
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(horizontal = 40.dp)
                             .height(48.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Merah),
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(50)
                     ) {
                         Text(
-                            text = "Batalkan Pesanan",
+                            text = "HAPUS SEMUA",
                             style = MaterialTheme.typography.headlineLarge.copy(
                                 color = Putih,
                                 fontWeight = FontWeight.Bold,
@@ -367,24 +380,6 @@ fun CartScreen(
                             )
                         )
                     }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = { navController.navigate("cashier_dashboard") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Oranye),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = "Pilih Jenis Hidangan",
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            color = UnguTua,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        )
-                    )
                 }
                 Spacer(modifier = Modifier.height(80.dp))
             }

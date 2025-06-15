@@ -33,42 +33,27 @@ fun AppNavigation() {
     val cartViewModel: CartViewModel = hiltViewModel()
     val mainNavigation = MainNavigation(navController)
 
-    // Ambil state login sekali untuk menentukan durasi dan navigasi
-    val isLoggedIn by authViewModel.isLoggedIn.observeAsState(initial = false)
-    val currentUser by authViewModel.currentUser.observeAsState()
-
     NavHost(
         navController = navController,
-        startDestination = "splash" // Splash screen SELALU menjadi layar awal
+        startDestination = "splash"
     ) {
         composable("splash") {
-            // Tentukan durasi berdasarkan status login
-            val duration = if (isLoggedIn) 1500L else 3000L // 1.5 detik jika login, 3 detik jika tidak
-
             SplashScreen(
-                duration = duration,
+                duration = 1800L,
                 onTimeout = {
-                    // Setelah timeout, tentukan tujuan navigasi
-                    val destination = if (isLoggedIn && currentUser != null) {
-                        // Jika sudah login, tentukan rute berdasarkan role
-                        when (currentUser!!.role) {
-                            UserRole.CASHIER -> Screen.CashierDashboard.route
-                            UserRole.MANAGER -> Screen.ManagerScreen.route
-                            UserRole.CHEF -> Screen.Login.route // Ganti dengan rute Chef jika ada
-                        }
-                    } else {
-                        // Jika belum login, arahkan ke Login
-                        Screen.Login.route
-                    }
-
-                    // Lakukan navigasi
-                    navController.navigate(destination) {
-                        // Hapus splash screen dari back stack agar tidak bisa kembali ke sana
+                    navController.navigate("onboarding") {
                         popUpTo("splash") { inclusive = true }
-                        launchSingleTop = true
                     }
                 }
             )
+        }
+
+        composable("onboarding") {
+            OnboardingAlur(onFinish = {
+                navController.navigate(Screen.Login.route) {
+                    popUpTo("onboarding") { inclusive = true }
+                }
+            })
         }
 
         composable(Screen.Login.route) {
@@ -80,10 +65,6 @@ fun AppNavigation() {
             )
         }
 
-        // ... (sisa kode composable Anda TIDAK BERUBAH) ...
-        composable(Screen.ManagerScreen.route) {
-            ManagerScreen(navController = navController)
-        }
         composable(Screen.CashierDashboard.route) {
             HomeScreen(
                 navController = navController,
@@ -91,30 +72,43 @@ fun AppNavigation() {
                 cashierViewModel = cashierViewModel
             )
         }
+
+        composable(Screen.ManagerScreen.route) {
+            ManagerScreen(navController = navController)
+        }
+
         composable("cart_screen") {
             CartScreen(navController = navController, viewModel = cashierViewModel)
         }
+
         composable("checkout_screen") {
             CheckoutScreen(navController = navController, viewModel = cashierViewModel)
         }
+
         composable("completion_screen") {
             CompletionScreen(navController = navController)
         }
+
         composable("profile") {
             ProfileScreen(navController = navController)
         }
+
         composable("order_history") {
             OrderHistoryScreen(navController = navController)
         }
+
         composable("order_history_manager") {
             OrderHistoryManager(navController = navController)
         }
+
         composable("close_order") {
             CloseOrderScreen(navController = navController)
         }
+
         composable("manager_dashboard") {
             DashboardManager(navController = navController)
         }
+
         composable("manager_profile") {
             ManagerProfileScreen(navController = navController)
         }
@@ -124,16 +118,14 @@ fun AppNavigation() {
 class MainNavigation(
     private val navController: NavHostController
 ) {
-    // Fungsi ini sekarang dipakai setelah login berhasil
     fun navigateBasedOnRole(user: User) {
         Log.d("MainNavigation", "Navigating for user: ${user.email}, role: ${user.role}")
         val destination = when (user.role) {
             UserRole.CASHIER -> Screen.CashierDashboard.route
-            UserRole.CHEF -> Screen.Login.route // Ganti jika ada layar chef
             UserRole.MANAGER -> Screen.ManagerScreen.route
+            else -> Screen.Login.route
         }
         navController.navigate(destination) {
-            // Hapus semua riwayat navigasi sampai ke login screen
             popUpTo(Screen.Login.route) { inclusive = true }
             launchSingleTop = true
         }

@@ -120,7 +120,7 @@ fun ManagerScreen(
                         focusedBorderColor = UnguTua,
                         unfocusedBorderColor = AbuAbu
                     ),
-                    shape = RoundedCornerShape(50)
+                    shape = RoundedCornerShape(8.dp)
                 )
             },
             confirmButton = {
@@ -243,7 +243,7 @@ fun ManagerScreen(
                                     focusedBorderColor = UnguTua,
                                     unfocusedBorderColor = AbuAbu
                                 ),
-                                shape = RoundedCornerShape(50)
+                                shape = RoundedCornerShape(8.dp)
                             )
                             Button(
                                 onClick = {
@@ -261,7 +261,7 @@ fun ManagerScreen(
                                     .align(Alignment.End)
                                     .height(48.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = Oranye),
-                                shape = RoundedCornerShape(50)
+                                shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(
                                     "Tambah Kategori",
@@ -301,7 +301,7 @@ fun ManagerScreen(
                                     focusedBorderColor = UnguTua,
                                     unfocusedBorderColor = AbuAbu
                                 ),
-                                shape = RoundedCornerShape(50)
+                                shape = RoundedCornerShape(8.dp)
                             )
                             OutlinedTextField(
                                 value = foodDesc,
@@ -314,7 +314,7 @@ fun ManagerScreen(
                                     focusedBorderColor = UnguTua,
                                     unfocusedBorderColor = AbuAbu
                                 ),
-                                shape = RoundedCornerShape(50)
+                                shape = RoundedCornerShape(8.dp)
                             )
                             OutlinedTextField(
                                 value = foodPrice,
@@ -327,7 +327,7 @@ fun ManagerScreen(
                                     focusedBorderColor = UnguTua,
                                     unfocusedBorderColor = AbuAbu
                                 ),
-                                shape = RoundedCornerShape(50)
+                                shape = RoundedCornerShape(8.dp)
                             )
                             Button(
                                 onClick = { imagePickerLauncher.launch("image/*") },
@@ -335,7 +335,7 @@ fun ManagerScreen(
                                     .fillMaxWidth()
                                     .height(48.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = Oranye),
-                                shape = RoundedCornerShape(50)
+                                shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(
                                     if (selectedImageUri == null) {
@@ -361,7 +361,7 @@ fun ManagerScreen(
                                         focusedBorderColor = UnguTua,
                                         unfocusedBorderColor = AbuAbu
                                     ),
-                                    shape = RoundedCornerShape(50),
+                                    shape = RoundedCornerShape(8.dp),
                                     trailingIcon = {
                                         IconButton(onClick = { isCategoryDropdownExpanded = true }) {
                                             Icon(
@@ -454,7 +454,7 @@ fun ManagerScreen(
                                     },
                                     modifier = Modifier.height(48.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = Oranye),
-                                    shape = RoundedCornerShape(50)
+                                    shape = RoundedCornerShape(8.dp)
                                 ) {
                                     Text(
                                         if (editingFoodItem == null) "Tambah Menu" else "Simpan Perubahan",
@@ -559,7 +559,7 @@ fun ManagerScreen(
                                     focusedBorderColor = UnguTua,
                                     unfocusedBorderColor = AbuAbu
                                 ),
-                                shape = RoundedCornerShape(50),
+                                shape = RoundedCornerShape(8.dp),
                                 leadingIcon = {
                                     Icon(
                                         imageVector = Icons.Default.Search,
