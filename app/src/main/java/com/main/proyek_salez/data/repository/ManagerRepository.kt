@@ -8,7 +8,6 @@ import com.main.proyek_salez.data.model.DailySummaryEntity
 import com.main.proyek_salez.data.model.FoodItemEntity
 import com.main.proyek_salez.data.model.OrderEntity
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
@@ -101,7 +100,7 @@ class ManagerRepository @Inject constructor(
 
     suspend fun addCategory(category: CategoryEntity): Result<Unit> {
         return try {
-            val normalizedName = category.name.lowercase().trim()
+            val normalizedName = category.name.uppercase().trim()
             val querySnapshot = firestore.collection("categories")
                 .whereEqualTo("name", normalizedName)
                 .get()
@@ -128,7 +127,7 @@ class ManagerRepository @Inject constructor(
 
     suspend fun updateCategory(categoryId: String, newName: String): Result<Unit> {
         return try {
-            val normalizedName = newName.lowercase().trim()
+            val normalizedName = newName.uppercase().trim()
             val querySnapshot = firestore.collection("categories")
                 .whereEqualTo("name", normalizedName)
                 .get()

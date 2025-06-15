@@ -47,13 +47,13 @@ fun HomeScreen(
     var menuInput by remember { mutableStateOf("") }
     var searchResult by remember { mutableStateOf<List<FoodItemEntity>>(emptyList()) }
     var errorMessage by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf<String?>("Rekomendasi") }
+    var selectedCategory by remember { mutableStateOf<String?>("POPULER") }
     val gradientBackground = Brush.verticalGradient(
         colors = listOf(Putih, Jingga, UnguTua)
     )
     val categories by cashierViewModel.getAllCategories().collectAsState(initial = emptyList())
     val categoryNames = remember(categories) {
-        listOf("Rekomendasi") + categories.map { it.name }
+        listOf("POPULER") + categories.map { it.name }
     }
 
     val cartItems by cartViewModel.cartItems.collectAsState(initial = emptyList())
@@ -328,13 +328,13 @@ fun MenuItemsDisplay(
     onDeleteFromCart: (FoodItemEntity) -> Unit
 ) {
     val foodItems = when (category) {
-        "Rekomendasi" -> cashierViewModel.getRecommendedItems().collectAsState(initial = emptyList())
+        "POPULER" -> cashierViewModel.getRecommendedItems().collectAsState(initial = emptyList())
         else -> cashierViewModel.getFoodItemsByCategory(category).collectAsState(initial = emptyList())
     }
 
     if (foodItems.value.isEmpty()) {
         Text(
-            text = if (category == "Rekomendasi") "Belum ada rekomendasi." else "Belum ada menu $category.",
+            text = if (category == "POPULER") "Belum ada rekomendasi." else "Belum ada menu $category.",
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = UnguTua,
                 textAlign = TextAlign.Center
