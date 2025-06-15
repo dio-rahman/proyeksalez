@@ -78,19 +78,6 @@ fun LoginScreen(
             .fillMaxSize()
             .background(brush = gradientBackground)
     ) {
-        IconButton(
-            onClick = { /* Tidak ada aksi */ },
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = UnguTua
-            )
-        }
-
         Image(
             painter = painterResource(id = R.drawable.salez_logo),
             contentDescription = "Salez Logo",
