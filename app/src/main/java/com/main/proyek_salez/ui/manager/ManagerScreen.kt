@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -58,10 +59,16 @@ fun ManagerScreen(
     var showDeleteFoodItemDialog by remember { mutableStateOf<Long?>(null) }
     var showEditCategoryDialog by remember { mutableStateOf<CategoryEntity?>(null) }
     var editingCategoryName by rememberSaveable { mutableStateOf("") }
+    var searchQuery by rememberSaveable { mutableStateOf("") } // New state for search query
 
     val categories by viewModel.categories.collectAsState()
     val foodItems by viewModel.foodItems.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+
+    // Filter food items based on search query
+    val filteredFoodItems = foodItems.filter {
+        it.name.contains(searchQuery, ignoreCase = true)
+    }
 
     val context = LocalContext.current
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -541,10 +548,31 @@ fun ManagerScreen(
                                 )
                             )
                             Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedTextField(
+                                value = searchQuery,
+                                onValueChange = { searchQuery = it },
+                                label = { Text("Cari Menu") },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    unfocusedContainerColor = Putih,
+                                    focusedContainerColor = Putih,
+                                    focusedBorderColor = UnguTua,
+                                    unfocusedBorderColor = AbuAbu
+                                ),
+                                shape = RoundedCornerShape(50),
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Search,
+                                        contentDescription = "Search Icon",
+                                        tint = UnguTua
+                                    )
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
                             LazyColumn(
                                 modifier = Modifier.heightIn(max = 200.dp)
                             ) {
-                                items(foodItems) { foodItem ->
+                                items(filteredFoodItems) { foodItem ->
                                     FoodItemCard(
                                         foodItem = foodItem,
                                         categoryName = categories.find { it.id == foodItem.categoryId }?.name ?: "Unknown",
