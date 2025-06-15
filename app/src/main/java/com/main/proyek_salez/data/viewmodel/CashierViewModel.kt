@@ -85,6 +85,7 @@ class  CashierViewModel @Inject constructor(
 
     fun getAllOrders(): Flow<List<OrderEntity>> {
         return repository.getAllOrders()
+            .map { orders -> orders.sortedByDescending { it.orderDate.toDate() } }
             .catch { e ->
                 Log.e("CashierViewModel", "Error getting all orders: ${e.message}")
                 _errorMessage.value = "Gagal memuat riwayat pesanan: ${e.message}"
