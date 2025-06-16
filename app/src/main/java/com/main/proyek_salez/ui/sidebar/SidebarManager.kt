@@ -4,6 +4,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -60,6 +66,7 @@ fun SidebarManager(
         Spacer(modifier = Modifier.height(40.dp))
         MenuItem(
             text = "Dashboard",
+            icon = Icons.Default.Home,
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = Putih,
                 fontWeight = FontWeight.Bold,
@@ -72,6 +79,7 @@ fun SidebarManager(
         )
         MenuItem(
             text = "Tambah Menu",
+            icon = Icons.Default.Add,
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = Putih,
                 fontWeight = FontWeight.Bold,
@@ -84,6 +92,7 @@ fun SidebarManager(
         )
         MenuItem(
             text = "Cek Histori",
+            icon = Icons.Default.History,
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = Putih,
                 fontWeight = FontWeight.Bold,
@@ -96,6 +105,7 @@ fun SidebarManager(
         )
         MenuItem(
             text = "Profile",
+            icon = Icons.Default.Person,
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = Putih,
                 fontWeight = FontWeight.Bold,
@@ -108,6 +118,7 @@ fun SidebarManager(
         )
         MenuItem(
             text = "Log Out",
+            icon = Icons.Default.ExitToApp,
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = Putih,
                 fontWeight = FontWeight.Bold,
