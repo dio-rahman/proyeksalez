@@ -32,53 +32,66 @@ fun MenuItemCard(
     onDeleteFromCart: (FoodItemEntity) -> Unit
 ) {
     Card(
-        modifier = modifier.height(120.dp),
+        modifier = modifier
+            .height(120.dp)
+            .width(160.dp), // Tetapkan lebar tetap untuk konsistensi
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Putih),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier.padding(4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween // Distribusi ruang merata
         ) {
-            if (foodItem.imagePath != null) {
-                AsyncImage(
-                    model = foodItem.imagePath,
-                    contentDescription = foodItem.name,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp)
-                        .clip(RoundedCornerShape(8.dp))
+            Column(
+                modifier = Modifier
+                    .weight(1f) // Bagian atas untuk gambar dan teks
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                if (foodItem.imagePath != null) {
+                    AsyncImage(
+                        model = foodItem.imagePath,
+                        contentDescription = foodItem.name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth(0.6f)
+                            .height(40.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+                Text(
+                    text = foodItem.name,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        color = UnguTua,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        fontSize = 14.sp
+                    ),
+                    maxLines = 2, // Izinkan 2 baris untuk teks panjang seperti "Es Krim Dubai"
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "Rp ${foodItem.price.toLong()}",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = AbuAbuGelap,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    ),
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = foodItem.name,
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    color = UnguTua,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    fontSize = 10.sp
-                ),
-                maxLines = 1,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = "Rp ${foodItem.price.toLong()}",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = AbuAbuGelap,
-                    fontSize = 8.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                modifier = Modifier.padding(vertical = 1.dp)
-            )
-            Spacer(modifier = Modifier.weight(1f))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 2.dp),
+                    .padding(top = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -88,18 +101,18 @@ fun MenuItemCard(
                             if (quantity == 1) onDeleteFromCart(foodItem) else onRemoveFromCart(foodItem)
                         },
                         modifier = Modifier
-                            .size(20.dp)
+                            .size(24.dp)
                             .background(Oranye, shape = CircleShape)
                     ) {
                         Icon(
                             imageVector = if (quantity == 1) Icons.Default.Delete else Icons.Default.Remove,
                             contentDescription = if (quantity == 1) "Delete item" else "Remove item",
                             tint = UnguTua,
-                            modifier = Modifier.size(12.dp)
+                            modifier = Modifier.size(14.dp)
                         )
                     }
                 } else {
-                    Spacer(modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.size(24.dp))
                 }
                 if (quantity > 0) {
                     Text(
@@ -107,7 +120,7 @@ fun MenuItemCard(
                         style = MaterialTheme.typography.bodyMedium.copy(
                             color = UnguTua,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 10.sp
+                            fontSize = 12.sp
                         )
                     )
                 } else {
@@ -116,14 +129,14 @@ fun MenuItemCard(
                 IconButton(
                     onClick = { onAddToCart(foodItem) },
                     modifier = Modifier
-                        .size(20.dp)
+                        .size(24.dp)
                         .background(Oranye, shape = CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add to cart",
                         tint = UnguTua,
-                        modifier = Modifier.size(12.dp)
+                        modifier = Modifier.size(14.dp)
                     )
                 }
             }

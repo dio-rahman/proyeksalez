@@ -72,7 +72,7 @@ fun ProfileScreen(navController: NavController) {
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
+        contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         hasPermission = isGranted
     }
@@ -211,7 +211,7 @@ fun ProfileScreen(navController: NavController) {
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .height(48.dp)
-                        .shadow(elevation = 5.dp, shape = RoundedCornerShape(8.dp)),
+                        .shadow(elevation = 8.dp, shape = RoundedCornerShape(50)), // Shadow disesuaikan
                     colors = ButtonDefaults.buttonColors(containerColor = Oranye),
                     shape = RoundedCornerShape(50)
                 ) {
@@ -243,7 +243,7 @@ fun ProfileScreen(navController: NavController) {
                             .weight(1f)
                             .padding(end = 8.dp)
                             .height(40.dp)
-                            .shadow(elevation = 5.dp, shape = RoundedCornerShape(8.dp)),
+                            .shadow(elevation = 6.dp, shape = RoundedCornerShape(50)), // Shadow disesuaikan
                         colors = ButtonDefaults.buttonColors(containerColor = Merah),
                         shape = RoundedCornerShape(50)
                     ) {
@@ -273,7 +273,7 @@ fun ProfileScreen(navController: NavController) {
                             .weight(1f)
                             .padding(start = 8.dp)
                             .height(40.dp)
-                            .shadow(elevation = 5.dp, shape = RoundedCornerShape(8.dp)),
+                            .shadow(elevation = 6.dp, shape = RoundedCornerShape(50)), // Shadow disesuaikan
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (hasSpacesInUsername) Color.Gray else Hijau
                         ),
@@ -302,7 +302,7 @@ fun ProfileScreen(navController: NavController) {
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .height(48.dp)
-                        .shadow(elevation = 5.dp, shape = RoundedCornerShape(8.dp)),
+                        .shadow(elevation = 8.dp, shape = RoundedCornerShape(50)), // Shadow disesuaikan
                     colors = ButtonDefaults.buttonColors(containerColor = Oranye),
                     shape = RoundedCornerShape(50)
                 ) {
